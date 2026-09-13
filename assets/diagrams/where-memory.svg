@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="820.8pt" height="345.6pt" viewBox="0 0 820.8 345.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-07T20:22:49.777926</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 345.6 
+L 820.8 345.6 
+L 820.8 0 
+L 0 0 
+z
+" style="fill: #05070a"/>
+  </g>
+  <g id="patch_2">
+   <path d="M 15.5952 341.4528 
+L 805.2048 341.4528 
+Q 815.8752 341.4528 815.8752 330.7824 
+L 815.8752 14.8176 
+Q 815.8752 4.1472 805.2048 4.1472 
+L 15.5952 4.1472 
+Q 4.9248 4.1472 4.9248 14.8176 
+L 4.9248 330.7824 
+Q 4.9248 341.4528 15.5952 341.4528 
+z
+" style="fill: #0d1117; stroke: #22272e; stroke-linejoin: miter"/>
+  </g>
+  <g id="axes_1">
+   <g clip-path="url(#p28b69f54f5)">
+    <image xlink:href="data:image/png;base64,
+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" id="imagedca7ff8cf9" transform="scale(1 -1) translate(0 -1.8)" x="4.95" y="-4.05" width="810.9" height="1.8"/>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_3">
+    <path d="M 18.0576 311.04 
+L 802.7424 311.04 
+L 802.7424 67.68 
+L 18.0576 67.68 
+L 18.0576 311.04 
+z
+" style="fill: none"/>
+   </g>
+   <g id="matplotlib.axis_1"/>
+   <g id="matplotlib.axis_2"/>
+   <g id="patch_4">
+    <path d="M 37.801296 168.264 
+L 265.106736 168.264 
+C 269.133003 168.264 272.396736 165.000267 272.396736 160.974 
+L 272.396736 96.066 
+C 272.396736 92.039733 269.133003 88.776 265.106736 88.776 
+L 37.801296 88.776 
+C 33.775029 88.776 30.511296 92.039733 30.511296 96.066 
+L 30.511296 160.974 
+C 30.511296 165.000267 33.775029 168.264 37.801296 168.264 
+z
+" clip-path="url(#p56062a379c)" style="fill: #4fd0e8; opacity: 0.1"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 37.801296 166.968 
+L 265.106736 166.968 
+C 268.417222 166.968 271.100736 164.284486 271.100736 160.974 
+L 271.100736 96.066 
+C 271.100736 92.755514 268.417222 90.072 265.106736 90.072 
+L 37.801296 90.072 
+C 34.49081 90.072 31.807296 92.755514 31.807296 96.066 
+L 31.807296 160.974 
+C 31.807296 164.284486 34.49081 166.968 37.801296 166.968 
+z
+" clip-path="url(#p56062a379c)" style="fill: #4fd0e8; opacity: 0.14"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 37.801296 165.996 
+L 265.106736 165.996 
+C 267.880387 165.996 270.128736 163.747651 270.128736 160.974 
+L 270.128736 96.066 
+C 270.128736 93.292349 267.880387 91.044 265.106736 91.044 
+L 37.801296 91.044 
+C 35.027645 91.044 32.779296 93.292349 32.779296 96.066 
+L 32.779296 160.974 
+C 32.779296 163.747651 35.027645 165.996 37.801296 165.996 
+z
+" clip-path="url(#p56062a379c)" style="fill: #4fd0e8; opacity: 0.18"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 37.801296 165.024 
+L 265.106736 165.024 
+C 267.343551 165.024 269.156736 163.210815 269.156736 160.974 
+L 269.156736 96.066 
+C 269.156736 93.829185 267.343551 92.016 265.106736 92.016 
+L 37.801296 92.016 
+C 35.564481 92.016 33.751296 93.829185 33.751296 96.066 
+L 33.751296 160.974 
+C 33.751296 163.210815 35.564481 165.024 37.801296 165.024 
+z
+" clip-path="url(#p56062a379c)" style="fill: #10161d; stroke: #4fd0e8; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 304.594128 160.1568 
+L 508.359024 160.1568 
+C 510.595839 160.1568 512.409024 158.343615 512.409024 156.1068 
+L 512.409024 100.9332 
+C 512.409024 98.696385 510.595839 96.8832 508.359024 96.8832 
+L 304.594128 96.8832 
+C 302.357313 96.8832 300.544128 98.696385 300.544128 100.9332 
+L 300.544128 156.1068 
+C 300.544128 158.343615 302.357313 160.1568 304.594128 160.1568 
+z
+" clip-path="url(#p56062a379c)" style="fill: #10161d; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 547.846416 160.1568 
+L 782.998704 160.1568 
+C 785.235519 160.1568 787.048704 158.343615 787.048704 156.1068 
+L 787.048704 100.9332 
+C 787.048704 98.696385 785.235519 96.8832 782.998704 96.8832 
+L 547.846416 96.8832 
+C 545.609601 96.8832 543.796416 98.696385 543.796416 100.9332 
+L 543.796416 156.1068 
+C 543.796416 158.343615 545.609601 160.1568 547.846416 160.1568 
+z
+" clip-path="url(#p56062a379c)" style="fill: #10161d; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 37.801296 272.1024 
+L 374.962608 272.1024 
+C 377.199423 272.1024 379.012608 270.289215 379.012608 268.0524 
+L 379.012608 212.8788 
+C 379.012608 210.641985 377.199423 208.8288 374.962608 208.8288 
+L 37.801296 208.8288 
+C 35.564481 208.8288 33.751296 210.641985 33.751296 212.8788 
+L 33.751296 268.0524 
+C 33.751296 270.289215 35.564481 272.1024 37.801296 272.1024 
+z
+" clip-path="url(#p56062a379c)" style="fill: #10161d; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 430.143696 272.1024 
+L 782.998704 272.1024 
+C 785.235519 272.1024 787.048704 270.289215 787.048704 268.0524 
+L 787.048704 212.8788 
+C 787.048704 210.641985 785.235519 208.8288 782.998704 208.8288 
+L 430.143696 208.8288 
+C 427.906881 208.8288 426.093696 210.641985 426.093696 212.8788 
+L 426.093696 268.0524 
+C 426.093696 270.289215 427.906881 272.1024 430.143696 272.1024 
+z
+" clip-path="url(#p56062a379c)" style="fill: #10161d; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 39.338594 154.80288 
+L 39.463459 154.80288 
+C 40.209064 154.80288 40.813459 154.198485 40.813459 153.45288 
+L 40.813459 103.58712 
+C 40.813459 102.841515 40.209064 102.23712 39.463459 102.23712 
+L 39.338594 102.23712 
+C 38.592989 102.23712 37.988594 102.841515 37.988594 103.58712 
+L 37.988594 153.45288 
+C 37.988594 154.198485 38.592989 154.80288 39.338594 154.80288 
+z
+" clip-path="url(#p56062a379c)" style="fill: #4fd0e8"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 305.628886 151.298496 
+L 305.628886 151.298496 
+C 306.330963 151.298496 306.900075 150.694101 306.900075 149.948496 
+L 306.900075 107.091504 
+C 306.900075 106.345899 306.330963 105.741504 305.628886 105.741504 
+L 305.628886 105.741504 
+C 304.926808 105.741504 304.357696 106.345899 304.357696 107.091504 
+L 304.357696 149.948496 
+C 304.357696 150.694101 304.926808 151.298496 305.628886 151.298496 
+z
+" clip-path="url(#p56062a379c)" style="fill: #d3a24a"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 549.524957 151.298496 
+L 549.743985 151.298496 
+C 550.48959 151.298496 551.093985 150.694101 551.093985 149.948496 
+L 551.093985 107.091504 
+C 551.093985 106.345899 550.48959 105.741504 549.743985 105.741504 
+L 549.524957 105.741504 
+C 548.779352 105.741504 548.174957 106.345899 548.174957 107.091504 
+L 548.174957 149.948496 
+C 548.174957 150.694101 548.779352 151.298496 549.524957 151.298496 
+z
+" clip-path="url(#p56062a379c)" style="fill: #e0765a"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 271.152931 140.688 
+Q 284.347038 140.688 295.752291 140.688 
+" clip-path="url(#p56062a379c)" style="fill: none; stroke: #3c4652; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 291.352291 138.488 
+L 295.752291 140.688 
+L 291.352291 142.888 
+z
+" clip-path="url(#p56062a379c)" style="fill: #3c4652; stroke: #3c4652; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 514.405219 140.688 
+Q 527.599326 140.688 539.004579 140.688 
+" clip-path="url(#p56062a379c)" style="fill: none; stroke: #3c4652; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 534.604579 138.488 
+L 539.004579 140.688 
+L 534.604579 142.888 
+z
+" clip-path="url(#p56062a379c)" style="fill: #3c4652; stroke: #3c4652; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 41.316 263.244096 
+L 42.759135 263.244096 
+C 43.50474 263.244096 44.109135 262.639701 44.109135 261.894096 
+L 44.109135 219.037104 
+C 44.109135 218.291499 43.50474 217.687104 42.759135 217.687104 
+L 41.316 217.687104 
+C 40.570395 217.687104 39.966 218.291499 39.966 219.037104 
+L 39.966 261.894096 
+C 39.966 262.639701 40.570395 263.244096 41.316 263.244096 
+z
+" clip-path="url(#p56062a379c)" style="fill: #7fd1b9"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 433.940886 263.244096 
+L 435.572346 263.244096 
+C 436.317951 263.244096 436.922346 262.639701 436.922346 261.894096 
+L 436.922346 219.037104 
+C 436.922346 218.291499 436.317951 217.687104 435.572346 217.687104 
+L 433.940886 217.687104 
+C 433.195281 217.687104 432.590886 218.291499 432.590886 219.037104 
+L 432.590886 261.894096 
+C 432.590886 262.639701 433.195281 263.244096 433.940886 263.244096 
+z
+" clip-path="url(#p56062a379c)" style="fill: #2b8ba6"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 127.913472 167.026402 
+Q 127.913472 185.209001 127.913472 201.602745 
+" clip-path="url(#p56062a379c)" style="fill: none; stroke-dasharray: 6.4,4.8; stroke-dashoffset: 0; stroke: #3c4652; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 130.113472 197.202745 
+L 127.913472 201.602745 
+L 125.713472 197.202745 
+z
+" clip-path="url(#p56062a379c)" style="fill: #3c4652; stroke-dasharray: 6.4,4.8; stroke-dashoffset: 0; stroke: #3c4652; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 600; font-size: 10.5px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="51.406704" y="112.217061" transform="rotate(-0 51.406704 112.217061)">atlas-api/</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="51.406704" y="125.131412" transform="rotate(-0 51.406704 125.131412)">.daidocs/store/</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="51.406704" y="138.637892" transform="rotate(-0 51.406704 138.637892)">13 memories</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 600; font-size: 9.4px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="316.433995" y="114.559221" transform="rotate(-0 316.433995 114.559221)">services/auth-service/</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="316.433995" y="125.861492" transform="rotate(-0 316.433995 125.861492)">.daidocs/store/</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="316.433995" y="137.567108" transform="rotate(-0 316.433995 137.567108)">locked</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 600; font-size: 9.4px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="562.040338" y="114.442364" transform="rotate(-0 562.040338 114.442364)">services/billing/</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="562.040338" y="125.861492" transform="rotate(-0 562.040338 125.861492)">.daidocs/store/</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="562.040338" y="137.567108" transform="rotate(-0 562.040338 137.567108)">confidential</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 600; font-size: 10px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="59.645894" y="226.66378" transform="rotate(-0 59.645894 226.66378)">~/DaiDocs/  (the shared store)</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 8.4px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #7f9188" x="59.645894" y="237.885705" transform="rotate(-0 59.645894 237.885705)">where every session lands until a folder is declared</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 8.4px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #7f9188" x="59.645894" y="249.546696" transform="rotate(-0 59.645894 249.546696)">nothing is lost by not declaring: it is just shared</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 600; font-size: 10px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="453.165322" y="226.539464" transform="rotate(-0 453.165322 226.539464)">~/.daidocs/stores.json  (the registry)</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 8.4px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #7f9188" x="453.165322" y="237.863392" transform="rotate(-0 453.165322 237.863392)">one permanent id per store: 20260907T110856-atlas-api</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 8.4px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #7f9188" x="453.165322" y="249.591321" transform="rotate(-0 453.165322 249.591321)">moved a folder? the id finds it again</text>
+   </g>
+   <g id="text_16">
+    <g id="patch_20">
+     <path d="M 269.454807 160.1528 
+L 300.246057 160.1528 
+Q 302.326057 160.1528 302.326057 158.0728 
+L 302.326057 150.0728 
+Q 302.326057 147.9928 300.246057 147.9928 
+L 269.454807 147.9928 
+Q 267.374807 147.9928 267.374807 150.0728 
+L 267.374807 158.0728 
+Q 267.374807 160.1528 269.454807 160.1528 
+z
+" style="fill: #0d1117; opacity: 0.92"/>
+    </g>
+    <text style="font-size: 8px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: middle; fill: #7f9188" x="284.850432" y="156.014206" transform="rotate(-0 284.850432 156.014206)">part of</text>
+   </g>
+   <g id="text_17">
+    <g id="patch_21">
+     <path d="M 512.707095 160.1528 
+L 543.498345 160.1528 
+Q 545.578345 160.1528 545.578345 158.0728 
+L 545.578345 150.0728 
+Q 545.578345 147.9928 543.498345 147.9928 
+L 512.707095 147.9928 
+Q 510.627095 147.9928 510.627095 150.0728 
+L 510.627095 158.0728 
+Q 510.627095 160.1528 512.707095 160.1528 
+z
+" style="fill: #0d1117; opacity: 0.92"/>
+    </g>
+    <text style="font-size: 8px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: middle; fill: #7f9188" x="528.10272" y="156.014206" transform="rotate(-0 528.10272 156.014206)">part of</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 9px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b4c2b8" x="253.46304" y="189.270619" transform="rotate(-0 253.46304 189.270619)">The parent can read its parts. A confidential part is the exception: it is never included.</text>
+   </g>
+   <g id="text_19">
+    <g id="patch_22">
+     <path d="M 110.318472 197.156788 
+L 145.508472 197.156788 
+Q 147.588472 197.156788 147.588472 195.076787 
+L 147.588472 176.342412 
+Q 147.588472 174.262412 145.508472 174.262412 
+L 110.318472 174.262412 
+Q 108.238472 174.262412 108.238472 176.342412 
+L 108.238472 195.076787 
+Q 108.238472 197.156788 110.318472 197.156788 
+z
+" style="fill: #0d1117; opacity: 0.92"/>
+    </g>
+    <text style="font-size: 8px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; fill: #7f9188" transform="translate(116.916597 182.967412)">until</text>
+    <text style="font-size: 8px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; fill: #7f9188" transform="translate(110.318472 192.3346)">declared</text>
+   </g>
+  </g>
+  <g id="text_20">
+   <text style="font-weight: 600; font-size: 14px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="22.9824" y="29.084375" transform="rotate(-0 22.9824 29.084375)">Where a memory lands</text>
+  </g>
+  <g id="text_21">
+   <text style="font-size: 10.5px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #7f9188" x="22.9824" y="48.204844" transform="rotate(-0 22.9824 48.204844)">In the folder the session was in. Declare a folder and its memory lives inside it, travelling with the code.</text>
+  </g>
+  <g id="text_22">
+   <text style="font-size: 8.5px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="22.9824" y="331.172744" transform="rotate(-0 22.9824 331.172744)">node daidocs.js stores   lists every declared store, and finds one that has moved</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p28b69f54f5">
+   <rect x="4.9248" y="3.9744" width="810.9504" height="1.728"/>
+  </clipPath>
+  <clipPath id="p56062a379c">
+   <rect x="18.0576" y="67.68" width="784.6848" height="243.36"/>
+  </clipPath>
+ </defs>
+</svg>

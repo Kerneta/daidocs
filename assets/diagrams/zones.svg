@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="820.8pt" height="331.2pt" viewBox="0 0 820.8 331.2" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-07T20:22:43.736976</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 331.2 
+L 820.8 331.2 
+L 820.8 0 
+L 0 0 
+z
+" style="fill: #05070a"/>
+  </g>
+  <g id="patch_2">
+   <path d="M 15.5952 327.2256 
+L 805.2048 327.2256 
+Q 815.8752 327.2256 815.8752 316.5552 
+L 815.8752 14.6448 
+Q 815.8752 3.9744 805.2048 3.9744 
+L 15.5952 3.9744 
+Q 4.9248 3.9744 4.9248 14.6448 
+L 4.9248 316.5552 
+Q 4.9248 327.2256 15.5952 327.2256 
+z
+" style="fill: #0d1117; stroke: #22272e; stroke-linejoin: miter"/>
+  </g>
+  <g id="axes_1">
+   <g clip-path="url(#pf603fadc09)">
+    <image xlink:href="data:image/png;base64,
+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" id="imageee1ef6677c" transform="scale(1 -1) translate(0 -1.8)" x="4.95" y="-3.6" width="810.9" height="1.8"/>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_3">
+    <path d="M 18.0576 296.64 
+L 802.7424 296.64 
+L 802.7424 67.68 
+L 18.0576 67.68 
+L 18.0576 296.64 
+z
+" style="fill: none"/>
+   </g>
+   <g id="matplotlib.axis_1"/>
+   <g id="matplotlib.axis_2"/>
+   <g id="patch_4">
+    <path d="M 296.74728 167.0832 
+L 524.05272 167.0832 
+C 528.078987 167.0832 531.34272 163.819467 531.34272 159.7932 
+L 531.34272 94.626 
+C 531.34272 90.599733 528.078987 87.336 524.05272 87.336 
+L 296.74728 87.336 
+C 292.721013 87.336 289.45728 90.599733 289.45728 94.626 
+L 289.45728 159.7932 
+C 289.45728 163.819467 292.721013 167.0832 296.74728 167.0832 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #4ade87; opacity: 0.1"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 296.74728 165.7872 
+L 524.05272 165.7872 
+C 527.363206 165.7872 530.04672 163.103686 530.04672 159.7932 
+L 530.04672 94.626 
+C 530.04672 91.315514 527.363206 88.632 524.05272 88.632 
+L 296.74728 88.632 
+C 293.436794 88.632 290.75328 91.315514 290.75328 94.626 
+L 290.75328 159.7932 
+C 290.75328 163.103686 293.436794 165.7872 296.74728 165.7872 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #4ade87; opacity: 0.14"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 296.74728 164.8152 
+L 524.05272 164.8152 
+C 526.826371 164.8152 529.07472 162.566851 529.07472 159.7932 
+L 529.07472 94.626 
+C 529.07472 91.852349 526.826371 89.604 524.05272 89.604 
+L 296.74728 89.604 
+C 293.973629 89.604 291.72528 91.852349 291.72528 94.626 
+L 291.72528 159.7932 
+C 291.72528 162.566851 293.973629 164.8152 296.74728 164.8152 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #4ade87; opacity: 0.18"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 37.801296 163.8432 
+L 265.106736 163.8432 
+C 267.343551 163.8432 269.156736 162.030015 269.156736 159.7932 
+L 269.156736 94.626 
+C 269.156736 92.389185 267.343551 90.576 265.106736 90.576 
+L 37.801296 90.576 
+C 35.564481 90.576 33.751296 92.389185 33.751296 94.626 
+L 33.751296 159.7932 
+C 33.751296 162.030015 35.564481 163.8432 37.801296 163.8432 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #10161d; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 296.74728 163.8432 
+L 524.05272 163.8432 
+C 526.289535 163.8432 528.10272 162.030015 528.10272 159.7932 
+L 528.10272 94.626 
+C 528.10272 92.389185 526.289535 90.576 524.05272 90.576 
+L 296.74728 90.576 
+C 294.510465 90.576 292.69728 92.389185 292.69728 94.626 
+L 292.69728 159.7932 
+C 292.69728 162.030015 294.510465 163.8432 296.74728 163.8432 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #10161d; stroke: #4ade87; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 555.693264 163.8432 
+L 782.998704 163.8432 
+C 785.235519 163.8432 787.048704 162.030015 787.048704 159.7932 
+L 787.048704 94.626 
+C 787.048704 92.389185 785.235519 90.576 782.998704 90.576 
+L 555.693264 90.576 
+C 553.456449 90.576 551.643264 92.389185 551.643264 94.626 
+L 551.643264 159.7932 
+C 551.643264 162.030015 553.456449 163.8432 555.693264 163.8432 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #10161d; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 37.801296 250.848 
+L 206.255376 250.848 
+C 208.492191 250.848 210.305376 249.034815 210.305376 246.798 
+L 210.305376 204.5268 
+C 210.305376 202.289985 208.492191 200.4768 206.255376 200.4768 
+L 37.801296 200.4768 
+C 35.564481 200.4768 33.751296 202.289985 33.751296 204.5268 
+L 33.751296 246.798 
+C 33.751296 249.034815 35.564481 250.848 37.801296 250.848 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #0b1015; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 228.479702 250.848 
+L 396.933782 250.848 
+C 399.170597 250.848 400.983782 249.034815 400.983782 246.798 
+L 400.983782 204.5268 
+C 400.983782 202.289985 399.170597 200.4768 396.933782 200.4768 
+L 228.479702 200.4768 
+C 226.242887 200.4768 224.429702 202.289985 224.429702 204.5268 
+L 224.429702 246.798 
+C 224.429702 249.034815 226.242887 250.848 228.479702 250.848 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #0b1015; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 419.158109 250.848 
+L 587.612189 250.848 
+C 589.849004 250.848 591.662189 249.034815 591.662189 246.798 
+L 591.662189 204.5268 
+C 591.662189 202.289985 589.849004 200.4768 587.612189 200.4768 
+L 419.158109 200.4768 
+C 416.921294 200.4768 415.108109 202.289985 415.108109 204.5268 
+L 415.108109 246.798 
+C 415.108109 249.034815 416.921294 250.848 419.158109 250.848 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #0b1015; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 609.836515 250.848 
+L 778.290595 250.848 
+C 780.52741 250.848 782.340595 249.034815 782.340595 246.798 
+L 782.340595 204.5268 
+C 782.340595 202.289985 780.52741 200.4768 778.290595 200.4768 
+L 609.836515 200.4768 
+C 607.5997 200.4768 605.786515 202.289985 605.786515 204.5268 
+L 605.786515 246.798 
+C 605.786515 249.034815 607.5997 250.848 609.836515 250.848 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #0b1015; stroke: #22272e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 39.338594 153.585792 
+L 39.463459 153.585792 
+C 40.209064 153.585792 40.813459 152.981397 40.813459 152.235792 
+L 40.813459 102.183408 
+C 40.813459 101.437803 40.209064 100.833408 39.463459 100.833408 
+L 39.338594 100.833408 
+C 38.592989 100.833408 37.988594 101.437803 37.988594 102.183408 
+L 37.988594 152.235792 
+C 37.988594 152.981397 38.592989 153.585792 39.338594 153.585792 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #38bdf8"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 298.284578 153.585792 
+L 298.409443 153.585792 
+C 299.155048 153.585792 299.759443 152.981397 299.759443 152.235792 
+L 299.759443 102.183408 
+C 299.759443 101.437803 299.155048 100.833408 298.409443 100.833408 
+L 298.284578 100.833408 
+C 297.538973 100.833408 296.934578 101.437803 296.934578 102.183408 
+L 296.934578 152.235792 
+C 296.934578 152.981397 297.538973 153.585792 298.284578 153.585792 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #4ade87"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 557.230562 153.585792 
+L 557.355427 153.585792 
+C 558.101032 153.585792 558.705427 152.981397 558.705427 152.235792 
+L 558.705427 102.183408 
+C 558.705427 101.437803 558.101032 100.833408 557.355427 100.833408 
+L 557.230562 100.833408 
+C 556.484957 100.833408 555.880562 101.437803 555.880562 102.183408 
+L 555.880562 152.235792 
+C 555.880562 152.981397 556.484957 153.585792 557.230562 153.585792 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #38bdf8"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 37.988594 243.796032 
+L 37.988594 243.796032 
+C 38.573659 243.796032 39.047918 243.191637 39.047918 242.446032 
+L 39.047918 208.878768 
+C 39.047918 208.133163 38.573659 207.528768 37.988594 207.528768 
+L 37.988594 207.528768 
+C 37.403529 207.528768 36.929269 208.133163 36.929269 208.878768 
+L 36.929269 242.446032 
+C 36.929269 243.191637 37.403529 243.796032 37.988594 243.796032 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #2b8ba6"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 228.667 243.796032 
+L 228.667 243.796032 
+C 229.252065 243.796032 229.726325 243.191637 229.726325 242.446032 
+L 229.726325 208.878768 
+C 229.726325 208.133163 229.252065 207.528768 228.667 207.528768 
+L 228.667 207.528768 
+C 228.081935 207.528768 227.607676 208.133163 227.607676 208.878768 
+L 227.607676 242.446032 
+C 227.607676 243.191637 228.081935 243.796032 228.667 243.796032 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #2b8ba6"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 419.345407 243.796032 
+L 419.345407 243.796032 
+C 419.930472 243.796032 420.404731 243.191637 420.404731 242.446032 
+L 420.404731 208.878768 
+C 420.404731 208.133163 419.930472 207.528768 419.345407 207.528768 
+L 419.345407 207.528768 
+C 418.760342 207.528768 418.286082 208.133163 418.286082 208.878768 
+L 418.286082 242.446032 
+C 418.286082 243.191637 418.760342 243.796032 419.345407 243.796032 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #2b8ba6"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 610.023813 243.796032 
+L 610.023813 243.796032 
+C 610.608878 243.796032 611.083138 243.191637 611.083138 242.446032 
+L 611.083138 208.878768 
+C 611.083138 208.133163 610.608878 207.528768 610.023813 207.528768 
+L 610.023813 207.528768 
+C 609.438748 207.528768 608.964489 208.133163 608.964489 208.878768 
+L 608.964489 242.446032 
+C 608.964489 243.191637 609.438748 243.796032 610.023813 243.796032 
+z
+" clip-path="url(#pe904d81c46)" style="fill: #2b8ba6"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 600; font-size: 10.5px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="51.406704" y="111.000152" transform="rotate(-0 51.406704 111.000152)">--- frontmatter ---</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="51.406704" y="123.801572" transform="rotate(-0 51.406704 123.801572)">id, title, date, type</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="51.406704" y="137.356004" transform="rotate(-0 51.406704 137.356004)">raw: _raw/&lt;id&gt;</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="51.406704" y="150.910436" transform="rotate(-0 51.406704 150.910436)">daidocs: format marker</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 600; font-size: 10.5px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="310.352688" y="110.811378" transform="rotate(-0 310.352688 110.811378)"># Understanding</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="310.352688" y="123.801572" transform="rotate(-0 310.352688 123.801572)">one JSON block:</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="310.352688" y="137.356004" transform="rotate(-0 310.352688 137.356004)">facts, events, topics,</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="310.352688" y="150.910436" transform="rotate(-0 310.352688 150.910436)">entities, decisions</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 600; font-size: 10.5px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="569.298672" y="110.877413" transform="rotate(-0 569.298672 110.877413)"># Content</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="569.298672" y="123.801572" transform="rotate(-0 569.298672 123.801572)">## [seg 1/N] ...</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="569.298672" y="137.356004" transform="rotate(-0 569.298672 137.356004)">the conversation,</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 8.6px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="569.298672" y="150.910436" transform="rotate(-0 569.298672 150.910436)">verbatim, in segments</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 600; font-size: 8.8px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b4c2b8" x="46.992852" y="214.8367" transform="rotate(-0 46.992852 214.8367)">_index/manifest.jsonl</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 8.2px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="46.992852" y="223.874501" transform="rotate(-0 46.992852 223.874501)">one line per file</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 600; font-size: 8.8px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b4c2b8" x="237.671258" y="214.8367" transform="rotate(-0 237.671258 214.8367)">_index/facts.jsonl</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 8.2px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="237.671258" y="223.874501" transform="rotate(-0 237.671258 223.874501)">every dated fact</text>
+   </g>
+   <g id="text_17">
+    <text style="font-weight: 600; font-size: 8.8px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b4c2b8" x="428.349665" y="214.787888" transform="rotate(-0 428.349665 214.787888)">_index/events.jsonl</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 8.2px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="428.349665" y="223.874501" transform="rotate(-0 428.349665 223.874501)">one row per occurrence</text>
+   </g>
+   <g id="text_19">
+    <text style="font-weight: 600; font-size: 8.8px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b4c2b8" x="619.028071" y="214.8367" transform="rotate(-0 619.028071 214.8367)">_index/profile.jsonl</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 8.2px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="619.028071" y="223.874501" transform="rotate(-0 619.028071 223.874501)">stated preferences</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 9px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b4c2b8" x="33.751296" y="191.3013" transform="rotate(-0 33.751296 191.3013)">Alongside it, written once per store:</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 9px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b4c2b8" x="33.751296" y="278.353912" transform="rotate(-0 33.751296 278.353912)">_raw/ keeps the original text exactly as it arrived, before any model saw it. If an extraction ever looks wrong, that is what it was made from.</text>
+   </g>
+  </g>
+  <g id="text_23">
+   <text style="font-weight: 600; font-size: 14px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #f2f7f3" x="22.9824" y="29.239688" transform="rotate(-0 22.9824 29.239688)">What is inside one .dai file</text>
+  </g>
+  <g id="text_24">
+   <text style="font-size: 10.5px; font-family: 'Plus Jakarta Sans', 'Plus Jakarta Sans Variable', 'Segoe UI', 'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #7f9188" x="22.9824" y="48.204844" transform="rotate(-0 22.9824 48.204844)">Three zones, in one plain-text file you can open in any editor, plus a pointer to the untouched original.</text>
+  </g>
+  <g id="text_25">
+   <text style="font-size: 8.5px; font-family: 'Commit Mono', 'Cascadia Code', 'Consolas', 'SF Mono', 'DejaVu Sans Mono'; text-anchor: start; fill: #7f9188" x="22.9824" y="316.772744" transform="rotate(-0 22.9824 316.772744)">the three zones are defined in spec/DAIDOCS-STANDARD.md</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pf603fadc09">
+   <rect x="4.9248" y="3.8088" width="810.9504" height="1.656"/>
+  </clipPath>
+  <clipPath id="pe904d81c46">
+   <rect x="18.0576" y="67.68" width="784.6848" height="228.96"/>
+  </clipPath>
+ </defs>
+</svg>

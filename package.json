@@ -1,0 +1,65 @@
+{
+  "name": "daidocs",
+  "version": "V4.4n32",
+  "description": ".dai, an open plain-text format for AI memory. Reference engine plus MCP server for Claude Desktop, Claude Code and any MCP client.",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "bin": {
+    "daidocs": "./daidocs.js",
+    "daidocs-setup": "./setup.js",
+    "daidocs-server": "./mcp_server.mjs",
+    "daidocs-archive": "./session_archiver.mjs",
+    "daidocs-context": "./session_context.mjs",
+    "daidocs-autosave": "./session_autosave.mjs",
+    "daidocs-lock": "./lock.js"
+  },
+  "scripts": {
+    "presetup": "npm install",
+    "setup": "node setup.js",
+    "selftest": "node mcp_selftest.mjs",
+    "server": "node mcp_server.mjs",
+    "catch-up": "node session_archiver.mjs --catch-up",
+    "check": "node keyless_check.mjs && node tools/test_surfaces.js",
+    "numbers": "node tools/check_numbers.mjs",
+    "charts": "python tools/make_charts.py",
+    "diagrams": "python tools/make_diagrams.py",
+    "badges": "python tools/make_badges.py",
+    "test": "node tools/test_surfaces.js",
+    "verify": "node verify_surfaces.mjs",
+    "lock": "node lock.js lock",
+    "unlock": "node lock.js unlock",
+    "lock-status": "node lock.js status",
+    "dashboard": "node tools/dashboard/build_dashboard.mjs",
+    "dashboard-live": "node tools/dashboard/build_dashboard.mjs --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "gpt-tokenizer": "3.4.0",
+    "zod": "^3.23.0"
+  },
+  "homepage": "https://daidocs.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kerneta/daidocs.git"
+  },
+  "files": [
+    "daidocs.js",
+    "setup.js",
+    "mcp_server.mjs",
+    "session_archiver.mjs",
+    "session_context.mjs",
+    "session_autosave.mjs",
+    "lock.js",
+    "keyless_check.mjs",
+    "mcp_selftest.mjs",
+    "lib/",
+    "prompts/",
+    "docs/",
+    "spec/",
+    "QUICKSTART.md",
+    "QUICKSTART.zh-CN.md",
+    "README.zh-CN.md",
+    "CHANGELOG.md",
+    "NOTICE"
+  ]
+}

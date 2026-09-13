@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use DaiDocs or report its scores, please cite as below and state the method version, the answering model, the judge snapshot and the denominator of the run."
+title: "DaiDocs: Plain-Text AI-Native Memory"
+version: V4.4n32
+authors:
+  - family-names: Rigi
+    given-names: Amin
+    email: amin@daidocs.com
+  - family-names: Munir
+    given-names: Muhammad Ali
+    email: ali@daidocs.com
+  - name: "The DaiDocs contributors"
+year: 2026
+date-released: 2026-09-12
+license: Apache-2.0
+repository-code: "https://github.com/Kerneta/daidocs"
+url: "https://daidocs.com"
+abstract: >
+  DaiDocs (.dai) is a plain-text memory layer for language models: three-zone
+  documents plus a derived index, written once by an observer model and read by
+  any answering model. On LongMemEval-S, all 500 questions, scored by the
+  benchmark authors' own evaluate_qa.py with judge snapshot gpt-4o-2024-08-06,
+  the daidocs-v44n engine scores 83.00% with GPT-4o answering and 92.00% with
+  Claude Fable 5 over the identical store. Accuracy is not model-independent:
+  the same store spans 14 points across five answering models, so any score
+  quoted without naming its actor is incomplete. Conditions and disclosures are
+  in docs/RESULTS.md.

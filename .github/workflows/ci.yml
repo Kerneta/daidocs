@@ -1,0 +1,31 @@
+name: check
+
+# Runs on every push and PR, with no API key or secrets, so it works on forks. It can't do
+# the paid end-to-end run (npm run selftest, ~$0.002, needs a key); it covers every regression
+# that has shipped: a provider missing available(), a bad raw: pointer, unparseable segments.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows is not optional: the CLI crash this guards against only reproduces there.
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [18, 22]
+    steps:
+      # v5 of both actions: v4 declares node20, which GitHub has deprecated. This is the Node
+      # the RUNNER uses for the action, unrelated to node-version below (the Node DaiDocs is tested on).
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install --no-audit --no-fund
+      - run: npm run check
+      - run: npm run verify
+      - run: node tools/check_numbers.mjs

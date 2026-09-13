@@ -1,0 +1,3 @@
+# Shows a "Sponsor" button. DaiDocs is funded by its hosted service at daidocs.com; the
+# engine here is free and Apache-2.0.
+custom: ["https://daidocs.com/community.html#support"]

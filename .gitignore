@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+
+# ---------------------------------------------------------------------------
+# Personal data. A .dai file IS someone's memory: their chats, their health,
+# their finances. None of it belongs in a commit, in this repo or in any repo
+# a user creates from it. Ignored by extension so that a store written to an
+# unexpected folder is still caught.
+# ---------------------------------------------------------------------------
+*.dai
+_raw/
+results/
+*.dai-store/
+.selftest-store/
+.mcp-selftest-store/
+
+# Derived index files that sit alongside a store
+_index/
+
+# Machine-specific config. setup.js writes .mcp.json containing absolute paths
+# from the machine it ran on, so committing it leaks the author's directory
+# layout and breaks for everyone else.
+.mcp.json
+.claude/settings.local.json
+
+# Environment. Keys live in the OS environment only, never in a file.
+.env
+.env.*
+*.key
+*.pem
+
+# Caches: derived, large, rebuildable, and built from personal content.
+.embed-cache/
+**/.embed-cache/
+**/.ingest-cache/
+
+# Backups written by setup.js when it edits a config it did not create
+*.daidocs-bak
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# The published recall sweep ships its results; the rule above is for working-copy run data.
+!experiments/recall-sweep/results/
+!experiments/recall-sweep/results/**
+
+# A built dashboard embeds the user's own memories, verbatim transcripts and
+# absolute paths. The builder ships; a built page never does.
+daidocs-dashboard.html
+
+# tools/make_charts.py imports tools/chart_theme.py, so Python leaves a cache
+# next to them. It is machine-specific and must never ship.
+__pycache__/
+*.pyc

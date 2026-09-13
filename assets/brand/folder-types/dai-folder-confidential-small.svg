@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="DaiDocs confidential folder">
+<defs>
+  <linearGradient id="confidentialsmallB" x1="0.15" y1="0" x2="0.85" y2="1">
+    <stop offset="0" stop-color="#06303d"/><stop offset="0.45" stop-color="#021a22"/><stop offset="1" stop-color="#010e13"/></linearGradient>
+  <linearGradient id="confidentialsmallF" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#2b8ba6"/><stop offset="1" stop-color="#083a4a"/></linearGradient>
+  <linearGradient id="confidentialsmallS" x1="0" y1="0" x2="0.7" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.2"/><stop offset="0.55" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="confidentialsmallG" cx="0.72" cy="0.8" r="0.55">
+    <stop offset="0" stop-color="#2fe0a8" stop-opacity="0.32"/><stop offset="1" stop-color="#2fe0a8" stop-opacity="0"/></radialGradient>
+  <filter id="confidentialsmallD" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="2.5" stdDeviation="2.6" flood-color="#01131a" flood-opacity="0.8"/></filter>
+  <filter id="confidentialsmallM" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <clipPath id="confidentialsmallC"><path d="M12 20 h21 a4 4 0 0 1 3 1.3 l4.8 5.4 a4 4 0 0 0 3 1.3 H84 a4 4 0 0 1 4 4 v46 a4 4 0 0 1 -4 4 H12 a4 4 0 0 1 -4 -4 V24 a4 4 0 0 1 4 -4 z"/></clipPath>
+</defs>
+
+<g filter="url(#confidentialsmallD)">
+  <path d="M12 20 h21 a4 4 0 0 1 3 1.3 l4.8 5.4 a4 4 0 0 0 3 1.3 H84 a4 4 0 0 1 4 4 v46 a4 4 0 0 1 -4 4 H12 a4 4 0 0 1 -4 -4 V24 a4 4 0 0 1 4 -4 z" fill="url(#confidentialsmallB)"/>
+  <g clip-path="url(#confidentialsmallC)">
+    <rect x="8" y="20" width="80" height="62" fill="url(#confidentialsmallG)"/>
+    <path d="M12 20 h21 l8 8 H88 v14 L12 20 z" fill="url(#confidentialsmallS)"/>
+    <path d="M8 38 h80 v40 a4 4 0 0 1 -4 4 H12 a4 4 0 0 1 -4 -4 z" fill="url(#confidentialsmallF)" opacity="0.5"/>
+    <path d="M8 38 h80 v40 a4 4 0 0 1 -4 4 H12 a4 4 0 0 1 -4 -4 z" fill="none" stroke="#4fd0e8" stroke-width="0.7" opacity="0.45"/>
+    
+    <g transform="translate(24 33) scale(2.0)" opacity="0.97">
+    <path d="M12 4.6 5.2 7.6 v4.7 c0 3.8 2.9 6.2 6.8 7.2 3.9-1 6.8-3.4 6.8-7.2 V7.6 z"
+          fill="#c2ffe8" opacity="0.22"/>
+    <path d="M12 4.6 5.2 7.6 v4.7 c0 3.8 2.9 6.2 6.8 7.2 3.9-1 6.8-3.4 6.8-7.2 V7.6 z"
+          fill="none" stroke="#c2ffe8" stroke-width="1.7" stroke-linejoin="round"/>
+    <circle cx="12" cy="11.4" r="1.8" fill="#c2ffe8"/>
+    <path d="M12 12.8 v2.6" stroke="#c2ffe8" stroke-width="1.6" stroke-linecap="round"/></g>
+  </g>
+  <path d="M12 20 h21 a4 4 0 0 1 3 1.3 l4.8 5.4 a4 4 0 0 0 3 1.3 H84 a4 4 0 0 1 4 4 v46 a4 4 0 0 1 -4 4 H12 a4 4 0 0 1 -4 -4 V24 a4 4 0 0 1 4 -4 z" fill="none" stroke="#5fd8ee" stroke-width="0.9" opacity="0.5"/>
+</g>
+
+</svg>

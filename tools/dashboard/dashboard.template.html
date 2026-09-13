@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<!-- no-cache: a rebuilt file served from cache looks like a build that never happened -->
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DaiDocs memory map</title>
+<style>
+/* Tokens lifted from daidocs.com theme.css so page and site match; folder-type colours mean
+   the same here as in Explorer. */
+:root{
+  --bg:#05070a; --surface-solid:#0d1117;
+  --glass:rgba(30,44,40,.24); --glass-hi:rgba(30,48,42,.44);
+  --header-bg:rgba(5,7,10,.72); --track:rgba(255,255,255,.05);
+  --text:#d5e0d8; --text-hi:#f2f7f3; --text-2:#b4c2b8; --muted:#7f9188;
+  --accent:#4ade87; --accent2:#38bdf8; --accent-ink:#04160c;
+  --accent-b:rgba(74,222,135,.36); --accent-bg:rgba(74,222,135,.09); --accent-glow:rgba(74,222,135,.17);
+  --accent2-b:rgba(56,189,248,.36); --accent2-bg:rgba(56,189,248,.09);
+  --warn:#d3a24a; --warn-b:rgba(211,162,74,.4); --warn-bg:rgba(211,162,74,.09);
+  --hairline:rgba(255,255,255,.09); --hairline-2:rgba(255,255,255,.2);
+  --grid-line:rgba(255,255,255,.035);
+  --shadow-lg:0 20px 50px rgba(0,0,0,.66);
+  --sans:'Plus Jakarta Sans Variable','Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Commit Mono',ui-monospace,'Cascadia Code','Consolas',monospace;
+
+  /* abyss teal, from the icon set */
+  --abyss-1:#0b4a5e; --abyss-2:#06303d; --abyss-3:#021a22;
+  --steel:#2b8ba6; --steel-2:#083a4a; --ring:#4fd0e8; --mark:#2fe0a8; --mark-hi:#a8ffe0;
+
+  /* folder types: same meaning as the Explorer icons */
+  --t-normal:#4fd0e8; --t-locked:#d3a24a; --t-frozen:#8fb6d9; --t-connected:#4ade87;
+  --t-shared:#7fd1b9; --t-confidential:#e0765a; --t-temporary:#9a8fd9;
+}
+@property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+  font-size:14px;line-height:1.5;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* a slow drifting starfield behind a fixed grid: panning reads as movement, not scrolling */
+#space{position:fixed;inset:0;z-index:0;pointer-events:none}
+#stars{position:absolute;inset:0;opacity:.55}
+#grid{
+  position:absolute;inset:-50%;
+  background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+  background-size:64px 64px;
+  transform:perspective(700px) rotateX(58deg);
+  transform-origin:50% 40%;
+  mask-image:radial-gradient(ellipse 70% 55% at 50% 42%,#000 30%,transparent 78%);
+  animation:drift 90s linear infinite;
+}
+@keyframes drift{to{background-position:0 640px,640px 0}}
+.aurora{position:absolute;border-radius:50%;filter:blur(90px);opacity:.16}
+.aurora.a{width:52vw;height:52vw;left:-12vw;top:-16vw;background:radial-gradient(circle,var(--mark),transparent 62%)}
+.aurora.b{width:46vw;height:46vw;right:-14vw;bottom:-18vw;background:radial-gradient(circle,var(--accent2),transparent 62%)}
+
+header{
+  position:relative;z-index:3;display:flex;align-items:center;gap:18px;
+  padding:12px 20px;background:var(--header-bg);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--hairline);
+}
+.brand{display:flex;align-items:center;gap:11px;font-weight:650;color:var(--text-hi);letter-spacing:.2px}
+.brand svg{width:26px;height:26px;flex:0 0 26px}
+.brand small{display:block;font-weight:450;color:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:.4px}
+
+.seg{display:flex;background:var(--glass);border:1px solid var(--hairline);border-radius:9px;padding:3px;gap:3px}
+.seg button{
+  appearance:none;border:0;background:transparent;color:var(--text-2);
+  font:inherit;font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;
+  transition:background .18s,color .18s;
+}
+.seg button[aria-selected="true"]{background:var(--accent-bg);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent-b)}
+.seg button:hover:not([aria-selected="true"]){color:var(--text-hi)}
+
+.spacer{flex:1}
+.stat{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:16px;align-items:center}
+.stat b{color:var(--text-hi);font-weight:600}
+.searchwrap{position:relative}
+#search{
+  background:var(--glass);border:1px solid var(--hairline);color:var(--text);
+  border-radius:8px;padding:7px 11px 7px 30px;font:inherit;font-size:12.5px;width:230px;outline:none;
+  transition:border-color .18s,box-shadow .18s;
+}
+#search:focus{border-color:var(--accent-b);box-shadow:0 0 0 3px var(--accent-glow)}
+.searchwrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;opacity:.5}
+
+main{position:relative;z-index:2;height:calc(100vh - 57px);display:grid;grid-template-columns:1fr 340px}
+#stage{position:relative;overflow:auto;padding:22px 24px 60px}
+#stage::-webkit-scrollbar{width:10px;height:10px}
+#stage::-webkit-scrollbar-thumb{background:var(--track);border-radius:8px}
+
+.crumbs{display:flex;align-items:center;gap:7px;margin-bottom:16px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+.crumbs button{
+  appearance:none;background:var(--glass);border:1px solid var(--hairline);color:var(--text-2);
+  font:inherit;padding:4px 10px;border-radius:6px;cursor:pointer;transition:.18s;
+}
+.crumbs button:hover{color:var(--accent);border-color:var(--accent-b)}
+.crumbs span{color:var(--muted)}
+/* The back button leads the row, so it is where a hand goes first, and it is
+   drawn a shade stronger than the crumbs beside it. */
+.crumbs .back{color:var(--text);border-color:var(--line-2);padding-left:9px}
+.crumbs .back:hover{color:var(--accent);border-color:var(--accent-b)}
+
+/* rows and columns of memories: a real grid, not a force layout, because a
+   grid can be read along an axis and a hairball cannot */
+.gridwrap{position:relative}
+#links{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:visible;
+  opacity:0;transition:opacity .22s}
+#links.on{opacity:1}
+.cells{position:relative;z-index:1;display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(196px,1fr))}
+
+.cell{
+  position:relative;border-radius:12px;padding:12px 13px;cursor:pointer;
+  background:linear-gradient(150deg,var(--abyss-1),var(--abyss-2) 45%,var(--abyss-3));
+  border:1px solid var(--hairline);
+  box-shadow:0 10px 26px rgba(1,19,26,.55);
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .2s,border-color .2s;
+  min-height:104px;display:flex;flex-direction:column;gap:6px;
+  animation:rise .45s cubic-bezier(.2,.7,.3,1) backwards;
+}
+@keyframes rise{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.cell:hover{transform:translateY(-4px);border-color:var(--ring);box-shadow:0 16px 40px rgba(1,19,26,.7),0 0 0 1px var(--ring),0 0 26px rgba(79,208,232,.22)}
+.cell.dim{opacity:.4;filter:saturate(.35) brightness(.8)}
+.cell.lit{z-index:4;border-color:var(--mark);box-shadow:0 16px 40px rgba(1,19,26,.7),0 0 0 1px var(--mark),0 0 30px rgba(47,224,168,.28)}
+.cell .t{font-size:12.5px;font-weight:620;color:var(--text-hi);line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cell .m{margin-top:auto;display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.cell .sz{color:var(--ring)}
+.cell .dot{position:absolute;top:10px;right:11px;width:7px;height:7px;border-radius:50%;background:var(--mark);box-shadow:0 0 10px var(--mark)}
+
+/* a store or folder tile: bigger, and it opens */
+.tile{
+  position:relative;border-radius:14px;padding:15px 16px;cursor:pointer;min-height:132px;
+  background:linear-gradient(150deg,var(--abyss-1),var(--abyss-2) 45%,var(--abyss-3));
+  border:1px solid var(--hairline);box-shadow:0 12px 30px rgba(1,19,26,.55);
+  display:flex;flex-direction:column;gap:8px;
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .2s,border-color .2s;
+  animation:rise .45s cubic-bezier(.2,.7,.3,1) backwards;
+}
+.tile:hover{transform:translateY(-5px);box-shadow:0 20px 46px rgba(1,19,26,.72),0 0 0 1px var(--tc,var(--ring)),0 0 30px color-mix(in oklab,var(--tc,var(--ring)) 30%,transparent)}
+.tile .head{display:flex;align-items:center;gap:10px}
+.tile .head svg{width:30px;height:30px;flex:0 0 30px}
+.tile .nm{font-weight:660;color:var(--text-hi);font-size:14px;line-height:1.25}
+.tile .ty{font-family:var(--mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--tc,var(--ring))}
+.tile .bar{height:5px;border-radius:3px;background:var(--track);overflow:hidden;display:flex}
+.tile .bar i{display:block;height:100%}
+.tile .kv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.tile .kv b{color:var(--text-2);font-weight:600}
+.tile .peek{
+  position:absolute;left:12px;right:12px;bottom:12px;padding:9px 10px;border-radius:9px;
+  background:rgba(2,18,24,.94);border:1px solid var(--hairline-2);backdrop-filter:blur(8px);
+  opacity:0;transform:translateY(6px);pointer-events:none;transition:.2s;
+  font-family:var(--mono);font-size:10.5px;color:var(--text-2);z-index:4;
+}
+.tile:hover .peek{opacity:1;transform:translateY(0)}
+.tile .peek div{display:flex;justify-content:space-between;gap:8px}
+.tile .peek div+div{margin-top:3px}
+
+/* a memory as its own page, rather than a cramped sidebar */
+.detail{max-width:960px;animation:rise .4s cubic-bezier(.2,.7,.3,1) backwards}
+.detail .dhead{
+  background:linear-gradient(150deg,var(--abyss-1),var(--abyss-2) 45%,var(--abyss-3));
+  border:1px solid var(--hairline);border-radius:14px;padding:20px 22px;margin-bottom:14px;
+  box-shadow:0 12px 30px rgba(1,19,26,.5);
+}
+.detail h1{margin:0 0 10px;font-size:20px;line-height:1.3;color:var(--text-hi);font-weight:670}
+.detail .facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.detail .facts b{color:var(--ring);font-weight:600}
+.detail .cols{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+@media (max-width:900px){.detail .cols{grid-template-columns:1fr}}
+.detail .panel{margin-bottom:14px}
+.backlink{
+  appearance:none;background:var(--glass);border:1px solid var(--hairline);color:var(--text-2);
+  font:inherit;font-family:var(--mono);font-size:12px;padding:5px 11px;border-radius:7px;cursor:pointer;margin-bottom:14px;
+}
+.backlink:hover{color:var(--accent);border-color:var(--accent-b)}
+
+/* the project tree, and what is in each folder */
+.kinds{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.kind{font-family:var(--mono);font-size:10.5px;padding:3px 8px;border-radius:20px;
+  background:var(--glass-hi);border:1px solid var(--hairline);color:var(--text-2)}
+.kind b{color:var(--ring);font-weight:600}
+.tnode .file{display:flex;align-items:center;gap:8px;padding:2px 7px 2px 24px;border-radius:6px;color:var(--muted)}
+.tnode .file .sz{margin-left:auto}
+.tnode .file:hover{background:var(--track)}
+.pathbox{
+  font-family:var(--mono);font-size:11px;color:var(--text-2);background:rgba(2,18,24,.6);
+  border:1px solid var(--hairline);border-radius:8px;padding:9px 10px;margin-top:8px;word-break:break-all;
+}
+.act{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.act a,.act button{
+  appearance:none;text-decoration:none;font:inherit;font-size:11.5px;font-weight:600;
+  background:var(--glass);border:1px solid var(--hairline);color:var(--text-2);
+  padding:7px 11px;border-radius:8px;cursor:pointer;transition:.16s;
+}
+.act a:hover,.act button:hover{color:var(--accent);border-color:var(--accent-b)}
+
+/* the reader: the memory itself, in the three zones the format defines */
+#reader{
+  position:fixed;inset:0;z-index:60;display:none;
+  background:rgba(2,6,10,.82);backdrop-filter:blur(10px);
+  padding:36px clamp(16px,5vw,80px);overflow:auto;
+}
+#reader.open{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0}}
+.rdr{
+  max-width:940px;margin:0 auto;background:var(--surface-solid);
+  border:1px solid var(--hairline);border-radius:16px;box-shadow:var(--shadow-lg);
+  overflow:hidden;animation:lift .26s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes lift{from{opacity:0;transform:translateY(14px) scale(.99)}}
+.rdr header{position:sticky;top:0;display:block;padding:18px 22px 0;background:var(--surface-solid);border:0}
+.rdr h1{margin:0 0 4px;font-size:18px;color:var(--text-hi);font-weight:660;line-height:1.3;padding-right:40px}
+.rdr .meta{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.rdr .close{
+  position:absolute;top:14px;right:16px;width:30px;height:30px;border-radius:8px;
+  background:var(--glass);border:1px solid var(--hairline);color:var(--text-2);
+  cursor:pointer;font-size:16px;line-height:1;display:grid;place-items:center;
+}
+.rdr .close:hover{color:var(--accent);border-color:var(--accent-b)}
+.zones{display:flex;gap:4px;padding:14px 22px 0;border-bottom:1px solid var(--hairline)}
+.zones button{
+  appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;
+  font-family:var(--mono);font-size:11px;letter-spacing:.6px;text-transform:uppercase;
+  padding:8px 12px;border-radius:7px 7px 0 0;cursor:pointer;border-bottom:2px solid transparent;
+}
+.zones button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.zones button:hover:not([aria-selected="true"]){color:var(--text-hi)}
+.zbody{padding:20px 22px 26px;max-height:calc(100vh - 230px);overflow:auto}
+.zbody pre{
+  margin:0;font-family:var(--mono);font-size:12px;line-height:1.65;color:var(--text-2);
+  white-space:pre-wrap;word-break:break-word;
+}
+.seg{border:1px solid var(--hairline);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--glass)}
+.seg .n{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mark);margin-bottom:7px}
+.seg .body{font-size:13px;line-height:1.62;color:var(--text-2);white-space:pre-wrap;word-break:break-word}
+.zbody .hint{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px}
+.readbtn{
+  width:100%;appearance:none;border:1px solid var(--accent-b);background:var(--accent-bg);
+  color:var(--accent);font:inherit;font-weight:620;font-size:12.5px;
+  padding:10px;border-radius:9px;cursor:pointer;margin-bottom:12px;transition:.16s;
+}
+.readbtn:hover{background:var(--accent-glow);border-color:var(--accent)}
+
+.wait{
+  border:1px solid var(--warn-b);background:var(--warn-bg);border-radius:12px;
+  padding:14px 16px;margin-bottom:18px;grid-column:1/-1;
+}
+.wait h3{margin:0 0 3px;font-size:13.5px;color:var(--warn);font-weight:660}
+.wait .sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:11px}
+.wgrid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.wcard{
+  background:rgba(2,18,24,.55);border:1px solid var(--hairline);border-radius:9px;
+  padding:10px 11px;cursor:pointer;transition:.16s;
+}
+.wcard:hover{border-color:var(--warn);background:rgba(2,18,24,.85)}
+.wcard .p{font-size:12.5px;font-weight:620;color:var(--text-hi);word-break:break-word;line-height:1.3}
+.wcard .n{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between}
+.wcard .n b{color:var(--warn);font-weight:600}
+
+.copy{
+  font-family:var(--mono);font-size:11px;line-height:1.5;color:var(--mark);
+  background:rgba(2,18,24,.7);border:1px solid var(--accent-b);border-radius:8px;
+  padding:9px 10px;margin-top:8px;cursor:pointer;word-break:break-all;transition:.16s;
+}
+.copy:hover{border-color:var(--mark);background:rgba(2,18,24,.95)}
+.copy.ok{color:var(--accent);text-align:center}
+.tile.add{background:linear-gradient(150deg,rgba(11,74,94,.5),rgba(2,26,34,.7));border-style:dashed}
+
+.sectionlabel{font-family:var(--mono);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--muted);margin:26px 0 12px;display:flex;align-items:center;gap:10px}
+.sectionlabel::after{content:'';flex:1;height:1px;background:var(--hairline)}
+
+aside{
+  position:relative;z-index:3;border-left:1px solid var(--hairline);
+  background:var(--header-bg);backdrop-filter:blur(14px);overflow:auto;padding:20px 18px 40px;
+}
+aside h2{margin:0 0 3px;font-size:15px;color:var(--text-hi);font-weight:660;line-height:1.3}
+aside .sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:16px}
+.panel{background:var(--glass);border:1px solid var(--hairline);border-radius:11px;padding:13px;margin-bottom:12px}
+.panel h3{margin:0 0 9px;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12.5px}
+.row+.row{border-top:1px solid var(--grid-line)}
+.row span{color:var(--muted)}
+.row b{color:var(--text-hi);font-weight:600;font-family:var(--mono);font-size:11.5px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-family:var(--mono);font-size:10.5px;padding:3px 8px;border-radius:20px;
+  background:var(--accent2-bg);border:1px solid var(--accent2-b);color:var(--accent2)}
+.chip.e{background:var(--accent-bg);border-color:var(--accent-b);color:var(--accent)}
+.summary{font-size:12.5px;color:var(--text-2);line-height:1.55}
+.linklist{display:flex;flex-direction:column;gap:6px}
+.linkitem{background:var(--glass-hi);border:1px solid var(--hairline);border-radius:8px;padding:8px 9px;cursor:pointer;transition:.16s}
+.linkitem:hover{border-color:var(--mark)}
+.linkitem .lt{font-size:11.5px;color:var(--text-hi);line-height:1.3;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.linkitem .lw{font-family:var(--mono);font-size:10px;color:var(--mark);margin-top:3px}
+.empty{color:var(--muted);font-size:12.5px;padding:30px 4px;text-align:center;line-height:1.6}
+
+/* storage bar legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* project tree */
+.tree{font-family:var(--mono);font-size:12px}
+.tnode{padding:3px 0 3px 0}
+.tnode .line{display:flex;align-items:center;gap:8px;padding:3px 7px;border-radius:6px;cursor:pointer}
+.tnode .line:hover{background:var(--accent-bg)}
+.tnode .nm{color:var(--text-2)}
+.tnode.isstore .nm{color:var(--mark)}
+.tnode .sz{margin-left:auto;color:var(--muted);font-size:10.5px}
+.tnode .kids{margin-left:14px;border-left:1px solid var(--grid-line);padding-left:8px}
+.caret{width:9px;opacity:.5;transition:transform .16s}
+.tnode.open>.line .caret{transform:rotate(90deg)}
+
+@media (max-width:1000px){
+  main{grid-template-columns:1fr}
+  aside{position:fixed;right:0;top:57px;bottom:0;width:min(360px,88vw);transform:translateX(101%);transition:transform .25s}
+  aside.open{transform:none;box-shadow:var(--shadow-lg)}
+}
+</style>
+</head>
+<body>
+
+<div id="space" aria-hidden="true">
+  <div class="aurora a"></div><div class="aurora b"></div>
+  <canvas id="stars"></canvas>
+  <div id="grid"></div>
+</div>
+
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 72 72" aria-hidden="true">
+      <defs>
+        <radialGradient id="bR" cx="36" cy="36" r="30" gradientUnits="userSpaceOnUse">
+          <stop offset=".2" stop-color="#005c40"/><stop offset="1" stop-color="#2fe0a8"/></radialGradient>
+        <radialGradient id="bC" cx="33" cy="31" r="12" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#a8ffe0"/><stop offset="1" stop-color="#00805c"/></radialGradient>
+        <mask id="bH"><rect x="-30" y="-30" width="140" height="140" fill="#fff"/><circle cx="36" cy="36" r="2.4" fill="#000"/></mask>
+      </defs>
+      <g mask="url(#bH)">
+        <g stroke="url(#bR)" stroke-width="4.4" stroke-linecap="round">
+          <line x1="36" y1="13" x2="36" y2="24"/>
+          <line x1="36" y1="13" x2="36" y2="24" transform="rotate(45 36 36)"/>
+          <line x1="36" y1="13" x2="36" y2="24" transform="rotate(90 36 36)"/>
+          <line x1="36" y1="13" x2="36" y2="24" transform="rotate(135 36 36)"/>
+          <line x1="36" y1="13" x2="36" y2="24" transform="rotate(180 36 36)"/>
+          <line x1="36" y1="13" x2="36" y2="24" transform="rotate(225 36 36)"/>
+          <line x1="36" y1="13" x2="36" y2="24" transform="rotate(270 36 36)"/>
+          <line x1="36" y1="13" x2="36" y2="24" transform="rotate(315 36 36)"/>
+        </g>
+        <circle cx="36" cy="36" r="10" fill="#1fc492" opacity=".75"/>
+        <circle cx="36" cy="36" r="9" fill="url(#bC)"/>
+      </g>
+    </svg>
+    <div>DaiDocs memory map<small id="ver">.</small></div>
+  </div>
+
+  <div class="seg" role="tablist">
+    <button role="tab" id="tab-memory" aria-selected="true">Memory</button>
+    <button role="tab" id="tab-project" aria-selected="false">Project files</button>
+  </div>
+
+  <div class="spacer"></div>
+  <div class="stat" id="topstat"></div>
+  <div class="searchwrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="search" type="search" placeholder="Search memories, topics, people">
+  </div>
+</header>
+
+<div id="reader" role="dialog" aria-modal="true" aria-label="Memory reader"><div class="rdr">
+  <header>
+    <button class="close" id="rclose" aria-label="Close">&times;</button>
+    <h1 id="rtitle"></h1>
+    <div class="meta" id="rmeta"></div>
+    <div class="zones" role="tablist">
+      <button role="tab" data-z="understanding" aria-selected="true">Understanding</button>
+      <button role="tab" data-z="content" aria-selected="false">Content</button>
+      <button role="tab" data-z="front" aria-selected="false">Frontmatter</button>
+      <button role="tab" data-z="raw" aria-selected="false">Raw original</button>
+    </div>
+  </header>
+  <div class="zbody" id="rbody"></div>
+</div></div>
+
+<main>
+  <section id="stage">
+    <div class="crumbs" id="crumbs"></div>
+    <div class="gridwrap">
+      <svg id="links"></svg>
+      <div class="cells" id="cells"></div>
+    </div>
+  </section>
+  <aside id="inspector"><div class="empty">Select anything to inspect it.</div></aside>
+</main>
+
+<script>
+/*__DATA__*/
+</script>
+<script>
+(() => {
+  const D = window.DAIDOCS || { stores: [], version: '?' };
+  const $ = s => document.querySelector(s);
+  const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h !== undefined) n.innerHTML = h; return n; };
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // Sizes are the point of half this page, so they are formatted honestly:
+  // three significant figures, never a bare "0 MB" for something that exists.
+  const KB = 1024, MB = KB * 1024;
+  const bytes = n => n >= MB ? (n / MB).toFixed(n / MB >= 10 ? 0 : 1) + ' MB'
+    : n >= KB ? Math.round(n / KB) + ' KB'
+    : n > 0 ? n + ' B' : '0';
+
+  const TYPE_COLOR = {
+    normal: 'var(--t-normal)', locked: 'var(--t-locked)', frozen: 'var(--t-frozen)',
+    connected: 'var(--t-connected)', shared: 'var(--t-shared)',
+    confidential: 'var(--t-confidential)', temporary: 'var(--t-temporary)',
+  };
+
+  // The folder glyph, drawn once and tinted per type, so a tile here and an
+  // icon in Explorer are recognisably the same object.
+  function folderSVG(type) {
+    const c = TYPE_COLOR[type] || 'var(--t-normal)';
+    const badge = {
+      locked: '<rect x="60" y="52" width="18" height="14" rx="3" fill="' + c + '"/><path d="M64 52v-4a5 5 0 0 1 10 0v4" fill="none" stroke="' + c + '" stroke-width="3"/>',
+      frozen: '<g stroke="' + c + '" stroke-width="3" stroke-linecap="round"><line x1="69" y1="48" x2="69" y2="70"/><line x1="59" y1="53" x2="79" y2="65"/><line x1="79" y1="53" x2="59" y2="65"/></g>',
+      connected: '<g fill="none" stroke="' + c + '" stroke-width="3"><rect x="54" y="52" width="13" height="10" rx="2"/><rect x="72" y="60" width="13" height="10" rx="2"/><path d="M67 57h5"/></g>',
+      shared: '<g fill="' + c + '" opacity=".9"><rect x="54" y="54" width="11" height="9" rx="2"/><rect x="63" y="58" width="11" height="9" rx="2"/><rect x="72" y="62" width="11" height="9" rx="2"/></g>',
+      confidential: '<circle cx="69" cy="59" r="11" fill="none" stroke="' + c + '" stroke-width="3"/><path d="M61 51l16 16" stroke="' + c + '" stroke-width="3"/>',
+      temporary: '<circle cx="69" cy="59" r="11" fill="none" stroke="' + c + '" stroke-width="3"/><path d="M69 53v7l5 3" stroke="' + c + '" stroke-width="3" fill="none" stroke-linecap="round"/>',
+      normal: '', shared_: '',
+    }[type] || '';
+    return '<svg viewBox="0 0 96 96">'
+      + '<defs><linearGradient id="fg' + type + '" x1="0" y1="0" x2="1" y2="1">'
+      + '<stop offset="0" stop-color="#0b4a5e"/><stop offset="1" stop-color="#021a22"/></linearGradient></defs>'
+      + '<path d="M12 20h21a4 4 0 0 1 3 1.3l4.8 5.4a4 4 0 0 0 3 1.3H84a4 4 0 0 1 4 4v46a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V24a4 4 0 0 1 4-4z" fill="url(#fg' + type + ')" stroke="' + c + '" stroke-width="2" stroke-opacity=".55"/>'
+      + '<path d="M8 40h80v38a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4z" fill="' + c + '" opacity=".13"/>'
+      + badge + '</svg>';
+  }
+
+  // memory | project
+  let view = 'memory';
+  // store id, or null for the top level
+  let openStore = null;
+  // {store, id} when one memory has the whole page
+  let openMemory = null;
+  // a store id when its project tree has the page
+  let openFolder = null;
+  let selected = null;
+  let query = '';
+
+  const stores = D.stores || [];
+  const byId = Object.fromEntries(stores.map(s => [s.id, s]));
+  const totalMem = stores.reduce((a, s) => a + s.counts.memories, 0);
+  const totalBytes = stores.reduce((a, s) => a + s.bytes.total, 0);
+  const totalPending = stores.reduce((a, s) => a + s.counts.pending, 0);
+
+  $('#ver').textContent = (D.version || '?') + ' · ' + new Date(D.generated).toLocaleString();
+  $('#topstat').innerHTML =
+    '<div><b>' + stores.length + '</b> stores</div>'
+    + '<div><b>' + totalMem + '</b> memories</div>'
+    + '<div><b>' + bytes(totalBytes) + '</b> on disk</div>'
+    + (totalPending ? '<div style="color:var(--warn)"><b>' + totalPending + '</b> unindexed</div>' : '');
+
+  (() => {
+    const c = $('#stars'), x = c.getContext('2d');
+    let stars = [];
+    function size() {
+      c.width = innerWidth; c.height = innerHeight;
+      stars = Array.from({ length: Math.round(innerWidth * innerHeight / 9000) }, () => ({
+        x: Math.random() * c.width, y: Math.random() * c.height,
+        r: Math.random() * 1.25 + .2, a: Math.random() * .6 + .15, v: Math.random() * .015 + .004,
+      }));
+    }
+    size(); addEventListener('resize', size);
+    let t = 0;
+    (function loop() {
+      t += .01; x.clearRect(0, 0, c.width, c.height);
+      for (const s of stars) {
+        const a = s.a * (.65 + .35 * Math.sin(t * 6 * s.v * 60 + s.x));
+        x.fillStyle = 'rgba(168,255,224,' + a.toFixed(3) + ')';
+        x.beginPath(); x.arc(s.x, s.y, s.r, 0, 6.284); x.fill();
+        s.y -= s.v; if (s.y < -2) { s.y = c.height + 2; s.x = Math.random() * c.width; }
+      }
+      requestAnimationFrame(loop);
+    })();
+  })();
+
+  // Up one level, wherever you are: the button, Escape, and the browser's own Back all use this.
+  function upOneLevel() {
+    // the reader is on top
+    if (reading) { closeReader(); return true; }
+    if (openMemory || openFolder) { openMemory = null; openFolder = null; render(); return true; }
+    if (openStore) { openStore = null; selected = null; render(); return true; }
+    // already at the top
+    return false;
+  }
+
+  function crumbs() {
+    const c = $('#crumbs'); c.innerHTML = '';
+    // No Back button at the top level: there's nowhere above to go.
+    if (openStore || openMemory || openFolder) {
+      const back = el('button', 'back', '&larr; Back');
+      back.title = 'Up one level (Escape, or your browser\'s back button)';
+      back.onclick = () => upOneLevel();
+      c.append(back);
+    }
+    const home = el('button', null, view === 'memory' ? 'All stores' : 'All projects');
+    home.onclick = () => { openStore = null; openMemory = null; openFolder = null; selected = null; render(); };
+    c.append(home);
+    if (openStore && byId[openStore]) {
+      c.append(el('span', null, '&rsaquo;'));
+      const b = el('button', null, esc(byId[openStore].label));
+      b.style.color = TYPE_COLOR[byId[openStore].type] || '';
+      b.onclick = () => { openMemory = null; openFolder = null; render(); };
+      c.append(b);
+    }
+    if (openFolder) { c.append(el('span', null, '&rsaquo;')); c.append(el('button', null, 'Project files')); }
+    if (openMemory && byId[openMemory.store]) {
+      const m = byId[openMemory.store].memories.find(x => x.id === openMemory.id);
+      if (m) {
+        c.append(el('span', null, '&rsaquo;'));
+        c.append(el('button', null, esc(m.id)));
+      }
+    }
+  }
+
+  function storeTile(s) {
+    const t = el('div', 'tile');
+    t.style.setProperty('--tc', TYPE_COLOR[s.type] || 'var(--t-normal)');
+    const b = s.bytes, tot = Math.max(1, b.total);
+    t.innerHTML =
+      '<div class="head">' + folderSVG(s.type)
+      + '<div><div class="nm">' + esc(s.label) + '</div><div class="ty">' + esc(s.type) + (s.declared ? '' : ' · default') + '</div></div></div>'
+      + '<div class="bar">'
+      + '<i style="width:' + (b.dai / tot * 100) + '%;background:var(--mark)"></i>'
+      + '<i style="width:' + (b.index / tot * 100) + '%;background:var(--accent2)"></i>'
+      + '<i style="width:' + (b.raw / tot * 100) + '%;background:var(--steel)"></i>'
+      + '</div>'
+      + '<div class="kv"><span>' + s.counts.memories + ' memories</span><b>' + bytes(b.total) + '</b></div>'
+      + (s.counts.pending ? '<div class="kv" style="color:var(--warn)"><span>' + s.counts.pending + ' unindexed</span><b>waiting</b></div>' : '')
+      + '<div class="peek">'
+      + '<div><span>.dai</span><span>' + bytes(b.dai) + '</span></div>'
+      + '<div><span>index</span><span>' + bytes(b.index) + '</span></div>'
+      + '<div><span>raw originals</span><span>' + bytes(b.raw) + '</span></div>'
+      + (s.counts.unconverted ? '<div><span>_unconverted</span><span>' + s.counts.unconverted + ' waiting, ' + bytes(b.unconverted || 0) + '</span></div>' : '')
+      + '<div><span>facts / events</span><span>' + s.counts.facts + ' / ' + s.counts.events + '</span></div>'
+      + (s.project ? '<div><span>folder</span><span>' + s.project.files + ' files, ' + bytes(s.project.bytes) + '</span></div>' : '')
+      + '</div>';
+    t.onclick = () => { openStore = s.id; openMemory = null; openFolder = null; selected = { kind: 'store', id: s.id }; render(); };
+    t.onmouseenter = () => inspect({ kind: 'store', id: s.id }, true);
+    return t;
+  }
+
+  // The project folder as a tile: what's actually IN the project at a glance. Hovering shows
+  // counts by file type, which say what a folder is faster than its name.
+  function folderTile(s) {
+    const p = s.project;
+    const t = el('div', 'tile');
+    t.style.setProperty('--tc', 'var(--steel)');
+    if (!p) {
+      t.innerHTML = '<div class="head"><div><div class="nm">No project folder</div>'
+        + '<div class="ty">this is the shared default store</div></div></div>'
+        + '<div class="summary" style="font-size:11.5px">Memories here are not tied to a folder on disk.</div>';
+      return t;
+    }
+    const kinds = Object.entries(p.kinds || {}).sort((a, b) => b[1] - a[1]);
+    t.innerHTML =
+      '<div class="head">'
+      + '<svg viewBox="0 0 96 96"><path d="M12 20h21a4 4 0 0 1 3 1.3l4.8 5.4a4 4 0 0 0 3 1.3H84a4 4 0 0 1 4 4v46a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V24a4 4 0 0 1 4-4z" fill="none" stroke="var(--steel)" stroke-width="2.4" opacity=".85"/>'
+      + '<g stroke="var(--ring)" stroke-width="2.6" stroke-linecap="round" opacity=".8"><line x1="24" y1="50" x2="52" y2="50"/><line x1="24" y1="60" x2="66" y2="60"/><line x1="24" y1="70" x2="44" y2="70"/></g></svg>'
+      + '<div><div class="nm">Project files</div><div class="ty">' + esc(p.name) + '</div></div></div>'
+      + '<div class="kv"><span>' + p.files + ' files, ' + p.dirs.length + ' folders</span><b>' + bytes(p.bytes) + '</b></div>'
+      + '<div class="kinds">' + kinds.slice(0, 4).map(([k, n]) => '<span class="kind"><b>' + n + '</b> ' + esc(k) + '</span>').join('') + '</div>'
+      + '<div class="peek">' + kinds.slice(0, 8).map(([k, n]) => '<div><span>' + esc(k) + '</span><span>' + n + '</span></div>').join('') + '</div>';
+    t.onclick = () => { openFolder = s.id; selected = { kind: 'folder', store: s.id }; render(); };
+    t.onmouseenter = () => inspect({ kind: 'folder', store: s.id }, true);
+    return t;
+  }
+
+  // A read-only map, not a file manager: nothing here opens a file (the page can't).
+  function treeNode(n, depth) {
+    const node = el('div', 'tnode' + (n.isStore ? ' isstore' : '') + (depth < 1 ? ' open' : ''));
+    const line = el('div', 'line');
+    const kinds = Object.entries(n.kinds || {}).sort((a, b) => b[1] - a[1]).slice(0, 3)
+      .map(([k, c]) => c + ' ' + k).join(', ');
+    line.innerHTML =
+      '<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7"/></svg>'
+      + '<span class="nm">' + esc(n.name) + (n.isStore ? ' · store' : '') + '</span>'
+      + '<span class="sz">' + (n.deep ? 'not scanned' : (kinds ? kinds + '  ·  ' : '') + bytes(n.bytes)) + '</span>';
+    const kids = el('div', 'kids');
+    for (const d of (n.dirs || [])) kids.append(treeNode(d, depth + 1));
+    for (const f of (n.fileList || [])) {
+      const fl = el('div', 'file');
+      fl.innerHTML = '<span>' + esc(f.name) + '</span><span class="sz">' + bytes(f.bytes) + '</span>';
+      kids.append(fl);
+    }
+    if (!kids.children.length) line.querySelector('.caret').style.visibility = 'hidden';
+    line.onclick = e => { e.stopPropagation(); node.classList.toggle('open'); kids.style.display = node.classList.contains('open') ? '' : 'none'; };
+    node.append(line);
+    if (kids.children.length) node.append(kids);
+    kids.style.display = node.classList.contains('open') ? '' : 'none';
+    return node;
+  }
+
+  function memoryCell(m, s) {
+    const c = el('div', 'cell');
+    c.dataset.id = m.id;
+    c.innerHTML =
+      '<div class="dot"></div>'
+      + '<div class="t">' + esc(m.title.replace(/^\[[^\]]+\]\s*/, '')) + '</div>'
+      + '<div class="m"><span>' + esc((m.at || m.date || '').slice(0, 10)) + '</span><span class="sz">' + bytes(m.bytes) + '</span></div>';
+    c.onclick = () => { openMemory = { store: s.id, id: m.id }; selected = { kind: 'memory', store: s.id, id: m.id }; render(); };
+    c.onmouseenter = () => { highlight(m.id, s); inspect({ kind: 'memory', store: s.id, id: m.id }, true); };
+    c.onmouseleave = () => highlight(null, s);
+    return c;
+  }
+
+  // Links are drawn after layout as an overlay, and only for the memory under the pointer:
+  // drawing every link at once is a hairball behind an opaque grid.
+  function drawLinks(s, focus) {
+    const svg = $('#links'), wrap = svg.parentElement;
+    svg.innerHTML = '';
+    svg.classList.toggle('on', !!focus);
+    if (!focus || !s || !s.links || !s.links.length) return;
+    const box = wrap.getBoundingClientRect();
+    svg.setAttribute('width', box.width); svg.setAttribute('height', wrap.scrollHeight);
+    svg.setAttribute('viewBox', '0 0 ' + box.width + ' ' + wrap.scrollHeight);
+    const pos = {};
+    for (const c of document.querySelectorAll('.cell')) {
+      const r = c.getBoundingClientRect();
+      pos[c.dataset.id] = { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2 };
+    }
+    const maxW = Math.max(...s.links.map(l => l.w), 1);
+    for (const l of s.links) {
+      const a = pos[l.a], b = pos[l.b];
+      if (!a || !b) continue;
+      const isFocus = focus && (l.a === focus || l.b === focus);
+      if (focus && !isFocus) continue;
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - Math.min(60, Math.abs(a.x - b.x) * .18);
+      p.setAttribute('d', 'M' + a.x + ' ' + a.y + ' Q' + mx + ' ' + my + ' ' + b.x + ' ' + b.y);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', isFocus ? 'var(--mark)' : 'var(--ring)');
+      p.setAttribute('stroke-width', isFocus ? 1.6 : Math.max(.45, l.w / maxW * 1.1));
+      p.setAttribute('stroke-opacity', isFocus ? .85 : .16);
+      svg.append(p);
+    }
+  }
+
+  function highlight(id, s) {
+    const cells = document.querySelectorAll('.cell');
+    if (!id) { cells.forEach(c => c.classList.remove('dim', 'lit')); drawLinks(s, null); return; }
+    const near = new Set([id]);
+    for (const l of (s.links || [])) { if (l.a === id) near.add(l.b); if (l.b === id) near.add(l.a); }
+    cells.forEach(c => {
+      c.classList.toggle('lit', c.dataset.id === id);
+      c.classList.toggle('dim', !near.has(c.dataset.id));
+    });
+    drawLinks(s, id);
+  }
+
+  function matches(m) {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    return (m.title + ' ' + m.summary + ' ' + m.topics.join(' ') + ' ' + m.entities.join(' ')).toLowerCase().includes(q);
+  }
+
+
+  // Every folder action is a link the browser can follow, a command to run, or a sentence to
+  // say in a session — the page can't write to disk. file:// needs exactly three slashes; a
+  // Windows path adds none and a POSIX path one, and encodeURI keeps the drive colon/slashes
+  // while encoding spaces and '#'.
+  function fileUrl(p) {
+    const u = String(p).split(String.fromCharCode(92)).join('/');
+    return encodeURI('file://' + (u.startsWith('/') ? u : '/' + u)).split('#').join('%23');
+  }
+
+  function folderActions(s) {
+    const inst = String(D.install || '').split(String.fromCharCode(92)).join('/');
+    const root = s.root || s.storeDir;
+    const q = p => '"' + p + '"';
+    // A real destination on the reading machine: Windows a second drive, else a home folder.
+    // The fallback is a placeholder, not a path — a page from an older builder has no hint,
+    // and any concrete guess (D:/backups) fails on some platform.
+    const dest = D.backupHint || '<destination folder>';
+    const cmds = {
+      backup: 'node ' + q(inst + '/daidocs.js') + ' backup ' + q(root) + ' --to ' + q(dest),
+      backupZip: 'node ' + q(inst + '/daidocs.js') + ' backup ' + q(root) + ' --to ' + q(dest) + ' --zip',
+      backupMem: 'node ' + q(inst + '/daidocs.js') + ' backup ' + q(root) + ' --to ' + q(dest) + ' --memory-only',
+      lock: 'node ' + q(inst + '/setup.js') + ' --project ' + q(root) + ' --project-type locked',
+      frozen: 'node ' + q(inst + '/setup.js') + ' --project ' + q(root) + ' --project-type frozen',
+      confidential: 'node ' + q(inst + '/setup.js') + ' --project ' + q(root) + ' --project-type confidential',
+      normal: 'node ' + q(inst + '/setup.js') + ' --project ' + q(root) + ' --project-type normal',
+    };
+
+    const panel = el('div');
+
+    const open = el('div', 'panel');
+    open.innerHTML = '<h3>Where it is</h3><div class="pathbox">' + esc(root) + '</div>'
+      + '<div class="act">'
+      + '<a href="' + esc(fileUrl(root)) + '" target="_blank" rel="noreferrer">Open folder</a>'
+      + '<button data-copy="' + esc(root) + '">Copy path</button>'
+      + '</div>'
+      + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:8px">'
+      + 'Open folder works when this page is opened from disk. Served over http a browser will refuse it, so copy the path instead.</div>';
+    panel.append(open);
+
+    const bk = el('div', 'panel');
+    bk.innerHTML = '<h3>Back up / transfer</h3>'
+      + '<div class="summary" style="font-size:11.5px">Copies to a dated folder at the destination. Nothing at the source is touched, and node_modules and .git are skipped.</div>'
+      + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:8px">Whole project, as files</div>'
+      + '<div class="copy" data-copy="' + esc(cmds.backup) + '">' + esc(cmds.backup) + '</div>'
+      + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:8px">As one zip</div>'
+      + '<div class="copy" data-copy="' + esc(cmds.backupZip) + '">' + esc(cmds.backupZip) + '</div>'
+      + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:8px">Memory only, when the code travels by git</div>'
+      + '<div class="copy" data-copy="' + esc(cmds.backupMem) + '">' + esc(cmds.backupMem) + '</div>';
+    panel.append(bk);
+
+    const set = el('div', 'panel');
+    const cur = s.type;
+    set.innerHTML = '<h3>Folder settings</h3>'
+      + '<div class="row"><span>type now</span><b style="color:' + (TYPE_COLOR[cur] || 'var(--ring)') + '">' + esc(cur) + '</b></div>'
+      + '<div class="row"><span>reads</span><b>' + esc((s.reads || ['self']).join(', ')) + '</b></div>'
+      + '<div class="row"><span>writable</span><b>' + (cur === 'locked' || cur === 'frozen' ? 'no' : 'yes') + '</b></div>'
+      + '<div class="row"><span>readable by others</span><b>' + (cur === 'confidential' || cur === 'temporary' ? 'no' : 'yes') + '</b></div>'
+      + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:10px">Ask in a session, which is the shortest route:</div>'
+      + '<div class="copy" data-copy="lock this folder">lock this folder</div>'
+      + '<div class="copy" data-copy="make this folder confidential">make this folder confidential</div>'
+      + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:10px">Or from a terminal:</div>'
+      + '<div class="copy" data-copy="' + esc(cmds.lock) + '">lock  →  --project-type locked</div>'
+      + '<div class="copy" data-copy="' + esc(cmds.frozen) + '">frozen  →  read-only for good</div>'
+      + '<div class="copy" data-copy="' + esc(cmds.confidential) + '">confidential  →  never in a wider read</div>'
+      + '<div class="copy" data-copy="' + esc(cmds.normal) + '">normal  →  unlock it again</div>';
+    panel.append(set);
+
+    panel.querySelectorAll('[data-copy]').forEach(n => n.onclick = () => {
+      navigator.clipboard?.writeText(n.dataset.copy);
+      const was = n.textContent; n.textContent = 'copied'; n.classList.add('ok');
+      setTimeout(() => { n.textContent = was; n.classList.remove('ok'); }, 1100);
+    });
+    return panel;
+  }
+
+  // A memory as its own page: the sidebar can't hold the whole of one.
+  function memoryPage(s, m) {
+    const wrap = el('div', 'detail');
+    const back = el('button', 'backlink', '‹ back to ' + esc(s.label));
+    back.onclick = () => { openMemory = null; render(); };
+    wrap.append(back);
+
+    const linked = (s.links || []).filter(l => l.a === m.id || l.b === m.id)
+      .map(l => ({ id: l.a === m.id ? l.b : l.a, w: l.w, on: l.on }));
+
+    const head = el('div', 'dhead');
+    head.innerHTML =
+      '<h1>' + esc(m.title.replace(/^\[[^\]]+\]\s*/, '')) + '</h1>'
+      + '<div class="facts">'
+      + '<span>date <b>' + esc((m.at || m.date || '').replace('T', ' ').slice(0, 16)) + '</b></span>'
+      + '<span>file <b>' + esc(m.id) + '.dai</b></span>'
+      + '<span>id <b>' + esc(m.id) + '</b></span>'
+      + '<span>size <b>' + bytes(m.bytes) + '</b></span>'
+      + (m.rawBytes ? '<span>raw <b>' + bytes(m.rawBytes) + '</b></span>' : '')
+      + '<span>segments <b>' + (m.segments || []).length + '</b></span>'
+      + '<span>type <b>' + esc(m.type) + '</b></span>'
+      + '<span>store <b>' + esc(s.label) + '</b></span>'
+      + '</div>';
+    wrap.append(head);
+
+    const cols = el('div', 'cols');
+    const left = el('div'), right = el('div');
+
+    const readBtn = el('button', 'readbtn', 'Open the file'
+      + ((m.segments || []).length ? '  ·  ' + m.segments.length + ' segments' : ''));
+    readBtn.onclick = () => openReader(s.id, m.id);
+    left.append(readBtn);
+
+    if (m.summary) left.append(el('div', 'panel', '<h3>Summary</h3><div class="summary">' + esc(m.summary) + '</div>'));
+    if (m.topics.length) left.append(el('div', 'panel', '<h3>Topics</h3><div class="chips">' + m.topics.map(t => '<span class="chip">' + esc(t) + '</span>').join('') + '</div>'));
+    if (m.entities.length) left.append(el('div', 'panel', '<h3>Entities</h3><div class="chips">' + m.entities.map(t => '<span class="chip e">' + esc(t) + '</span>').join('') + '</div>'));
+    if ((m.tags || []).length) left.append(el('div', 'panel', '<h3>Tags</h3><div class="chips">' + m.tags.map(t => '<span class="kind">' + esc(t) + '</span>').join('') + '</div>'));
+
+    const conn = el('div', 'panel');
+    conn.innerHTML = '<h3>Connected memories (' + linked.length + ')</h3>';
+    if (linked.length) {
+      const list = el('div', 'linklist');
+      for (const l of linked) {
+        const o = s.memories.find(x => x.id === l.id);
+        const item = el('div', 'linkitem',
+          '<div class="lt">' + esc((o ? o.title : l.id).replace(/^\[[^\]]+\]\s*/, '')) + '</div>'
+          + '<div class="lw">' + l.w + ' shared: ' + esc(l.on.slice(0, 4).join(', ')) + '</div>');
+        item.onclick = () => { openMemory = { store: s.id, id: l.id }; selected = { kind: 'memory', store: s.id, id: l.id }; render(); };
+        list.append(item);
+      }
+      conn.append(list);
+    } else conn.append(el('div', 'summary', 'Nothing else in this store shares two or more topics with it.'));
+    left.append(conn);
+
+    right.append(el('div', 'panel',
+      '<h3>On disk</h3>'
+      + '<div class="row"><span>store</span><b>' + esc(s.label) + '</b></div>'
+      + '<div class="row"><span>type</span><b>' + esc(s.type) + '</b></div>'
+      + '<div class="pathbox">' + esc(s.storeDir + '/' + m.id + '.dai') + '</div>'
+      + (m.rawPath ? '<div class="pathbox">' + esc(s.storeDir + '/_raw/' + m.rawPath) + '</div>' : '')));
+    right.append(el('div', 'panel',
+      '<h3>What is in the file</h3>'
+      + '<div class="row"><span>Understanding</span><b>' + (m.understanding ? bytes(m.understanding.length) : 'none') + '</b></div>'
+      + '<div class="row"><span>Content segments</span><b>' + (m.segments || []).length + '</b></div>'
+      + '<div class="row"><span>Frontmatter</span><b>' + (m.front ? m.front.split(String.fromCharCode(10)).length + ' lines' : 'none') + '</b></div>'
+      + '<div class="row"><span>Raw original</span><b>' + (m.rawBytes ? bytes(m.rawBytes) : 'none') + '</b></div>'));
+
+    cols.append(left); cols.append(right);
+    wrap.append(cols);
+    return wrap;
+  }
+
+  // A project folder as its own page: the tree, and what to do with it.
+  function folderPage(s) {
+    const wrap = el('div', 'detail');
+    const back = el('button', 'backlink', '‹ back to ' + esc(s.label));
+    back.onclick = () => { openFolder = null; render(); };
+    wrap.append(back);
+    const p = s.project;
+    if (!p) { wrap.append(el('div', 'empty', 'This store has no project folder: it is the shared default.')); return wrap; }
+
+    const kinds = Object.entries(p.kinds || {}).sort((a, b) => b[1] - a[1]);
+    const head = el('div', 'dhead');
+    head.innerHTML =
+      '<h1>' + esc(p.name) + '</h1>'
+      + '<div class="facts"><span>files <b>' + p.files + '</b></span><span>size <b>' + bytes(p.bytes) + '</b></span>'
+      + '<span>kinds <b>' + kinds.length + '</b></span></div>'
+      + '<div class="kinds">' + kinds.map(([k, n]) => '<span class="kind"><b>' + n + '</b> ' + esc(k) + '</span>').join('') + '</div>';
+    wrap.append(head);
+
+    const cols = el('div', 'cols');
+    const left = el('div'), right = el('div');
+    const tp = el('div', 'panel');
+    tp.innerHTML = '<h3>Folder layout</h3><div class="summary" style="color:var(--muted);font-size:11.5px;margin-bottom:9px">'
+      + 'Everything in the project, with sizes. This is a map: nothing here opens a file.</div>';
+    const tree = el('div', 'tree'); tree.append(treeNode(p, 0)); tp.append(tree);
+    left.append(tp);
+
+    right.append(folderActions(s));
+    cols.append(left); cols.append(right);
+    wrap.append(cols);
+    return wrap;
+  }
+
+  // Each descent pushes a history entry so the browser's Back goes up a level instead of
+  // leaving the page (same URL, same document). Place is also kept across a reload, since
+  // the page is rebuilt to show new work and a reload shouldn't dump you at the top.
+  const PLACE = 'daidocs-map-place';
+  function keepPlace() {
+    try {
+      sessionStorage.setItem(PLACE, JSON.stringify({
+        view, openStore, openMemory, openFolder, query, y: scrollY, at: Date.now(),
+      }));
+    } catch (_) { /* storage off: the place is just lost */ }
+  }
+  function takePlace() {
+    try {
+      const p = JSON.parse(sessionStorage.getItem(PLACE) || 'null');
+      // Only a place from this sitting (expires after an hour).
+      if (!p || Date.now() - (p.at || 0) > 3600000) return null;
+      // A since-deleted store must not leave the page on a screen that can't be drawn.
+      if (p.openStore && !byId[p.openStore]) return null;
+      return p;
+    } catch (_) { return null; }
+  }
+
+  let histDepth = 0;
+  function depthNow() {
+    if (reading) return 3;
+    if (openMemory || openFolder) return 2;
+    if (openStore) return 1;
+    return 0;
+  }
+  function syncHistory() {
+    const d = depthNow();
+    // Push only on the way down; coming up spends an entry the browser already has.
+    if (d > histDepth) { try { history.pushState({ daidocsDepth: d }, ''); } catch (_) { } }
+    histDepth = d;
+  }
+
+  function render() {
+    crumbs();
+    syncHistory();
+    keepPlace();
+    const cells = $('#cells'); cells.innerHTML = ''; $('#links').innerHTML = '';
+    cells.style.gridTemplateColumns = '';
+
+    // An open memory or folder takes the whole page: the grid is only how you find it.
+    if (openMemory && byId[openMemory.store]) {
+      const st = byId[openMemory.store];
+      const m = st.memories.find(x => x.id === openMemory.id);
+      if (m) { cells.style.gridTemplateColumns = '1fr'; cells.append(memoryPage(st, m)); inspect(selected); return; }
+      openMemory = null;
+    }
+    if (openFolder && byId[openFolder]) {
+      cells.style.gridTemplateColumns = '1fr';
+      cells.append(folderPage(byId[openFolder]));
+      inspect(selected);
+      return;
+    }
+
+    if (view === 'project') {
+      cells.style.gridTemplateColumns = '1fr';
+      const list = openStore ? [byId[openStore]] : stores;
+      for (const s of list) {
+        if (!s) continue;
+        const panel = el('div', 'panel');
+        panel.style.animation = 'rise .4s cubic-bezier(.2,.7,.3,1) backwards';
+        panel.innerHTML = '<h3>' + esc(s.label) + ' · ' + esc(s.type) + '</h3>';
+        if (s.project) {
+          const head = el('div', 'row', '<span>' + esc(s.root) + '</span><b>' + s.project.files + ' files · ' + bytes(s.project.bytes) + '</b>');
+          panel.append(head);
+          const t = el('div', 'tree'); t.append(treeNode(s.project, 0)); panel.append(t);
+        } else {
+          panel.append(el('div', 'empty', 'This store has no project folder on disk: it is the shared default.'));
+        }
+        cells.append(panel);
+      }
+      inspect(selected);
+      return;
+    }
+
+    if (!openStore) {
+      // Nothing saved yet: an empty grid reads as a failed load, so say what it is and what to do.
+      const anyMemories = stores.reduce((a, s) => a + s.counts.memories, 0);
+      if (!anyMemories) {
+        const inst = String(D.install || '').split(String.fromCharCode(92)).join('/');
+        const first = el('div', 'wait');
+        first.style.gridColumn = '1/-1';
+        first.innerHTML =
+          '<h3>Nothing saved yet</h3>'
+          + '<div class="sub">This page is built from your files, and there are none to show '
+          + 'yet. Nothing is broken.</div>'
+          + '<div class="panel" style="margin-top:14px"><h3>Just work</h3>'
+          + '<div class="summary">In Claude Code every session saves itself as you go, every '
+          + '4,000 tokens and again at the end. Come back here and rebuild the page.</div></div>'
+          + '<div class="panel" style="margin-top:10px"><h3>Or bring in what you already have</h3>'
+          + '<div class="summary">Your existing sessions, converted in one go. It shows you what '
+          + 'it found and quotes the cost before anything is spent; on a Claude subscription that '
+          + 'is nothing.</div>'
+          + '<div class="copy" data-copy="node &quot;' + esc(inst) + '/daidocs.js&quot; convert" style="margin-top:8px">'
+          + 'node "' + esc(inst) + '/daidocs.js" convert</div></div>';
+        cells.append(first);
+        first.querySelectorAll('[data-copy]').forEach(n => n.onclick = () => {
+          navigator.clipboard?.writeText(n.dataset.copy);
+          const was = n.textContent; n.textContent = 'copied'; n.classList.add('ok');
+          setTimeout(() => { n.textContent = was; n.classList.remove('ok'); }, 1100);
+        });
+      }
+      // Node.append() returns undefined, so build then style as separate steps (chaining throws).
+      // No 'Stores' label when there are none: a heading over blank ground reads as a failed load.
+      if (stores.length) {
+        const lab = el('div', 'sectionlabel', 'Stores');
+        lab.style.gridColumn = '1/-1';
+        cells.append(lab);
+      }
+      for (const [i, s] of stores.entries()) {
+        const t = storeTile(s); t.style.animationDelay = (i * 30) + 'ms'; cells.append(t);
+      }
+
+      // The backlog sits below the stores (a banner on top of every visit is a nag), grouped by project.
+      const waiting = stores.flatMap(st => (st.pendingGroups || []).map(g => ({ ...g, store: st })));
+      if (waiting.length) {
+        const total = waiting.reduce((a, g) => a + g.items.length, 0);
+        const box = el('div', 'wait');
+        box.innerHTML =
+          '<h3>' + total + ' session' + (total === 1 ? '' : 's') + ' captured but not converted</h3>'
+          + '<div class="sub">across ' + waiting.length + ' project' + (waiting.length === 1 ? '' : 's')
+          + '. Convert a project at a time: you do not have to do all of them.</div>';
+        const grid = el('div', 'wgrid');
+        for (const g of waiting.sort((a, b) => b.items.length - a.items.length)) {
+          const c = el('div', 'wcard');
+          c.innerHTML = '<div class="p">' + esc(g.project) + '</div>'
+            + '<div class="n"><span><b>' + g.items.length + '</b> waiting</span><span>' + bytes(g.bytes) + '</span></div>';
+          c.onclick = () => { selected = { kind: 'waiting', project: g.project, store: g.store.id }; render(); };
+          grid.append(c);
+        }
+        box.append(grid);
+        cells.append(box);
+      }
+
+    } else {
+      const s = byId[openStore];
+
+      // Child stores (folders under this one) render before the memories: they're part of what's inside.
+      const kids = stores.filter(o => o.id !== s.id && o.root && s.root
+        && o.root.toLowerCase().startsWith(s.root.toLowerCase().replace(/\/+$/, '') + '/'));
+      if (kids.length) {
+        const lab = el('div', 'sectionlabel', kids.length + ' part' + (kids.length === 1 ? '' : 's') + ' of this project');
+        lab.style.gridColumn = '1/-1'; cells.append(lab);
+        for (const [i, k] of kids.entries()) {
+          const t = storeTile(k); t.style.animationDelay = (i * 30) + 'ms'; cells.append(t);
+        }
+      }
+
+      const addLab = el('div', 'sectionlabel', 'Memories');
+      addLab.style.gridColumn = '1/-1';
+
+      const list = s.memories.filter(matches)
+        .sort((a, b) => String(b.at || b.date || '').localeCompare(String(a.at || a.date || '')));
+      cells.append(addLab);
+      cells.append(folderTile(s));
+      if (!list.length) {
+        const e = el('div', 'empty', query ? 'Nothing here matches “' + esc(query) + '”.' : 'This store holds no memories yet.');
+        e.style.gridColumn = '1/-1'; cells.append(e);
+      }
+      for (const [i, m] of list.entries()) {
+        const c = memoryCell(m, s); c.style.animationDelay = Math.min(i * 18, 400) + 'ms'; cells.append(c);
+      }
+      requestAnimationFrame(() => drawLinks(s, null));
+    }
+    inspect(selected);
+  }
+
+  function inspect(sel, hover) {
+    const a = $('#inspector');
+    if (!sel) { a.innerHTML = '<div class="empty">Hover a store to preview it.<br>Click to open and inspect.</div>'; return; }
+
+    if (sel.kind === 'waiting') {
+      const st = byId[sel.store];
+      const g = (st && (st.pendingGroups || []).find(x => x.project === sel.project));
+      if (!g) { a.innerHTML = '<div class="empty">Nothing waiting for that project.</div>'; return; }
+      const inst = String(D.install || '').split(String.fromCharCode(92)).join('/');
+      const route = 'node "' + inst + '/daidocs.js" pending --route "' + g.project + '"';
+      const dates = g.items.map(i => i.date).filter(Boolean).sort();
+      a.innerHTML =
+        '<h2>' + esc(g.project) + '</h2>'
+        + '<div class="sub">' + g.items.length + ' waiting · ' + bytes(g.bytes)
+        + (dates.length ? ' · ' + esc(dates[0]) + ' to ' + esc(dates[dates.length - 1]) : '') + '</div>'
+        + '<div class="panel"><h3>Convert this project</h3>'
+        + '<div class="summary" style="font-size:11.5px">One step moves these sessions into this project’s own folder, '
+        + 'declaring it if it is not declared yet. Nothing is converted or billed by that step.</div>'
+        + '<div class="copy" data-copy="' + esc(route) + '">' + esc(route) + '</div>'
+        + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:9px">Then, in Claude Code inside that folder:</div>'
+        + '<div class="copy" data-copy="convert my pending daidocs sessions">convert my pending daidocs sessions</div>'
+        + '<div class="summary" style="color:var(--muted);font-size:11px;margin-top:9px">'
+        + 'You write the extractions yourself in that session, so it is free and uses no API key.</div></div>'
+        + (g.cwd ? '<div class="panel"><h3>Came from</h3><div class="pathbox">' + esc(g.cwd) + '</div></div>' : '')
+        + '<div class="panel"><h3>The sessions</h3>'
+        + g.items.slice(0, 40).map(i => '<div class="row"><span>' + esc((i.title || i.id).slice(0, 60))
+          + '</span><b>' + bytes(i.bytes) + '</b></div>').join('')
+        + (g.items.length > 40 ? '<div class="summary" style="color:var(--muted)">and ' + (g.items.length - 40) + ' more</div>' : '')
+        + '</div>';
+      a.querySelectorAll('[data-copy]').forEach(n => n.onclick = () => {
+        navigator.clipboard?.writeText(n.dataset.copy);
+        const was = n.textContent; n.textContent = 'copied'; n.classList.add('ok');
+        setTimeout(() => { n.textContent = was; n.classList.remove('ok'); }, 1100);
+      });
+      return;
+    }
+
+    if (sel.kind === 'folder') {
+      const st = byId[sel.store]; const p = st && st.project;
+      if (!p) { a.innerHTML = '<div class="empty">No project folder on disk.</div>'; return; }
+      const kinds = Object.entries(p.kinds || {}).sort((x, y) => y[1] - x[1]);
+      a.innerHTML =
+        '<h2>' + esc(p.name) + '</h2><div class="sub">project folder</div>'
+        + '<div class="panel"><h3>What is in it</h3>'
+        + '<div class="row"><span>Files</span><b>' + p.files + '</b></div>'
+        + '<div class="row"><span>Top-level folders</span><b>' + p.dirs.length + '</b></div>'
+        + '<div class="row"><span>Size</span><b>' + bytes(p.bytes) + '</b></div></div>'
+        + '<div class="panel"><h3>By type</h3>'
+        + (kinds.length
+          ? kinds.map(([k, n]) => '<div class="row"><span>' + esc(k) + '</span><b>' + n + ' file' + (n === 1 ? '' : 's') + '</b></div>').join('')
+          : '<div class="summary">Empty.</div>')
+        + '</div>'
+        + '<div class="panel"><h3>Largest folders</h3>'
+        + (p.dirs.length
+          ? p.dirs.slice(0, 8).map(d => '<div class="row"><span>' + esc(d.name) + '</span><b>' + bytes(d.bytes) + '</b></div>').join('')
+          : '<div class="summary">No subfolders.</div>')
+        + '</div>'
+        + '<div class="panel"><h3>Where</h3><div class="pathbox">' + esc(p.path) + '</div></div>';
+      return;
+    }
+
+    if (sel.kind === 'store') {
+      const s = byId[sel.id]; if (!s) return;
+      const b = s.bytes;
+      a.innerHTML =
+        '<h2>' + esc(s.label) + '</h2><div class="sub">' + esc(s.type) + (s.declared ? ' · declared' : ' · default store') + '</div>'
+        + '<div class="panel"><h3>Storage</h3>'
+        + '<div class="row"><span>Memories (.dai)</span><b>' + bytes(b.dai) + '</b></div>'
+        + '<div class="row"><span>Index</span><b>' + bytes(b.index) + '</b></div>'
+        + '<div class="row"><span>Raw originals</span><b>' + bytes(b.raw) + '</b></div>'
+        + (s.counts.unconverted ? '<div class="row"><span style="color:var(--warn)">Not yet converted (_unconverted)</span><b style="color:var(--warn)">' + s.counts.unconverted + ' · ' + bytes(b.unconverted || 0) + '</b></div>' : '')
+        + '<div class="row"><span>Total</span><b>' + bytes(b.total) + '</b></div>'
+        + '<div class="legend"><span><i style="background:var(--mark)"></i>.dai</span>'
+        + '<span><i style="background:var(--accent2)"></i>index</span>'
+        + '<span><i style="background:var(--steel)"></i>raw</span></div></div>'
+        + '<div class="panel"><h3>Contents</h3>'
+        + '<div class="row"><span>Memories</span><b>' + s.counts.memories + '</b></div>'
+        + '<div class="row"><span>Facts</span><b>' + s.counts.facts + '</b></div>'
+        + '<div class="row"><span>Events</span><b>' + s.counts.events + '</b></div>'
+        + '<div class="row"><span>Preferences</span><b>' + s.counts.profile + '</b></div>'
+        + (s.counts.pending ? '<div class="row"><span style="color:var(--warn)">Captured, not indexed</span><b style="color:var(--warn)">' + s.counts.pending + '</b></div>' : '')
+        + '</div>'
+        + '<div class="panel"><h3>Reach</h3>'
+        + '<div class="chips">' + (s.reads || ['self']).map(r => '<span class="chip">reads: ' + esc(r) + '</span>').join('')
+        + (s.connections || []).map(c => '<span class="chip e">' + esc(c.to) + ' · ' + esc(c.mode || 'both') + '</span>').join('') + '</div>'
+        + (s.type === 'confidential' ? '<div class="summary" style="margin-top:9px;color:var(--t-confidential)">Confidential: no other store can read this one, including its parent.</div>' : '')
+        + '</div>'
+        + '<div class="panel"><h3>On disk</h3><div class="summary" style="font-family:var(--mono);font-size:11px;word-break:break-all">' + esc(s.storeDir) + '</div></div>'
+        // The general store collects every undeclared folder's sessions; this panel shows the way out.
+        + (!s.declared ? '<div class="panel"><h3>Give a folder its own memory</h3><div class="summary">Open Claude Code in that folder and say:</div><div class="copy" data-copy="make this folder a project" style="margin-top:8px">make this folder a project</div><div class="summary" style="margin-top:8px">One folder per part of a project, each declared, keeps every session small.</div></div>' : '');
+      a.querySelectorAll('[data-copy]').forEach(n => n.onclick = () => {
+        navigator.clipboard?.writeText(n.dataset.copy);
+        const was = n.textContent; n.textContent = 'copied'; n.classList.add('ok');
+        setTimeout(() => { n.textContent = was; n.classList.remove('ok'); }, 1100);
+      });
+      return;
+    }
+
+    const s = byId[sel.store]; if (!s) return;
+    const m = s.memories.find(x => x.id === sel.id); if (!m) return;
+    const linked = (s.links || []).filter(l => l.a === m.id || l.b === m.id)
+      .map(l => ({ id: l.a === m.id ? l.b : l.a, w: l.w, on: l.on })).slice(0, 12);
+    a.innerHTML =
+      '<h2>' + esc(m.title.replace(/^\[[^\]]+\]\s*/, '')) + '</h2>'
+      + '<div class="sub">' + esc(m.id) + ' · ' + esc((m.at || m.date || '').replace('T', ' ').slice(0, 16)) + ' · ' + bytes(m.bytes) + '</div>'
+      + '<button class="readbtn" id="doread">Read this memory'
+      + ((m.segments && m.segments.length) ? '  ·  ' + m.segments.length + ' segments' : '') + '</button>'
+      + (m.summary ? '<div class="panel"><h3>Summary</h3><div class="summary">' + esc(m.summary) + '</div></div>' : '')
+      + (m.topics.length ? '<div class="panel"><h3>Topics</h3><div class="chips">' + m.topics.map(t => '<span class="chip">' + esc(t) + '</span>').join('') + '</div></div>' : '')
+      + (m.entities.length ? '<div class="panel"><h3>Entities</h3><div class="chips">' + m.entities.map(t => '<span class="chip e">' + esc(t) + '</span>').join('') + '</div></div>' : '')
+      + '<div class="panel"><h3>Connected memories</h3>'
+      + (linked.length ? '<div class="linklist">' + linked.map(l => {
+        const o = s.memories.find(x => x.id === l.id);
+        return '<div class="linkitem" data-go="' + esc(l.id) + '"><div class="lt">' + esc((o ? o.title : l.id).replace(/^\[[^\]]+\]\s*/, ''))
+          + '</div><div class="lw">' + l.w + ' shared: ' + esc(l.on.slice(0, 3).join(', ')) + '</div></div>';
+      }).join('') + '</div>' : '<div class="summary" style="color:var(--muted)">Nothing else in this store shares two or more topics with it.</div>')
+      + '</div>';
+    a.querySelectorAll('[data-go]').forEach(n => n.onclick = () => { selected = { kind: 'memory', store: s.id, id: n.dataset.go }; render(); });
+    const rb = a.querySelector('#doread'); if (rb) rb.onclick = () => openReader(s.id, m.id);
+  }
+
+  // The file in the three .dai zones. Understanding opens first (it answers most questions);
+  // Content holds the verbatim segments; Frontmatter is the header.
+  let reading = null, zone = 'understanding';
+
+  function openReader(storeId, memId) {
+    const st = byId[storeId]; if (!st) return;
+    const m = st.memories.find(x => x.id === memId); if (!m) return;
+    reading = m; zone = 'understanding';
+    // the reader is a level too, so Back closes it
+    syncHistory();
+
+    $('#rtitle').textContent = m.title.replace(/^\[[^\]]+\]\s*/, '');
+    $('#rmeta').textContent = m.id + '  ·  ' + (m.at || m.date || '').replace('T', ' ').slice(0, 16)
+      + '  ·  ' + bytes(m.bytes) + '  ·  ' + (m.segments ? m.segments.length : 0) + ' segments'
+      + (m.rawBytes ? '  ·  raw ' + bytes(m.rawBytes) : '');
+    document.querySelectorAll('.zones button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.z === zone)));
+    paintZone();
+    $('#reader').classList.add('on', 'open');
+    $('#rclose').focus();
+  }
+
+  function closeReader() { $('#reader').classList.remove('open'); reading = null; histDepth = depthNow(); }
+
+  function paintZone() {
+    const b = $('#rbody'); if (!reading) return;
+    if (zone === 'front') {
+      b.innerHTML = reading.front
+        ? '<pre>' + esc(reading.front) + '</pre>'
+        : '<div class="empty">This file has no frontmatter block.</div>';
+      return;
+    }
+    if (zone === 'understanding') {
+      let pretty = reading.understanding || '';
+      try { pretty = JSON.stringify(JSON.parse(pretty), null, 2); } catch { /* show it as it is */ }
+      b.innerHTML = pretty
+        ? '<div class="hint">The extraction: what was understood from the conversation.</div><pre>' + esc(pretty) + '</pre>'
+        : '<div class="empty">This file has no Understanding block.</div>';
+      return;
+    }
+    if (zone === 'raw') {
+      // The verbatim source the extraction was made from — check here if an extraction looks wrong.
+      const note = reading.rawPath
+        ? 'The verbatim original: _raw/' + reading.rawPath + ', ' + bytes(reading.rawBytes || 0)
+          + (reading.rawTruncated ? '. Showing the first 140 KB; open the file for the rest.' : '. Nothing withheld.')
+        : '';
+      b.innerHTML = reading.raw
+        ? '<div class="hint">' + esc(note) + '</div><pre>' + esc(reading.raw) + '</pre>'
+        : '<div class="empty">No raw original is stored beside this memory.</div>';
+      return;
+    }
+    const segs = reading.segments || [];
+    b.innerHTML = segs.length
+      ? '<div class="hint">The conversation itself, verbatim, in ' + segs.length + ' segment' + (segs.length === 1 ? '' : 's') + '.</div>'
+        + segs.map(g => '<div class="seg"><div class="n">seg ' + esc(g.n) + '</div><div class="body">' + esc(g.text) + '</div></div>').join('')
+      : '<div class="empty">This file has no Content segments.</div>';
+  }
+
+  $('#rclose').onclick = closeReader;
+  $('#reader').onclick = e => { if (e.target.id === 'reader') closeReader(); };
+  document.querySelectorAll('.zones button').forEach(btn => btn.onclick = () => {
+    zone = btn.dataset.z;
+    document.querySelectorAll('.zones button').forEach(b => b.setAttribute('aria-selected', String(b === btn)));
+    paintZone();
+    $('#rbody').scrollTop = 0;
+  });
+
+  // ---------------- events ----------------
+  $('#tab-memory').onclick = () => { view = 'memory'; $('#tab-memory').setAttribute('aria-selected', 'true'); $('#tab-project').setAttribute('aria-selected', 'false'); render(); };
+  $('#tab-project').onclick = () => { view = 'project'; $('#tab-project').setAttribute('aria-selected', 'true'); $('#tab-memory').setAttribute('aria-selected', 'false'); render(); };
+  $('#search').oninput = e => { query = e.target.value.trim(); render(); };
+  addEventListener('resize', () => { if (view === 'memory' && openStore) drawLinks(byId[openStore], null); });
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape') upOneLevel();
+  });
+  // popstate: an entry was already spent, so just move the page to match; at the top, Back leaves the page.
+  addEventListener('popstate', () => { histDepth = Math.max(0, histDepth - 1); upOneLevel(); });
+
+  // Come back to where you were, if this is a reload rather than a first look.
+  const place = takePlace();
+  if (place) {
+    view = place.view || 'memory';
+    openStore = place.openStore || null;
+    openMemory = place.openMemory || null;
+    openFolder = place.openFolder || null;
+    query = place.query || '';
+    if (query) $('#search').value = query;
+    if (view === 'project') {
+      $('#tab-project').setAttribute('aria-selected', 'true');
+      $('#tab-memory').setAttribute('aria-selected', 'false');
+    }
+    if (openStore) selected = { kind: 'store', id: openStore };
+  }
+
+  render();
+  if (place && place.y) scrollTo({ top: place.y });
+
+  // A file:// page can't detect that its file changed (no server), so it reloads on a timer:
+  // only when the build is watched (D.live), and only after the page has been idle a while.
+  if (D.live) {
+    let lastTouch = Date.now();
+    const touched = () => { lastTouch = Date.now(); };
+    for (const ev of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll', 'input']) {
+      addEventListener(ev, touched, { passive: true });
+    }
+    setInterval(() => {
+      if (document.hidden) return;               // a tab nobody is on can wait
+      if (reading) return;                       // never pull a document away mid-read
+      if (Date.now() - lastTouch < 12000) return;
+      keepPlace();
+      location.reload();
+    }, 4000);
+  }
+})();
+</script>
+</body>
+</html>

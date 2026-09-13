@@ -1,0 +1,155 @@
+#!/usr/bin/env node
+// Lock and unlock a release folder, and record every lock/unlock.
+//   node lock.js status|lock|unlock|manifest [dir]   (default dir: this install)
+//
+// A read-only attribute alone is a courtesy lock: it stops edits but not new files being
+// added or deleted. So locking does two things: read-only on every file, and (Windows) a
+// deny entry on the directory for create/delete. Reading is untouched; unlock removes both.
+// Every lock/unlock is appended to ~/.daidocs-installs.jsonl.
+
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { execSync } = require('child_process');
+const V = require('./lib/versioning');
+
+const HERE = __dirname;
+const [, , cmdRaw, dirRaw] = process.argv;
+const cmd = (cmdRaw || 'status').replace(/^--/, '');
+const DIR = path.resolve(dirRaw || HERE);
+const log = s => console.log('  ' + s);
+
+const principal = () =>
+  process.env.USERDOMAIN ? `${process.env.USERDOMAIN}\\${process.env.USERNAME}` : (process.env.USERNAME || process.env.USER);
+
+function eachFile(dir, fn) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) eachFile(p, fn); else fn(p);
+  }
+}
+
+function setReadOnly(dir, on) {
+  let n = 0;
+  eachFile(dir, fp => {
+    try {
+      const m = fs.statSync(fp).mode;
+      // 0o222 is the write bits. Clearing them is the portable half of this;
+      // on Windows it is what sets the read-only attribute.
+      fs.chmodSync(fp, on ? (m & ~0o222) : (m | 0o200));
+      n++;
+    } catch { /* a file we cannot stat is a file we cannot lock; keep going */ }
+  });
+  return n;
+}
+
+// The half that stops files being added or removed. Windows only: on other
+// platforms the directory's own write bit does the same job.
+function denyCreateDelete(dir, on) {
+  const who = principal();
+  try {
+    if (process.platform === 'win32') {
+      const arg = on
+        ? ['/deny', `${who}:(OI)(CI)(WD,AD,DC)`]
+        : ['/remove:d', who, '/t', '/q'];
+      execSync(`icacls "${dir}" ${arg.join(' ')}`, { stdio: 'pipe' });
+    } else {
+      const m = fs.statSync(dir).mode;
+      fs.chmodSync(dir, on ? (m & ~0o222) : (m | 0o200));
+    }
+    return true;
+  } catch (e) {
+    log(`could not ${on ? 'apply' : 'remove'} the directory rule: ${String(e.message).split('\n')[0]}`);
+    return false;
+  }
+}
+
+// Can this folder actually be added to right now? The only honest way to answer
+// is to try, so the probe writes a file and removes it again.
+function probeWritable(dir) {
+  const p = path.join(dir, `.daidocs-lockprobe-${process.pid}`);
+  try { fs.writeFileSync(p, 'x'); fs.unlinkSync(p); return true; } catch { return false; }
+}
+
+function status(dir) {
+  let total = 0, writable = 0;
+  eachFile(dir, fp => { total++; try { fs.accessSync(fp, fs.constants.W_OK); writable++; } catch { } });
+  const canAdd = probeWritable(dir);
+  log(`${path.basename(dir)}`);
+  log(`  files            ${total}`);
+  log(`  writable files   ${writable}`);
+  log(`  can add files    ${canAdd ? 'YES' : 'no'}`);
+  const locked = writable === 0 && !canAdd;
+  log(`  state            ${locked ? 'LOCKED' : (writable === 0 ? 'partly locked: files are read-only but new files can still be added' : 'unlocked')}`);
+  return locked;
+}
+
+// The manifest is the README's "what is described is what was measured" check. Rewritten
+// on every lock (before files go read-only) with the version and date in its header. The
+// engine file and run-artifacts/benchmark/recall-sweep results hash identically across
+// releases (docs/PROVENANCE.md; `npm run verify` checks the engine hash); everything else
+// may change between locks.
+const MANIFEST_SKIP_DIRS = new Set(['node_modules', '.git', '__pycache__', '.selftest-store']);
+const MANIFEST_SKIP_FILES = new Set(['MANIFEST.sha256', 'LOCKED.md', 'daidocs-dashboard.html']);
+function writeManifest(dir) {
+  const crypto = require('crypto');
+  const files = [];
+  (function walk(d) {
+    const entries = fs.readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
+    for (const e of entries) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) { if (!MANIFEST_SKIP_DIRS.has(e.name)) walk(p); continue; }
+      if (MANIFEST_SKIP_FILES.has(e.name)) continue;
+      files.push(p);
+    }
+  })(dir);
+  const rel = f => path.relative(dir, f).split(path.sep).join('/');
+  const lines = files
+    .map(f => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex') + '  ' + rel(f))
+    .sort((a, b) => a.slice(66).localeCompare(b.slice(66)));
+  const head = [
+    `# ${V.packageVersion(HERE)}, locked ${new Date().toISOString().slice(0, 10)}.`,
+    '# This folder is a locked release copy. Never edit it; make a copy and edit that.',
+    '# Lock state is managed by lock.js, which also records every lock and unlock.',
+    '# Regenerated by `node lock.js lock` and `node lock.js manifest`. See docs/PROVENANCE.md',
+    '# for which of these hashes never move and which are expected to change between releases.',
+  ];
+  fs.writeFileSync(path.join(dir, 'MANIFEST.sha256'), head.concat(lines).join('\n') + '\n');
+  return lines.length;
+}
+
+function lock(dir) {
+  const hashed = writeManifest(dir);
+  log(`${hashed} files hashed into MANIFEST.sha256`);
+  const n = setReadOnly(dir, true);
+  const denied = denyCreateDelete(dir, true);
+  const ok = !probeWritable(dir);
+  log(`${n} files set read-only`);
+  log(denied ? 'directory now refuses new files and deletions' : 'directory rule NOT applied');
+  log(ok ? 'verified: a test write was refused' : 'WARNING: a test write still succeeded, this folder is not fully locked');
+  V.recordEvent('lock', { version: V.packageVersion(HERE), installPath: dir, files: n, hard: denied && ok });
+  return ok;
+}
+
+function unlock(dir) {
+  const denied = denyCreateDelete(dir, false);
+  const n = setReadOnly(dir, false);
+  const ok = probeWritable(dir);
+  log(`${n} files made writable`);
+  log(denied ? 'directory rule removed' : 'directory rule could not be removed');
+  log(ok ? 'verified: this folder can be written to again' : 'WARNING: still cannot write here');
+  V.recordEvent('unlock', { version: V.packageVersion(HERE), installPath: dir, files: n });
+  if (ok) {
+    log('');
+    log('Re-lock when you are done:  node lock.js lock');
+    log('Leave the folder afterwards rather than working on inside it.');
+  }
+  return ok;
+}
+
+if (!fs.existsSync(DIR)) { console.error(`no such folder: ${DIR}`); process.exit(1); }
+if (cmd === 'lock') process.exitCode = lock(DIR) ? 0 : 1;
+else if (cmd === 'unlock') process.exitCode = unlock(DIR) ? 0 : 1;
+else if (cmd === 'status') process.exitCode = status(DIR) ? 0 : 2;
+else if (cmd === 'manifest') { log(`${writeManifest(DIR)} files hashed into MANIFEST.sha256`); process.exitCode = 0; }
+else { console.log('usage: node lock.js status|lock|unlock|manifest [dir]'); process.exitCode = 1; }

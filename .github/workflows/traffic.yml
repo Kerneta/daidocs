@@ -1,0 +1,36 @@
+name: traffic
+
+# GitHub keeps traffic for only 14 days; this archives clones and views to metrics/*.csv
+# weekly so the history is never lost. Run by hand from the Actions tab (workflow_dispatch).
+
+on:
+  schedule:
+    # Mondays, 04:17 UTC
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Archive traffic
+        env:
+          # github.token works if it has traffic access; on a 403, add a PAT (repo or
+          # Administration: read) as the TRAFFIC_TOKEN secret.
+          GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+        run: node tools/archive_traffic.mjs
+      - name: Commit the numbers
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add metrics/
+          git diff --cached --quiet || git commit -m "Archive GitHub traffic ($(date -u +%F))"
+          git push

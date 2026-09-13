@@ -1,0 +1,104 @@
+{
+  "note": "Published third-party figures for LongMemEval-S, recorded as data with sources. Deliberately kept out of every document: nothing here is a comparison until the release run publishes a score of ours to place beside them, at which point the publish step quotes from this file.",
+  "full_context_baseline": {
+    "system": "GPT-4o full context",
+    "score": 60.6,
+    "source": "the benchmark authors' published baseline"
+  },
+  "leaderboard": [
+    {
+      "system": "Mastra Observational Memory",
+      "score": 84.8,
+      "note": "micro; they headline 84.23 task-averaged"
+    },
+    {
+      "system": "Supermemory",
+      "score": 81.6,
+      "note": "cleaned-dataset variant, own harness"
+    },
+    {
+      "system": "Mastra RAG topK 20",
+      "score": 81.2,
+      "note": "judge not named"
+    },
+    {
+      "system": "EmergenceMem Simple Fast",
+      "score": 79,
+      "note": "the open-sourced configuration"
+    },
+    {
+      "system": "TiMem",
+      "score": 76.88,
+      "note": "project's own figure"
+    },
+    {
+      "system": "Zep",
+      "score": 71.2,
+      "note": "own harness, re-implemented baselines"
+    },
+    {
+      "system": "Feather",
+      "score": 69.3,
+      "note": "vendor-published"
+    },
+    {
+      "system": "GPT-4o + Chain-of-Note",
+      "score": 64,
+      "note": "benchmark authors' baseline"
+    },
+    {
+      "system": "GPT-4o full context",
+      "score": 60.6,
+      "note": "benchmark authors' baseline"
+    }
+  ],
+  "retrieval_recall": {
+    "note": "Published retrieval recall figures on LongMemEval, recorded with the unit each system retrieves, because recall is not comparable across rows without it. Sources checked 2026-08-17.",
+    "rows": [
+      {
+        "system": "MemPalace",
+        "metric": "Recall@5",
+        "value": 96.6,
+        "unit": "whole sessions stored verbatim as one document each, ChromaDB default embeddings (all-MiniLM-L6-v2), no heuristics, no reranking, no LLM",
+        "dataset": "LongMemEval_S",
+        "source": "https://raw.githubusercontent.com/MemPalace/mempalace/main/benchmarks/BENCHMARKS.md, row 'Raw ChromaDB | 96.6%'"
+      },
+      {
+        "system": "Supermemory",
+        "metric": "Recall@5",
+        "value": 86,
+        "unit": "atomic memories, ingested session by session; the original source chunk is injected on a hit",
+        "dataset": "LongMemEval_S",
+        "source": "https://supermemory.ai/research/ ('Overall 86% . ~190 mean tokens' at @5; 91% at @10, 95% at @15) and https://supermemory.ai/research/longmembench"
+      },
+      {
+        "system": "LongMemEval paper, session-level baseline",
+        "metric": "Recall@5",
+        "value": 70.6,
+        "unit": "whole sessions, key = value, Stella V5 1.5B retriever",
+        "dataset": "LongMemEval_M (about 1.5M tokens per history, so harder than _S)",
+        "source": "https://arxiv.org/html/2410.10813, Table 3, row 'Value = Session, K = V'. The round-level row with fact expansion is 0.644 in the same table."
+      },
+      {
+        "system": "Mastra Observational Memory",
+        "metric": "none",
+        "value": null,
+        "unit": "no per-turn retrieval; keeps a running compressed log",
+        "dataset": "LongMemEval_S",
+        "source": "https://mastra.ai/research/observational-memory publishes QA accuracy only"
+      }
+    ]
+  },
+  "excluded": [
+    {
+      "system": "EmergenceMem Internal",
+      "score": 86,
+      "reason": "described by its authors as not publicly reproducible"
+    },
+    {
+      "system": "EmergenceMem Simple",
+      "score": 82.4,
+      "reason": "not the open-sourced configuration"
+    }
+  ]
+}

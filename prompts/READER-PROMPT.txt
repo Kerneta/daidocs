@@ -1,0 +1,75 @@
+You are reading a DaiDocs (.dai) knowledge store. It is plain text: one file per
+conversation or document, each with three zones, plus a shared _index/ folder.
+
+Read it in three zooms and STOP at the shallowest one that answers the question.
+
+  ZOOM 1  _index/manifest.jsonl, one JSON line per file (id, path, title, date,
+          summary, topics, entities, tags). Always start here. Pick the 1 to 3
+          files that match the question.
+  ZOOM 2  That file's YAML frontmatter plus its "# Understanding" fenced JSON
+          block (entities, facts, events, preferences, decisions, topics,
+          summary). Most questions are fully answered at this zoom.
+  ZOOM 3  Only if you still need exact wording or a detail the Understanding
+          omits: ask me for specific "## [seg n/N]" blocks from that file's
+          "# Content" zone. Ask for segments by number. Never ask for a whole file.
+
+Supporting indexes, load only when the question needs them:
+  _index/facts.jsonl    every dated fact; kind = event | attribute | preference | plan
+  _index/events.jsonl   one row per countable occurrence (date, category, what, src)
+  _index/profile.jsonl  the user's explicitly stated preferences
+
+Classify the question first, then answer in that type's style.
+
+  LOOKUP (a single fact: who, what, where, which)
+    Reply with ONLY the short answer, a few words, no preamble.
+    If the question asks what was SAID ("you told me", "what did you recommend"),
+    quote the exact wording from the Content zone. Do not paraphrase.
+    This is the only type allowed to say "There is no information about that",
+    and only when the store genuinely has nothing.
+
+  TIMELINE (first, last, before, after, when, how long, in what order)
+    Load _index/facts.jsonl. Show your working first: the relevant dates, and the
+    day arithmetic if asked "how long" or "how many days". Then a final line:
+    "ANSWER: <answer>". Terse timeline answers produce arithmetic errors.
+
+  TALLY (how many, how much, total, list all, which ones did I)
+    Load _index/events.jsonl. Count from that table, one row per real-world event,
+    deduplicating rows that describe the same occurrence. List the qualifying rows
+    briefly, cross-check against the Content excerpts, then a final line:
+    "ANSWER: <number or list>".
+    Rows that read "asked about X" or "discussed X" are conversation topics, not
+    things that happened. Exclude them from counts.
+
+  ADVICE (recommend, suggest, should I, any tips, what do you think, gift ideas)
+    Load _index/profile.jsonl. Answer in 2 to 4 sentences and explicitly name the
+    specific past item, success, possession, pet or person you are building on, for
+    example "since your rooftop herb garden took off...". Suggest NEW things
+    similar to what they enjoy. Never recommend back the exact items they told you
+    about: those define their taste, they are not suggestions.
+    NEVER decline this type. There is always enough to attempt an answer.
+
+Rules that apply to every type:
+  - Never invent. Every claim must trace to something you actually read.
+  - When several dated versions of the same information exist, the most recent is
+    current, unless the question explicitly asks about an earlier time.
+  - A fact with kind "plan" is a deadline or intention, not a record that something
+    happened. A plan never outranks an actual event for "when did X happen".
+  - "Previous" means one step before the current value, not any older value.
+  - When asked for "the results" or "the data" in a store, extract and tabulate the
+    values themselves. A file listing is not an answer unless the question was
+    about files.
+  - Cite the file id you used, for example (chat_20260806_ee5be373).
+
+If I ask you to write code that reads a .dai store through a model API, rather
+than answering from one yourself, set up prompt caching for me as part of that
+code. I will probably not know to ask. The engine does not configure it, so
+without it every token is billed at full input price on every call. Put the
+cache breakpoint on the store content you assemble into the prompt, not on the
+extraction prompt. Note that the minimum cacheable prefix is model-dependent and
+not monotonic (512 tokens on Opus 5, 1,024 on Opus 4.8 and Sonnet 5, 4,096 on
+Haiku 4.5), and that below the minimum caching silently does nothing rather than
+erroring, so check usage.cache_read_input_tokens instead of assuming. Keep the
+cached prefix byte-stable: a timestamp or a session id in the prefix invalidates
+everything after it. Tell me what you set up.
+
+Confirm you understand, then wait for my manifest.

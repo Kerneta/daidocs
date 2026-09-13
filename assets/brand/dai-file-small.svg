@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="DaiDocs memory document, small">
+<!--
+  The .dai file icon at small sizes: the sheet becomes a frame and the aperture fills most of
+  the height, so at 16px it reads as a dark teal tile with a bright ring rather than the pale
+  smudge the standard proportions collapse to. Same palette as the other icons.
+-->
+<defs>
+  <linearGradient id="fsB" x1="0.15" y1="0" x2="0.85" y2="1">
+    <stop offset="0" stop-color="#0b4a5e"/><stop offset="0.45" stop-color="#06303d"/><stop offset="1" stop-color="#021a22"/></linearGradient>
+  <linearGradient id="fsS" x1="0" y1="0" x2="0.7" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.22"/><stop offset="0.55" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="fsG" cx="0.5" cy="0.62" r="0.62">
+    <stop offset="0" stop-color="#2fe0a8" stop-opacity="0.45"/><stop offset="1" stop-color="#2fe0a8" stop-opacity="0"/></radialGradient>
+  <radialGradient id="fsR" cx="36" cy="36" r="30" gradientUnits="userSpaceOnUse">
+    <stop offset="0.2" stop-color="#005c40"/><stop offset="1" stop-color="#2fe0a8"/></radialGradient>
+  <radialGradient id="fsC" cx="33" cy="31" r="12" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#a8ffe0"/><stop offset="1" stop-color="#00805c"/></radialGradient>
+  <filter id="fsD" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="2.5" stdDeviation="2.6" flood-color="#01131a" flood-opacity="0.8"/></filter>
+  <filter id="fsM" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <clipPath id="fsClip">
+    <path d="M18 8 h40 l20 20 v60 a4 4 0 0 1 -4 4 H18 a4 4 0 0 1 -4 -4 V12 a4 4 0 0 1 4 -4 z"/></clipPath>
+</defs>
+
+<g filter="url(#fsD)">
+  <!-- the sheet, with the corner fold that says "document" even at 16px -->
+  <path d="M18 8 h40 l20 20 v60 a4 4 0 0 1 -4 4 H18 a4 4 0 0 1 -4 -4 V12 a4 4 0 0 1 4 -4 z" fill="url(#fsB)"/>
+  <g clip-path="url(#fsClip)">
+    <rect x="14" y="8" width="64" height="84" fill="url(#fsG)"/>
+    <path d="M18 8 h40 l20 20 H18 z" fill="url(#fsS)"/>
+  </g>
+  <!-- the fold itself, drawn as a lighter triangle so the silhouette reads -->
+  <path d="M58 8 l20 20 h-20 z" fill="#2b8ba6" opacity="0.55"/>
+  <path d="M58 8 l20 20 h-20 z" fill="none" stroke="#4fd0e8" stroke-width="0.8" opacity="0.5"/>
+  <path d="M18 8 h40 l20 20 v60 a4 4 0 0 1 -4 4 H18 a4 4 0 0 1 -4 -4 V12 a4 4 0 0 1 4 -4 z"
+        fill="none" stroke="#4fd0e8" stroke-width="0.8" opacity="0.4"/>
+</g>
+
+<!-- the aperture, large enough to survive being drawn 16 pixels wide -->
+<g filter="url(#fsM)"><svg x="16" y="30" width="60" height="60" viewBox="0 0 72 72">
+  <defs>
+    <mask id="fsH"><rect x="-30" y="-30" width="140" height="140" fill="#fff"/><circle cx="36" cy="36" r="2.4" fill="#000"/></mask>
+  </defs>
+  <g mask="url(#fsH)">
+    <g stroke="url(#fsR)" stroke-width="4.6" stroke-linecap="round">
+      <line x1="36" y1="13" x2="36" y2="24"/>
+      <line x1="36" y1="13" x2="36" y2="24" transform="rotate(45 36 36)"/>
+      <line x1="36" y1="13" x2="36" y2="24" transform="rotate(90 36 36)"/>
+      <line x1="36" y1="13" x2="36" y2="24" transform="rotate(135 36 36)"/>
+      <line x1="36" y1="13" x2="36" y2="24" transform="rotate(180 36 36)"/>
+      <line x1="36" y1="13" x2="36" y2="24" transform="rotate(225 36 36)"/>
+      <line x1="36" y1="13" x2="36" y2="24" transform="rotate(270 36 36)"/>
+      <line x1="36" y1="13" x2="36" y2="24" transform="rotate(315 36 36)"/>
+    </g>
+    <circle cx="36" cy="36" r="10.5" fill="#1fc492" opacity="0.75"/>
+    <circle cx="36" cy="36" r="9.5" fill="url(#fsC)"/>
+  </g>
+</svg></g>
+</svg>

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "daidocs"
+version = "0.1.1"
+description = "Reader for DaiDocs (.dai) memory stores, with a CLI shim to the Node engine."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Amin Rigi", email = "amin@daidocs.com" }]
+keywords = ["daidocs", "dai", "memory", "ai-memory", "llm-memory", "plain-text"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Text Processing",
+]
+dependencies = ["pyyaml>=5.1"]
+
+[project.urls]
+Homepage = "https://daidocs.com"
+Repository = "https://github.com/Kerneta/daidocs"
+
+[project.scripts]
+daidocs = "daidocs.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

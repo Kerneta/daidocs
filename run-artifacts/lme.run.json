@@ -1,0 +1,12 @@
+{
+  "engine": "daidocs-v44n",
+  "engine_version": "4.4n",
+  "ingest_signature": "daidocs-4.4.1",
+  "actor": "openai:gpt-4o",
+  "observer": "openai:gpt-4.1-mini",
+  "tokenizer": "gpt-tokenizer@3.4.0",
+  "dataset": "longmemeval_s_cleaned.json",
+  "questions": 500,
+  "mock": false,
+  "started": "2026-08-14T16:52:31.458Z"
+}
