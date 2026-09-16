@@ -18,7 +18,7 @@ A `.dai` file has three zones, and you read them in three zooms, never all at on
 
 | Zoom | What you read | When |
 |---|---|---|
-| 1 | `_index/manifest.jsonl`, one line per file, no body | Always first. This is the table of contents. |
+| 1 | `_index/manifest.jsonl`, one line per file, no body | Always first. This is the table of contents. Grep it for your query terms and load only the matching lines, never the whole file: on a large store that alone costs more than the answer. |
 | 2 | A file's `---` frontmatter plus its `# Understanding` JSON | For the 1 to 3 files the manifest says are relevant. |
 | 3 | Specific `## [seg n/N]` blocks from `# Content` | Only for exact quotes or details the Understanding does not hold. |
 

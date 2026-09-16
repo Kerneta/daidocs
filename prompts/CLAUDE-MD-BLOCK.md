@@ -7,6 +7,9 @@ the default failure mode: it costs an order of magnitude more tokens for no accu
 
 1. `_index/manifest.jsonl` for one JSON line per file (id, path, title, date, summary,
    topics, entities, tags). Always start here, then pick the 1 to 3 files that match.
+   Grep or filter the manifest for your query terms and load only the matching lines.
+   Never read the whole manifest into context: on a large store that alone costs more
+   than the answer.
 2. That file's YAML frontmatter plus its `# Understanding` fenced JSON block. Most
    questions are fully answered at this zoom.
 3. Specific `## [seg n/N]` blocks from `# Content`, by number, only when you need exact
