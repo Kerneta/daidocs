@@ -11,6 +11,17 @@ other scales are marked as such and are not comparable.
 
 ### Fixed
 
+- **The dashboard check in the verify suite is hermetic.** The standalone-dashboard
+  build in `verify_surfaces.mjs` inherited the environment without `DAIDOCS_STORE`,
+  so it embedded the real machine's `~/DaiDocs` store, and the "nothing is loaded
+  over the network" regex ran over the whole page including that embedded data. On
+  any machine whose store merely mentioned `fetch(` or `<link href=` the check
+  failed. The build now reads a store made inside the suite's temp dir (with its
+  own home and registry, as the watcher and empty-map builds already did), and the
+  regex reads only the page around the first embedded data script block. The test
+  store deliberately mentions `fetch(` and `<link href=` so the distinction stays
+  pinned down.
+
 - **A conversion now lands beside its capture.** The hooks resolve the store from
   the session's own working directory, so a project folder keeps its raw captures
   in its local `.daidocs/store`. `save_memory` resolved from the MCP server's own

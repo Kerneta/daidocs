@@ -1971,9 +1971,35 @@ if (wanted('version')) {
   section('the memory dashboard builds and stands alone');
   // One self-contained page: everything is read at build time and embedded, so it opens with a
   // double click and needs no running process.
+  // Built against a store made here, its own home and registry (the watcher and empty-map
+  // builds above do the same): without DAIDOCS_STORE the builder falls back to the real
+  // ~/DaiDocs, so the suite would embed, and its checks would depend on, whatever this
+  // machine happens to hold. The memory deliberately mentions fetch( and <link href=,
+  // because embedded data that merely talks about HTML is not the page loading anything.
+  const dashHome = path.join(TMP, 'dash-home');
+  const dashStore = path.join(dashHome, 'DaiDocs');
+  fs.mkdirSync(path.join(dashStore, '_index'), { recursive: true });
+  fs.writeFileSync(path.join(dashStore, 'note_1.dai'), [
+    '---', 'id: note_1', 'title: A note about pages', 'date: 2026-09-08', '---', '',
+    '# Understanding', '', '```json',
+    '{"summary": "A page that calls fetch( and carries a <link href= tag."}',
+    '```', '', '# Content', '', '## [seg 1/1]', '',
+    'The page under study used fetch( for its data and a <link href= for its styles,',
+    'and a <script src= for a library.', '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(dashStore, '_index', 'manifest.jsonl'), JSON.stringify({
+    id: 'note_1', title: 'A note about pages', date: '2026-09-08',
+    summary: 'Mentions fetch( and <link href= in passing.',
+    topics: ['pages', 'markup'], entities: ['fetch'],
+  }) + '\n');
+  const dashEnv = {
+    ...process.env, HOME: dashHome, USERPROFILE: dashHome,
+    DAIDOCS_STORE: dashStore,
+    DAIDOCS_REGISTRY: path.join(dashHome, 'registry', 'stores.json'),
+  };
   const dashOut = path.join(TMP, 'dash', 'daidocs-dashboard.html');
   const dashRun = await new Promise(res => {
-    const p = spawn(process.execPath, ['tools/dashboard/build_dashboard.mjs', '--out', dashOut], { cwd: here });
+    const p = spawn(process.execPath, ['tools/dashboard/build_dashboard.mjs', '--out', dashOut], { cwd: here, env: dashEnv });
     let out = ''; p.stdout.on('data', d => out += d); p.stderr.on('data', d => out += d);
     p.on('close', code => res({ out, code }));
   });
@@ -1997,7 +2023,7 @@ if (wanted('version')) {
   }
   const spaceOut = path.join(TMP, 'dash-space', 'daidocs-dashboard.html');
   const spaceRun = await new Promise(res => {
-    const p = spawn(process.execPath, [path.join(spaceDir, 'build_dashboard.mjs'), '--out', spaceOut, '--install', here], { cwd: TMP });
+    const p = spawn(process.execPath, [path.join(spaceDir, 'build_dashboard.mjs'), '--out', spaceOut, '--install', here], { cwd: TMP, env: dashEnv });
     let out = ''; p.stdout.on('data', d => out += d); p.stderr.on('data', d => out += d);
     p.on('close', code => res({ out, code }));
   });
@@ -2007,7 +2033,14 @@ if (wanted('version')) {
 
   const dashHtml = fs.existsSync(dashOut) ? fs.readFileSync(dashOut, 'utf8') : '';
   ok('the data is embedded, not fetched', /window\.DAIDOCS = \{/.test(dashHtml));
-  ok('nothing is loaded over the network', !/<script[^>]+src=|<link[^>]+href=|fetch\(/.test(dashHtml), 'no external references');
+  // The external-reference check reads the page around the data, not the data itself: the
+  // data is the first script block, whole (the convention embeddedData relies on), and a
+  // memory whose text mentions fetch( or <link href= is content, not a network reference.
+  const dataOpen = dashHtml.indexOf('<script>');
+  const dataClose = dashHtml.indexOf('</script>', dataOpen);
+  const pageAroundData = (dataOpen < 0 || dataClose < 0) ? dashHtml
+    : dashHtml.slice(0, dataOpen + 8) + dashHtml.slice(dataClose);
+  ok('nothing is loaded over the network', !/<script[^>]+src=|<link[^>]+href=|fetch\(/.test(pageAroundData), 'no external references');
   ok('it declares both views', /Project files/.test(dashHtml) && /id="tab-memory"/.test(dashHtml));
   // The tile shows the project folder itself, not an add-a-folder button; declaring still
   // happens through declare_project.
