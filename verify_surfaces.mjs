@@ -2083,6 +2083,49 @@ if (wanted('version')) {
   ok('with the conversation date, not today',
     /2026-09-07/.test(fs.readFileSync(path.join(freshProj, '.daidocs', 'store', '_index', 'manifest.jsonl'), 'utf8')));
 
+  section('a conversion lands beside its capture');
+  // The hooks resolve the store from the session's own working directory, so a
+  // project folder keeps its raw captures locally. The MCP server resolves from
+  // its own process.cwd(), which is wherever the client was launched. Those two
+  // differ routinely, and save_memory then converted a captured session into
+  // the general store while the raw and the markers sat in the project store:
+  // raw local, conversion elsewhere, marker never cleared, every folder looking
+  // permanently unconverted. A conversion must land beside its capture.
+  const routeHome = store('route-home');
+  const routeProj = path.join(TMP, 'route-proj');
+  const routeLaunch = path.join(TMP, 'route-launch');
+  for (const d of [routeHome, routeProj, routeLaunch]) fs.mkdirSync(d, { recursive: true });
+  const routeEnv = { DAIDOCS_STORE: '', DAIDOCS_OBSERVER: MOCK, HOME: routeHome, USERPROFILE: routeHome };
+  const routeTr = path.join(TMP, 'route.jsonl');
+  fs.writeFileSync(routeTr, [
+    JSON.stringify({ type: 'user', timestamp: '2026-09-20T10:00:00.000Z', cwd: routeProj, sessionId: 'route1', message: { content: 'we decided the launch is on october the third. '.repeat(40) } }),
+    JSON.stringify({ type: 'assistant', timestamp: '2026-09-20T10:01:00.000Z', message: { content: [{ type: 'text', text: 'noted, filed under launch planning. '.repeat(100) }] } }),
+  ].join(String.fromCharCode(10)));
+  await runNode('session_autosave.mjs', [], routeEnv,
+    JSON.stringify({ session_id: 'route1', transcript_path: routeTr, cwd: routeProj }));
+  const routeStore = path.join(routeProj, '.daidocs', 'store');
+  ok('the capture sits in the project store', fs.existsSync(path.join(routeStore, '_unconverted', 'cc_route1.txt')));
+
+  const routeClient = new Client({ name: 'verify-route', version: '0.0.1' });
+  await routeClient.connect(new StdioClientTransport({
+    command: process.execPath, args: [path.join(here, 'mcp_server.mjs')],
+    cwd: routeLaunch, env: { ...process.env, ...routeEnv },
+  }));
+  const routeSave = await routeClient.callTool({ name: 'save_memory', arguments: {
+    title: 'proj session', content: 'we decided the launch is on october the third.',
+    date: '2026-09-20', session: 'route1',
+    understanding: { summary: 'launch date decided', facts: [{ fact: 'launch on october 3', date: '2026-09-20', kind: 'plan' }], events: [], topics: ['launch'] },
+  } });
+  await routeClient.close();
+  const routeDai = d => { try { return fs.readdirSync(d).filter(f => f.endsWith('.dai')); } catch { return []; } };
+  ok('the conversion lands in the project store, from a server launched elsewhere',
+    routeDai(routeStore).length === 1, routeSave.content[0].text.split(String.fromCharCode(10))[0]);
+  ok('nothing leaks to the general store', routeDai(path.join(routeHome, 'DaiDocs')).length === 0,
+    routeDai(path.join(routeHome, 'DaiDocs')).join(','));
+  ok('and the markers come down in the store that holds the capture',
+    !fs.existsSync(path.join(routeStore, '_unconverted', 'cc_route1.txt'))
+    && !fs.existsSync(path.join(routeStore, '_pending', 'cc_route1.json')));
+
   section('declaring a project from the conversation');
   // declare_project makes the per-project store reachable from the conversation, not only from
   // a terminal command a user had to know existed.

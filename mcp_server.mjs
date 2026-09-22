@@ -26,7 +26,7 @@ const { attribute } = require('./lib/convert');
 const { resolveObserver, subscriptionMode } = require('./lib/host');
 const { needsKey } = require('./lib/observers');
 const S = require('./lib/stores');
-const { markSaved, unconvertedFor } = require('./lib/session_marks');
+const { markSaved, unconvertedFor, cleanId, UNCONVERTED } = require('./lib/session_marks');
 const Reg = require('./lib/registry');
 
 // Resolved per call, not once at startup: one server serves every project, and
@@ -35,6 +35,49 @@ function currentStore() {
   const r = S.resolveStore(process.cwd());
   for (const d of ['_index', '_raw']) fs.mkdirSync(path.join(r.storeDir, d), { recursive: true });
   return r;
+}
+
+// Where a captured session's conversion belongs: the store that already holds
+// the capture.
+//
+// The hooks resolve the store from the SESSION's working directory, so the raw
+// and the waiting tail land in the project's own store. This server resolves
+// from its own process.cwd(), and the two differ whenever the client was
+// launched somewhere other than the folder the conversation ran in: a parent
+// folder, the desktop app, a session that changed directory. Conversion then
+// wrote the .dai and the index rows into the WRONG store, usually the general
+// one, while markSaved cleared markers that were never there; the project kept
+// its raw files, its markers never came down, and every conversion of its
+// sessions leaked out of the folder. The capture files themselves say which
+// store owns the session, so follow them: the current store first, then every
+// store the registry knows, then the general store.
+function storeForSession(session, first) {
+  const id = cleanId(session);
+  const holds = dir => [
+    path.join(dir, '_pending', id + '.json'),
+    path.join(dir, UNCONVERTED, id + '.txt'),
+    path.join(dir, '_raw', id + '.meta.json'),
+    path.join(dir, '_raw', id + '.txt'),
+  ].some(fp => fs.existsSync(fp));
+  const seen = new Set();
+  const candidates = [];
+  const push = r => {
+    if (!r || !r.storeDir) return;
+    const k = path.resolve(r.storeDir).replace(/\\/g, '/').toLowerCase();
+    if (!seen.has(k)) { seen.add(k); candidates.push(r); }
+  };
+  push(first);
+  try {
+    for (const s of Reg.list()) {
+      if (!s.present || !s.root) continue;
+      const found = S.findProject(s.root);
+      if (!found) continue;
+      const cfg = S.loadConfig(found.root, found.configPath);
+      push({ id: cfg.id || null, storeDir: cfg.storeDir, type: cfg.type, label: cfg.label, source: cfg.configPath, config: cfg, rules: cfg.rules });
+    }
+  } catch { /* the registry is a convenience; the current store still works */ }
+  push({ storeDir: S.SHARED_STORE(), type: 'shared', label: 'general', source: 'shared default', config: null, rules: S.TYPES.shared });
+  return candidates.find(c => holds(c.storeDir)) || null;
 }
 
 // store I/O: plain files, loaded fresh per call
@@ -259,7 +302,20 @@ server.tool(
     // Redact before the lossless copy is written, not after. Same reasoning as
     // the archiver: a credential in the conversation must never reach disk or
     // the observer API, and this is the last point where both are still ahead.
-    const here = currentStore();
+    //
+    // A capture converts where it was captured. When a session id is given,
+    // the store that holds that session's raw is the store this save belongs
+    // to, wherever this server process happens to be running. DAIDOCS_STORE
+    // stays an explicit override: the hooks wrote there too, so the search
+    // would only find the same place.
+    let here = currentStore();
+    if (session && here.source !== 'DAIDOCS_STORE') {
+      const owner = storeForSession(session, here);
+      if (owner) {
+        here = owner;
+        for (const d of ['_index', '_raw']) fs.mkdirSync(path.join(here.storeDir, d), { recursive: true });
+      }
+    }
     const w = S.canWrite(here);
     if (!w.ok) return { content: [{ type: 'text', text: `save_memory: ${w.reason}` }], isError: true };
     const STORE_DIR = here.storeDir;

@@ -9,6 +9,20 @@ other scales are marked as such and are not comparable.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A conversion now lands beside its capture.** The hooks resolve the store from
+  the session's own working directory, so a project folder keeps its raw captures
+  in its local `.daidocs/store`. `save_memory` resolved from the MCP server's own
+  `process.cwd()` instead, which is wherever the client was launched, so converting
+  a captured session wrote the `.dai` and index rows into the wrong store, usually
+  the general one, and the project's `_pending`/`_unconverted` markers never came
+  down. When a session id is given, `save_memory` now finds the store that already
+  holds that session's capture (current store, then every store the registry knows,
+  then the general store) and writes the conversion there. A session from a folder
+  with no project store still converts into the general store, exactly as before.
+  `DAIDOCS_STORE` remains an explicit override for both halves.
+
 ### Added
 
 - **Python reader package (`daidocs` on PyPI, 0.1.0).** A pure-Python reader for
