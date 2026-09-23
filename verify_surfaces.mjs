@@ -2389,6 +2389,9 @@ if (wanted('version')) {
   // Nothing that costs money or takes minutes may start on its own.
   ok('but never converts a history nobody asked it to convert',
     /not converted yet/.test(silentRun.out) && !/Converting/.test(silentRun.out));
+  ok('and the deferred convert command works from any cwd',
+    /npx daidocs convert/.test(silentRun.out) && !/node daidocs\.js convert/.test(silentRun.out),
+    (silentRun.out.match(/[^\n]*not converted yet[^\n]*/) || [''])[0]);
   ok('the model is chosen, not prompted for', /Observer: \S+/.test(silentRun.out) && !/Choose 1 to/.test(silentRun.out),
     (silentRun.out.match(/Observer: \S+/) || [''])[0]);
   ok('and the run says where to change any of it', /node setup\.js --status/.test(silentRun.out));

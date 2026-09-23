@@ -11,6 +11,12 @@ other scales are marked as such and are not comparable.
 
 ### Fixed
 
+- **The convert hint after setup works from any directory.** A silent install
+  printed `node daidocs.js convert`, which only resolves if the shell is already
+  in the install directory. After `npx daidocs setup` it is not, so the command
+  fails with `MODULE_NOT_FOUND`. The hint now prints `npx daidocs convert`, the
+  same entry point as the documented install.
+
 - **The dashboard check in the verify suite is hermetic.** The standalone-dashboard
   build in `verify_surfaces.mjs` inherited the environment without `DAIDOCS_STORE`,
   so it embedded the real machine's `~/DaiDocs` store, and the "nothing is loaded
