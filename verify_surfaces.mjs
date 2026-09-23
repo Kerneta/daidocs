@@ -13,7 +13,7 @@
 // Exit code is 0 only if every check passed.
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
@@ -2392,6 +2392,12 @@ if (wanted('version')) {
   ok('the model is chosen, not prompted for', /Observer: \S+/.test(silentRun.out) && !/Choose 1 to/.test(silentRun.out),
     (silentRun.out.match(/Observer: \S+/) || [''])[0]);
   ok('and the run says where to change any of it', /node setup\.js --status/.test(silentRun.out));
+  // These four land at the project root. A nested .daidocs/.gitignore cannot cover them,
+  // but creating a .gitignore in a folder that is not a repo is not setup's job.
+  ok('a silent install into a folder that is not a git repo does not create .gitignore',
+    !fs.existsSync(path.join(qWork, '.gitignore')));
+  ok('even though it did write the setup files',
+    ['AGENTS.md', 'GEMINI.md', '.cursorrules', '.mcp.json'].every(f => fs.existsSync(path.join(qWork, f))));
 
   // The questions still exist behind --ask, and now survive a non-terminal stdin: a readline
   // interface per question dropped every line that arrived while nothing was waiting, so a
@@ -2401,6 +2407,64 @@ if (wanted('version')) {
   ok('and every one of them is asked, not just the first two',
     (asked.out.match(/\[Y\/n\]/g) || []).length >= 7, String((asked.out.match(/\[Y\/n\]/g) || []).length));
   ok('and an asked run still reaches the end', /Done\. DaiDocs/.test(asked.out), String(asked.code));
+
+  section('setup files in a git repo are named in .gitignore');
+  // The store uses a nested .daidocs/.gitignore so it never edits the project's.
+  // AGENTS.md, GEMINI.md, .cursorrules and .mcp.json sit at the root and cannot.
+  const giNames = ['AGENTS.md', 'GEMINI.md', '.cursorrules', '.mcp.json'];
+  const giLines = t => t.split(/\r?\n/).map(l => l.trim());
+  const giHome = path.join(TMP, 'gitignore-home');
+  const giRepo = path.join(giHome, 'repo');
+  fs.mkdirSync(giRepo, { recursive: true });
+  const giInit = spawnSync('git', ['init'], { cwd: giRepo, encoding: 'utf8' });
+  ok('the fixture is a git repo', giInit.status === 0, (giInit.stderr || giInit.stdout || '').trim());
+  const giEnv = {
+    ...process.env, HOME: giHome, USERPROFILE: giHome,
+    APPDATA: path.join(giHome, 'AppData', 'Roaming'), LOCALAPPDATA: path.join(giHome, 'AppData', 'Local'),
+    DAIDOCS_NO_PERSIST: '1', DAIDOCS_STORE: path.join(giHome, 'DaiDocs'), DAIDOCS_OBSERVER: '',
+  };
+  const runGi = (args, cwd, script) => new Promise(res => {
+    const p2 = spawn(process.execPath, [script || path.join(here, 'setup.js'), ...args], { cwd, env: giEnv });
+    let out = ''; p2.stdout.on('data', d => out += d); p2.stderr.on('data', d => out += d);
+    p2.stdin.end('');
+    p2.on('close', code => res({ out, code }));
+  });
+  const gi1 = await runGi(['--code', '--instructions', '--project', giRepo], giRepo);
+  const giPath = path.join(giRepo, '.gitignore');
+  ok('a repo with no .gitignore gets one', fs.existsSync(giPath),
+    (gi1.out.split(String.fromCharCode(10)).find(l => /gitignore/i.test(l)) || gi1.out.slice(-120)));
+  const giBody = fs.existsSync(giPath) ? fs.readFileSync(giPath, 'utf8') : '';
+  ok('and it names every setup file', giNames.every(n => giLines(giBody).includes(n)), giBody);
+  await runGi(['--code', '--instructions', '--project', giRepo], giRepo);
+  const giBody2 = fs.readFileSync(giPath, 'utf8');
+  ok('a second run does not duplicate the names',
+    giNames.every(n => giLines(giBody2).filter(l => l === n).length === 1), giBody2);
+
+  const giRepo2 = path.join(giHome, 'repo-existing');
+  fs.mkdirSync(giRepo2, { recursive: true });
+  spawnSync('git', ['init'], { cwd: giRepo2 });
+  fs.writeFileSync(path.join(giRepo2, '.gitignore'), 'node_modules/\nAGENTS.md\n');
+  await runGi(['--code', '--instructions', '--project', giRepo2], giRepo2);
+  const giExist = fs.readFileSync(path.join(giRepo2, '.gitignore'), 'utf8');
+  ok('an existing .gitignore keeps what the user wrote', giLines(giExist).includes('node_modules/'), giExist);
+  ok('and does not duplicate a name already present', giLines(giExist).filter(l => l === 'AGENTS.md').length === 1, giExist);
+  ok('and appends only the missing names',
+    ['GEMINI.md', '.cursorrules', '.mcp.json'].every(n => giLines(giExist).includes(n)), giExist);
+
+  // HERE is __dirname of the running setup.js. Copy it so the skip can fire without
+  // writing into this checkout's .gitignore. A stub sdk dir keeps ensureDependencies quiet.
+  const giHere = path.join(TMP, 'setup-as-here');
+  fs.mkdirSync(giHere, { recursive: true });
+  for (const f of ['setup.js', 'package.json']) fs.copyFileSync(path.join(here, f), path.join(giHere, f));
+  fs.cpSync(path.join(here, 'lib'), path.join(giHere, 'lib'), { recursive: true });
+  fs.cpSync(path.join(here, 'prompts'), path.join(giHere, 'prompts'), { recursive: true });
+  fs.mkdirSync(path.join(giHere, 'node_modules', '@modelcontextprotocol', 'sdk'), { recursive: true });
+  spawnSync('git', ['init'], { cwd: giHere });
+  await runGi(['--code', '--instructions'], giHere, path.join(giHere, 'setup.js'));
+  ok('setup run from the install folder does not write a .gitignore there',
+    !fs.existsSync(path.join(giHere, '.gitignore')));
+  ok('even when that folder is a git repo and the protocol files were written',
+    fs.existsSync(path.join(giHere, 'AGENTS.md')));
 
   // git clone .../daidocs from a home directory makes ~/daidocs; the default store is ~/DaiDocs,
   // and on Windows/macOS those are one folder. If the store is already there git refuses (which

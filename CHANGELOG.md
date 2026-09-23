@@ -11,6 +11,15 @@ other scales are marked as such and are not comparable.
 
 ### Fixed
 
+- **Setup no longer leaves its project files for `git add .` to take.** A
+  silent install writes `AGENTS.md`, `GEMINI.md`, `.cursorrules` and
+  `.mcp.json` into the working directory. The store keeps itself out of git
+  with a nested `.daidocs/.gitignore`; these four sit at the project root and
+  cannot. When the target directory is a git repository, setup now appends
+  those names to `.gitignore` (creating the file if the repo has none, skipping
+  names that are already there, and never touching the install folder itself).
+  A folder that is not a repository is left alone.
+
 - **The dashboard check in the verify suite is hermetic.** The standalone-dashboard
   build in `verify_surfaces.mjs` inherited the environment without `DAIDOCS_STORE`,
   so it embedded the real machine's `~/DaiDocs` store, and the "nothing is loaded
