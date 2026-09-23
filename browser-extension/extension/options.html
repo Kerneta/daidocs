@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DaiDocs capture settings</title>
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; margin: 24px; max-width: 520px; color: #222; }
+    h3 { margin: 26px 0 6px; border-top: 1px solid #ddd; padding-top: 18px; }
+    label { display: block; margin: 14px 0 4px; font-weight: 600; }
+    input[type=number], input[type=text], input[type=password] { width: 100%; padding: 6px 8px; font: inherit; box-sizing: border-box; }
+    .row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+    .row label { margin: 0; font-weight: 500; flex: 1; }
+    button { margin-top: 16px; padding: 8px 16px; font: inherit; cursor: pointer; }
+    #status { margin-left: 10px; color: #2a7a2a; }
+    p.hint { color: #666; font-size: 12.5px; margin: 4px 0 0; }
+    .vaultstate { font-size: 13px; padding: 8px 10px; border-radius: 6px; background: #f2f2f2; margin-top: 8px; }
+    .banner { background: #e9f7f1; border: 1px solid #9fdcc8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; }
+    .banner b { color: #0e6b57; }
+  </style>
+</head>
+<body>
+  <h2>DaiDocs capture</h2>
+  <div class="banner">
+    <b>Settings live in the on-page pill now.</b> Click the gear on the DaiDocs
+    pill (top-left of any supported site), open <b>More settings</b>, and control
+    everything there. This page is only needed to grant the "all websites"
+    browser permission, and to bring the pill back if you have hidden it, since a
+    page cannot do those two things for itself.
+  </div>
+  <p>The extension sends captures to the DaiDocs capture server on this
+     machine. Start it with <code>npm run capture</code> in the DaiDocs folder.
+     Your captured data stays on your computer.</p>
+
+  <h3>What gets captured</h3>
+  <p class="hint">AI chats are captured as plain text into your memory store.
+     Browsing (X and websites) always goes to the encrypted Vault, in its own
+     folder, separate from chat history.</p>
+
+  <div class="row"><label for="t_chatgpt">ChatGPT conversations</label><input id="t_chatgpt" type="checkbox"></div>
+  <div class="row"><label for="t_claude">Claude conversations</label><input id="t_claude" type="checkbox"></div>
+  <div class="row"><label for="t_gemini">Gemini conversations</label><input id="t_gemini" type="checkbox"></div>
+  <div class="row"><label for="t_x">X / Twitter timeline (Vault)</label><input id="t_x" type="checkbox"></div>
+  <div class="row"><label for="t_all">All websites (Vault)</label><input id="t_all" type="checkbox"></div>
+  <p class="hint">"All websites" asks the browser for permission to run on every
+     site. Chat sites and X keep their own toggles above. A site can also be
+     toggled from the on-page pill.</p>
+
+  <div class="row"><label for="t_pill">Show the save pill on pages</label><input id="t_pill" type="checkbox"></div>
+
+  <h3>Vault</h3>
+  <p class="hint">The Vault stores your browsing history encrypted on disk.
+     An assistant can only read it after you give it the vault password
+     (<code>node vault.mjs unlock</code>). Set it up once with
+     <code>node vault.mjs init --password ...</code> in the DaiDocs folder.</p>
+  <div id="vaultstate" class="vaultstate">Checking vault...</div>
+
+  <div class="row"><label for="t_encchats">Also encrypt AI chat captures into the Vault</label><input id="t_encchats" type="checkbox"></div>
+  <p class="hint">Off by default. When on, chats are stored encrypted too and
+     are not converted to searchable memory until you unlock and export them.</p>
+
+  <h3>Server</h3>
+  <label for="port">Server port</label>
+  <input id="port" type="number" min="1" max="65535">
+  <p class="hint">Default 41100. Must match DAIDOCS_CAPTURE_PORT if you set it.</p>
+
+  <label for="token">Bearer token (optional)</label>
+  <input id="token" type="text" autocomplete="off">
+  <p class="hint">Only needed if the server was started with DAIDOCS_CAPTURE_TOKEN.</p>
+
+  <button id="save">Save</button><span id="status"></span>
+
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up DaiDocs Memory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f6f5; --panel:#ffffff; --ink:#0f1e1c; --muted:#5b6b68;
+    --line:#dde5e3; --accent:#0e9c87; --accent-ink:#053e36; --accent-soft:#e4f5f1;
+    --amber:#b0641f; --amber-soft:#f7ecdf; --code-bg:#0c1f1c; --code-ink:#d6f7ec;
+    --shadow:0 1px 2px rgba(6,48,61,.06),0 8px 30px rgba(6,48,61,.06);
+  }
+  :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#07100f; --panel:#0d1a18; --ink:#e7efec; --muted:#93a5a1;
+      --line:#1d2b28; --accent:#2fe0a8; --accent-ink:#062a22; --accent-soft:#0f2a25;
+      --amber:#e0913c; --amber-soft:#2a1e12; --code-bg:#04100e; --code-ink:#c9f7ec;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 34px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#07100f; --panel:#0d1a18; --ink:#e7efec; --muted:#93a5a1;
+    --line:#1d2b28; --accent:#2fe0a8; --accent-ink:#062a22; --accent-soft:#0f2a25;
+    --amber:#e0913c; --amber-soft:#2a1e12; --code-bg:#04100e; --code-ink:#c9f7ec;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 34px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding-block:clamp(40px,7vw,72px); padding-inline:20px}
+  code, kbd, .cmd, .path{font-family:"IBM Plex Mono", ui-monospace, monospace}
+  a{color:var(--accent)}
+  .eyebrow{font:600 12px/1 "IBM Plex Mono", monospace; letter-spacing:.18em; text-transform:uppercase; color:var(--accent)}
+  h1{font-weight:700; font-size:clamp(30px,5.2vw,44px); line-height:1.08; letter-spacing:-.02em; text-wrap:balance; margin:.5rem 0 0}
+  .lede{color:var(--muted); font-size:18px; max-width:60ch; margin:.9rem 0 0}
+  h2{font-weight:700; font-size:22px; letter-spacing:-.01em; margin:0}
+  h3{font-weight:600; font-size:16px; margin:0 0 .35rem}
+  p{margin:.6rem 0}
+  .facts{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:28px}
+  .fact{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 15px; box-shadow:var(--shadow)}
+  .fact b{display:block; font-size:14px}
+  .fact span{color:var(--muted); font-size:13px}
+  @media (max-width:560px){ .facts{grid-template-columns:1fr} }
+
+  .req{background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); border-radius:12px; padding:16px 18px; margin-top:34px}
+  .req h3{color:var(--accent-ink)} :root:not([data-theme="light"]) .req h3{color:var(--accent)}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .req h3{color:var(--accent)} }
+  .req ul{margin:.4rem 0 0; padding-left:18px} .req li{margin:.25rem 0}
+
+  .steps{list-style:none; counter-reset:step; margin:40px 0 0; padding:0; display:flex; flex-direction:column; gap:14px}
+  .step{position:relative; counter-increment:step; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px 22px 20px 62px; box-shadow:var(--shadow)}
+  .step::before{content:counter(step); position:absolute; left:16px; top:18px; width:30px; height:30px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center; font:600 15px/1 "IBM Plex Mono", monospace;
+    background:var(--accent); color:var(--accent-ink)}
+  .step h2{margin-bottom:.1rem}
+  .sub{color:var(--muted); font-size:14px; margin:.15rem 0 .8rem}
+
+  .tabs{display:flex; gap:6px; margin:.5rem 0 .7rem; flex-wrap:wrap}
+  .tab{font:600 13px/1 "IBM Plex Mono", monospace; padding:8px 12px; border-radius:8px; border:1px solid var(--line);
+    background:transparent; color:var(--muted); cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--accent-soft); color:var(--accent-ink); border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+  :root:not([data-theme="light"]) .tab[aria-selected="true"]{color:var(--accent)}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .tab[aria-selected="true"]{color:var(--accent)} }
+
+  .cmd{position:relative; background:var(--code-bg); color:var(--code-ink); border-radius:10px; padding:14px 46px 14px 16px;
+    font-size:13.5px; line-height:1.7; overflow-x:auto; white-space:pre; margin:.3rem 0}
+  .cmd .c{color:#6fd7bf}
+  .copy{position:absolute; top:8px; right:8px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06);
+    color:var(--code-ink); font:600 11px/1 "IBM Plex Mono", monospace; padding:6px 8px; border-radius:6px; cursor:pointer}
+  .copy:hover{background:rgba(255,255,255,.14)}
+  .path{background:var(--accent-soft); border-radius:6px; padding:1px 6px; font-size:13px; word-break:break-all}
+
+  .note{border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:.7rem 0; color:var(--muted); font-size:14.5px}
+  .warn{border-left-color:var(--amber)}
+  .pill{display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; padding:5px 11px; border-radius:999px}
+  .pill .dot{width:8px;height:8px;border-radius:50%}
+  .pill.on{background:var(--accent-soft); color:var(--accent-ink)} .pill.on .dot{background:var(--accent)}
+  :root:not([data-theme="light"]) .pill.on{color:var(--accent)}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .pill.on{color:var(--accent)} }
+  .pill.off{background:var(--amber-soft); color:var(--amber)} .pill.off .dot{background:var(--amber)}
+
+  .divide{height:1px; background:var(--line); margin:44px 0}
+  details{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:4px 18px; margin:10px 0; box-shadow:var(--shadow)}
+  summary{cursor:pointer; font-weight:600; padding:12px 0; list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"+ "; color:var(--accent); font-family:"IBM Plex Mono",monospace}
+  details[open] summary::before{content:"\2212 "}
+  details .body{padding:0 0 14px; color:var(--muted); font-size:14.5px}
+  footer{margin-top:48px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); padding-top:18px}
+  .kbd{font:600 12px/1 "IBM Plex Mono",monospace; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:2px 6px; background:var(--panel)}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">DaiDocs Memory Capture</p>
+  <h1>Turn what you read into memory you own</h1>
+  <p class="lede">A browser extension that saves the pages and chats you choose to plain files on your own computer, so any AI can recall them later. Local, private, encrypted if you want. Here is how to set it up in about five minutes.</p>
+
+  <div class="facts">
+    <div class="fact"><b>Stays on your machine</b><span>This version keeps your data on your computer. The developer never receives it.</span></div>
+    <div class="fact"><b>You choose what it saves</b><span>Off by default; never banking, health or what you type.</span></div>
+    <div class="fact"><b>Plain files you can open</b><span>Readable text, optionally in an encrypted vault.</span></div>
+  </div>
+
+  <div class="req">
+    <h3>Before you start</h3>
+    <ul>
+      <li><b>Node.js</b> installed (the free LTS from <a href="https://nodejs.org">nodejs.org</a>). Check with <code>node --version</code>.</li>
+      <li>This project folder on your computer. Everything below runs from it.</li>
+      <li>A Chromium browser (Chrome or Edge) or Firefox.</li>
+    </ul>
+  </div>
+
+  <ol class="steps">
+    <li class="step">
+      <h2>Start the capture server</h2>
+      <p class="sub">A small local program that writes the files. It must be running for anything to save.</p>
+      <div class="tabs" role="tablist" data-group="start">
+        <button class="tab" role="tab" aria-selected="true" data-panel="start-bat">Double-click (easiest)</button>
+        <button class="tab" role="tab" aria-selected="false" data-panel="start-term">Terminal</button>
+      </div>
+      <div id="start-bat" class="panel">
+        <p>Open the <span class="path">launcher</span> folder and double-click <span class="path">start-daidocs.bat</span>. A window opens, you see it load, then you can minimise it.</p>
+        <p class="note warn">Keep that window open. Closing it stops capture until you launch it again.</p>
+      </div>
+      <div id="start-term" class="panel" hidden>
+        <p>Run this from the DaiDocs <b>program folder</b> (the one that contains <span class="path">capture_server.mjs</span>). This is not your memory folder where captures are saved, they just have similar names. No <span class="path">npm install</span> is needed:</p>
+        <div class="cmd"><button class="copy">Copy</button>node capture_server.mjs</div>
+        <p>Or the same thing via npm:</p>
+        <div class="cmd"><button class="copy">Copy</button>npm run capture</div>
+        <p class="note">To store your memory in a folder of your choice, set it first (Windows):</p>
+        <div class="cmd"><button class="copy">Copy</button>set DAIDOCS_STORE=C:\Users\you\Documents\Memory<br>npm run capture</div>
+      </div>
+    </li>
+
+    <li class="step">
+      <h2>Load the extension in your browser</h2>
+      <p class="sub">One-time. It stays until you remove it.</p>
+      <div class="tabs" role="tablist" data-group="load">
+        <button class="tab" role="tab" aria-selected="true" data-panel="load-chromium">Chrome or Edge</button>
+        <button class="tab" role="tab" aria-selected="false" data-panel="load-firefox">Firefox</button>
+      </div>
+      <div id="load-chromium" class="panel">
+        <p>Open <span class="path">edge://extensions</span> (or <span class="path">chrome://extensions</span>), turn on <b>Developer mode</b>, click <b>Load unpacked</b>, and pick the <span class="path">extension</span> folder (the one with <span class="path">manifest.json</span> inside).</p>
+      </div>
+      <div id="load-firefox" class="panel" hidden>
+        <p>Open <span class="path">about:debugging</span>, click <b>This Firefox</b>, then <b>Load Temporary Add-on</b>, and pick <span class="path">extension/manifest.json</span>. (Temporary add-ons clear when Firefox closes; reload it next start.)</p>
+      </div>
+      <p class="note warn">After any reload of the extension, refresh open tabs (<span class="kbd">F5</span>) so the fresh version runs.</p>
+    </li>
+
+    <li class="step">
+      <h2>Accept the one-time consent</h2>
+      <p class="sub">Nothing is captured until you agree.</p>
+      <p>A consent page opens on install. Read it, tick the box, and click <b>Accept</b>. If you missed it, the on-page pill shows <span class="pill off"><span class="dot"></span>tap to accept</span>, click it and accept.</p>
+    </li>
+
+    <li class="step">
+      <h2>Turn on encryption (optional but recommended)</h2>
+      <p class="sub">Locks your captured files behind a password.</p>
+      <p>Click the pill's gear, open <b>Encryption</b>, type a password (8+ characters) and click <b>Turn on encryption</b>. From then on captures are encrypted; you read them back with that password. The password is never stored, so keep it safe.</p>
+    </li>
+
+    <li class="step">
+      <h2>Use it</h2>
+      <p class="sub">Capture is off per site by default. Turn on what you want.</p>
+      <p>On a supported site the pill sits top-left. Click it, or its gear, to turn capture on for that site. When it is saving it shows <span class="pill on"><span class="dot"></span>capture on</span>.</p>
+      <p>Works out of the box on your AI chats (<b>ChatGPT, Claude, Gemini</b>) and your <b>X</b> timeline. For other websites, open the gear, enable <b>All websites</b>, and grant the one-time permission.</p>
+    </li>
+
+    <li class="step">
+      <h2>Read your memory back</h2>
+      <p class="sub">See the originals any time.</p>
+      <p>Captured chats land in per-site folders in your store, for example <span class="path">chat_chatgpt</span>, <span class="path">chat_gemini</span>. If you turned on encryption, open the gear and click <b>Open vault reader</b>, enter your password, and browse the decrypted files. Nothing is written to disk unencrypted; locking clears the view.</p>
+    </li>
+  </ol>
+
+  <div class="divide"></div>
+
+  <h2>Terminal reference</h2>
+  <p class="sub" style="margin-top:.3rem">Everything you can do without the buttons, run from the project folder.</p>
+  <div class="cmd"><button class="copy">Copy</button><span class="c"># start the capture server (keep it running)</span><br>npm run capture<br><br><span class="c"># set up the encrypted vault once (pick a strong password)</span><br>node vault.mjs init --password "your password here"<br><br><span class="c"># see what is in the vault (counts only, no content)</span><br>node vault.mjs status<br><br><span class="c"># read the vault out to plain files, then lock it again</span><br>node vault.mjs unlock --password "your password here"<br>node vault.mjs lock</div>
+
+  <div class="divide"></div>
+
+  <h2>If something is not saving</h2>
+  <details><summary>The pill says "server offline"</summary><div class="body">The capture server is not running. Start it (Step 1). The pill turns green once it is up.</div></details>
+  <details><summary>You reloaded the extension and it stopped</summary><div class="body">Refresh the open tabs (<span class="kbd">F5</span>). Reloading the extension orphans the old script on already-open pages; a refresh loads the fresh one.</div></details>
+  <details><summary>Nothing appears in the folder</summary><div class="body">Check the pill is green and shows capture on for that site, that you accepted consent, and that the server window is still open. Chat files appear in <span class="path">chat_&lt;site&gt;</span> inside your store.</div></details>
+  <details><summary>Your antivirus warns about the launcher</summary><div class="body">The launcher is a plain script that runs Node. Some antivirus tools are cautious about background helpers; allow it once. It does not connect to the internet.</div></details>
+
+  <div class="divide"></div>
+
+  <h2>What it never captures</h2>
+  <p>What you type (form fields, drafts, passwords), and sensitive sites: banking, payments, webmail, health, government, and password managers are on a built-in never-capture list that cannot be overridden. Card numbers and national IDs are scrubbed before anything is stored. It is for personal use only.</p>
+
+  <footer>
+    Local, private, plain-text memory. This version keeps your data on your computer. A separate cloud plan for collaboration may come later, opt-in and with its own add-on. See the privacy policy and terms for full detail.
+  </footer>
+</main>
+<script>
+  // Tab switching (start / load / any group)
+  document.querySelectorAll('[role="tablist"]').forEach(function(list){
+    var tabs = list.querySelectorAll('[role="tab"]');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        tabs.forEach(function(t){
+          t.setAttribute('aria-selected', String(t === tab));
+          var p = document.getElementById(t.dataset.panel);
+          if (p) p.hidden = (t !== tab);
+        });
+      });
+    });
+  });
+  // Copy buttons
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var block = btn.parentElement.cloneNode(true);
+      var b = block.querySelector('.copy'); if (b) b.remove();
+      var text = block.innerText.replace(/\u00a0/g,' ');
+      navigator.clipboard && navigator.clipboard.writeText(text).then(function(){
+        var old = btn.textContent; btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = old; }, 1200);
+      }).catch(function(){});
+    });
+  });
+</script>
+</body>
+</html>
