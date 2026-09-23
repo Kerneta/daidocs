@@ -58,12 +58,14 @@ measured comparison is still worth publishing and still does not exist.
 
 ## 3. Implementation
 
-**The reader has no unit tests.** The surfaces around it are covered heavily:
+**The reference-engine reader has no dedicated unit tests.** The Python reader has
+unit coverage, while the surfaces around the reference engine are covered heavily:
 `npm run verify` runs more than five hundred offline checks with no API key, plus
 the keyless checks and 18 unit tests for the derived surfaces. Those cover the CLI,
 the hooks, the MCP server, the store system, the registry, backup, redaction and
-the dashboard. The reader itself, which carries most of the remaining behaviour
-and all of the accuracy, is still exercised only end to end.
+the dashboard. The reference-engine reader in `lib/methods/daidocs-reader/method.js`,
+which carries most of the remaining behaviour and all of the accuracy, is still
+exercised only end to end.
 
 **The embedder is a single external dependency.** Reads degrade to lexical
 selection with a visible warning when it is unavailable, which is the designed
@@ -79,13 +81,14 @@ written and never read. A future format change will need real version handling.
 interleave appends to the index files. Fine for a single user, not for anything
 shared.
 
-**Never run on macOS.** Every platform branch has been audited by reading it, and
-two defects that audit found were fixed, but nothing has been executed on a Mac.
-`npm run verify` there is the honest first test. Two features are known absent
-and say so rather than failing: the `.dai` file icon, which needs an application
-bundle rather than a config file, and folder type icons, which need Finder custom
-icons rather than `desktop.ini`. Both are cosmetic and both are written up in
-`DAIDOCS-AFTER-LAUNCH.md`.
+**macOS has automated CI coverage but no manual product validation.** The CI matrix
+runs on `macos-latest` alongside Ubuntu and Windows for Node 18 and 22. That is
+automated coverage, not a hands-on product-validation pass on a Mac; `npm run verify`
+in a real macOS environment remains the honest first manual test. Two features are
+known absent and say so rather than failing: the `.dai` file icon, which needs an
+application bundle rather than a config file, and folder type icons, which need
+Finder custom icons rather than `desktop.ini`. Both are cosmetic and both are
+written up in `DAIDOCS-AFTER-LAUNCH.md`.
 
 **The dashboard is a snapshot.** `npm run dashboard` reads the stores and embeds
 everything in one self-contained page, which is what lets it work offline and be
