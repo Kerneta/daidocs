@@ -4,6 +4,7 @@
 const assert = require('assert');
 const s = require('../lib/derive/surfaces');
 const cal = require('../lib/derive/calendar');
+const reader = require('../lib/methods/daidocs-reader/method');
 
 let n = 0;
 const ok = (name, fn) => { fn(); n++; console.log('  PASS  ' + name); };
@@ -87,6 +88,40 @@ ok('"last month" is the previous calendar month', () => {
 });
 ok('a question with no relative expression resolves to nothing', () => {
   assert.strictEqual(cal.resolveExpression('what is my dog called', '2023-05-22'), null);
+});
+
+// markSuperseded: an update is almost never worded like the fact it replaces, so the
+// chain rule has to survive rewording without merging two unrelated subjects.
+const deployFacts = () => [
+  { date: '2026-06-10', fact: 'The Northwind API is deployed on Heroku', kind: 'attribute', entities: ['Northwind'] },
+  { date: '2026-09-15', fact: 'The Northwind API moved off Heroku and now runs on Fly.io', kind: 'attribute', entities: ['Northwind'] },
+];
+
+ok('a reworded update supersedes the fact it replaces', () => {
+  const out = reader.markSuperseded(deployFacts());
+  assert.strictEqual(out[0].superseded, '2026-09-15');
+});
+ok('the newest fact in a chain is never marked superseded', () => {
+  const out = reader.markSuperseded(deployFacts());
+  assert.strictEqual(out[1].superseded, undefined);
+});
+ok('shared vocabulary alone does not chain two different subjects', () => {
+  const out = reader.markSuperseded([
+    ...deployFacts(),
+    { date: '2026-07-01', fact: 'The office coffee machine is covered in Heroku stickers', kind: 'attribute', entities: ['Office'] },
+  ]);
+  assert.strictEqual(out[2].superseded, undefined);
+});
+ok('a lone fact is left alone', () => {
+  const out = reader.markSuperseded([deployFacts()[0]]);
+  assert.strictEqual(out[0].superseded, undefined);
+});
+ok('event-kind facts never form a supersede chain', () => {
+  const out = reader.markSuperseded([
+    { date: '2026-06-10', fact: 'Deployed the Northwind API to Heroku', kind: 'event', entities: ['Northwind'] },
+    { date: '2026-09-15', fact: 'Moved the Northwind API from Heroku to Fly.io', kind: 'event', entities: ['Northwind'] },
+  ]);
+  assert.ok(out.every(f => f.superseded === undefined));
 });
 
 console.log(`\n${n} pass, 0 fail`);
