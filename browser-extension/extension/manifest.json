@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "DaiDocs Memory Capture",
-  "version": "0.6.10",
+  "version": "0.6.11",
   "description": "Captures your AI chats, and (opt-in) your X timeline and websites you choose, into your local DaiDocs memory store. Browsing history lands in an encrypted Vault. Everything stays on your machine.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["storage", "scripting"],
   "host_permissions": [
     "http://127.0.0.1/*",
@@ -59,7 +65,13 @@
     }
   ],
   "action": {
-    "default_title": "DaiDocs capture"
+    "default_title": "DaiDocs capture",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "options_page": "options.html"
 }
