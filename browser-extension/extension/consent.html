@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DaiDocs: before you start</title>
+  <style>
+    body { font: 15px/1.6 system-ui, sans-serif; margin: 0; background: #0f0f16; color: #e8e8ee; }
+    .wrap { max-width: 640px; margin: 6vh auto; padding: 28px 30px; background: #17171f; border-radius: 16px; box-shadow: 0 12px 50px rgba(0,0,0,.5); }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    .sub { color: #9a9aa8; margin: 0 0 18px; }
+    h2 { font-size: 15px; margin: 20px 0 6px; }
+    ul { margin: 6px 0 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    .ok { color: #7ee0a0; }
+    .no { color: #ff9d80; }
+    .row { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0 6px; }
+    button { font: inherit; padding: 10px 18px; border-radius: 9px; border: 0; cursor: pointer; }
+    .accept { background: #16a34a; color: #06240f; font-weight: 700; }
+    .decline { background: #2a2a36; color: #e8e8ee; border: 1px solid #3a3a46; }
+    #status { margin-top: 12px; color: #7ee0a0; min-height: 20px; }
+    a { color: #8ab4ff; }
+    code { background: #0d0d13; padding: 1px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>DaiDocs Memory Capture</h1>
+    <p class="sub">Please read this and accept before any capture begins.</p>
+
+    <h2>What it does</h2>
+    <ul>
+      <li class="ok">Saves the content you scroll on sites you turn on, into <b>plain files on your own computer</b>.</li>
+      <li class="ok">This version runs on your computer, and the developer never receives your captured data.</li>
+      <li class="ok">You can encrypt it with a password (the vault) and choose where it is stored.</li>
+    </ul>
+
+    <h2>What it never does</h2>
+    <ul>
+      <li class="no">It does not capture what you type, passwords, or form fields, only what is displayed.</li>
+      <li class="no">It never captures banking, health, webmail, or password-manager sites.</li>
+      <li class="no">It does not send your captured content anywhere off your machine.</li>
+    </ul>
+
+    <h2>Intended use</h2>
+    <ul>
+      <li>This is for your <b>personal use</b> only: your own memory of what you read.</li>
+      <li class="no">It is <b>not</b> for selling data, harvesting other people's personal data, or surveillance.</li>
+      <li>You are responsible for how you use what it captures.</li>
+    </ul>
+
+    <p style="color:#9a9aa8">Full privacy policy: <a href="PRIVACY.html" target="_blank">PRIVACY</a> (also in the repo).</p>
+
+    <div class="row">
+      <input type="checkbox" id="agree">
+      <label for="agree">I have read the above. I will use this for personal use only, and I accept the privacy policy.</label>
+    </div>
+    <button class="accept" id="accept" disabled>Accept and enable capture</button>
+    <button class="decline" id="decline">Not now</button>
+    <div id="status"></div>
+  </div>
+  <script src="consent.js"></script>
+</body>
+</html>

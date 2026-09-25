@@ -113,6 +113,18 @@ One store, connected over MCP, read and written by the tools you already use. `n
 
 ---
 
+## Browser extension
+
+DaiDocs also ships a browser extension that captures your AI chats (ChatGPT, Claude, Gemini) and, opt-in, your X timeline and the websites you choose, straight into a local DaiDocs store. It is local only: nothing leaves your machine, capture is off by default, and sensitive sites (banking, health, webmail, password managers) are never touched.
+
+It lives in [`browser-extension/`](browser-extension/), and it is not installed automatically: you load it once in your browser. The full step-by-step is in [browser-extension/GETTING-STARTED.md](browser-extension/GETTING-STARTED.md). In short:
+
+1. Start the local capture server from `browser-extension/`: `node capture_server.mjs` (no extra install needed).
+2. In Chrome or Edge, open the extensions page, turn on Developer mode, then Load unpacked the `browser-extension/extension` folder. In Firefox, open `about:debugging` and load `browser-extension/extension/manifest.json`.
+3. Accept the one-time consent, then use the on-page pill to turn capture on for a site.
+
+---
+
 ## Install
 
 Node 18 or newer.
