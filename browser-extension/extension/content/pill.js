@@ -29,7 +29,7 @@
 
   let consentAccepted = true;
   function readEnabled(cb) {
-    chrome.storage.sync.get({ chatToggles: {}, browseToggles: {}, allWebsites: false, excludedHosts: [], consentAccepted: false }, s => {
+    chrome.storage.sync.get({ chatToggles: {}, browseToggles: {}, allWebsites: true, excludedHosts: [], consentAccepted: false }, s => {
       consentAccepted = !!s.consentAccepted;
       if (!consentAccepted) { cb(false); return; }
       // Sensitive sites (default list or user list) are never captured. Chat
@@ -473,23 +473,6 @@
     });
   }
 
-  function renderAllWebsites(box) {
-    box.innerHTML = '';
-    chrome.storage.sync.get({ allWebsites: false }, s => {
-      if (s.allWebsites) {
-        box.append(note('All websites: ON. Every site is captured (each can be toggled from its own pill).'));
-        const off = btn('Turn off all-websites');
-        off.onclick = () => chrome.storage.sync.set({ allWebsites: false }, () => renderAllWebsites(box));
-        box.append(off);
-      } else {
-        box.append(note('Websites beyond X and the chat sites are not captured yet. Enabling all-websites needs a one-time browser permission, granted on the settings page.'));
-        const open = btn('Enable website capture (opens settings)');
-        open.onclick = () => bg('open_options');
-        box.append(open);
-      }
-    });
-  }
-
   // Everything that used to be on the separate options page, folded into the
   // pill: per-site chat toggles you can flip from anywhere, the X toggle,
   // all-websites, saved-site management, the show-pill switch, and the advanced
@@ -498,10 +481,10 @@
   function renderMore(box) {
     box.innerHTML = '';
 
-    box.append(sectionTitle('AI chat sites and X'));
+    box.append(sectionTitle('What gets captured'));
     const togBox = document.createElement('div'); box.append(togBox);
     togBox.append(note('Turn capture on or off for these, from any page.'));
-    chrome.storage.sync.get({ chatToggles: {}, browseToggles: {} }, s => {
+    chrome.storage.sync.get({ chatToggles: {}, browseToggles: {}, allWebsites: true }, s => {
       const chats = [['chatgpt', 'ChatGPT'], ['claude', 'Claude'], ['gemini', 'Gemini']];
       for (const [key, lab] of chats) {
         togBox.append(toggleRow(lab + ' conversations', s.chatToggles[key] !== false, on => {
@@ -511,13 +494,25 @@
       togBox.append(toggleRow('X / Twitter timeline', !!s.browseToggles.x, on => {
         chrome.storage.sync.get({ browseToggles: {} }, c => { const t = c.browseToggles || {}; t.x = on; chrome.storage.sync.set({ browseToggles: t }); });
       }));
+      // All websites, folded into the same list. The all-sites browser
+      // permission is granted at first-run consent, so this is normally just a
+      // flag. If it is missing (consent declined the browser prompt), a content
+      // script cannot ask for it, so turning it on hands off to the options
+      // page, the one place a permission prompt is allowed.
+      bg('perm_all_urls').then(p => {
+        const granted = !!(p && p.granted);
+        const row = toggleRow('All websites', !!s.allWebsites && granted, on => {
+          if (!on) { chrome.storage.sync.set({ allWebsites: false }); return; }
+          if (granted) { chrome.storage.sync.set({ allWebsites: true }); return; }
+          bg('open_options');   // needs the browser permission; grant it there once
+          renderMore(box);      // reflect real state until permission is granted
+        });
+        togBox.append(row);
+      });
     });
-
-    box.append(hr(), sectionTitle('All websites'));
-    const webBox = document.createElement('div'); box.append(webBox); renderAllWebsites(webBox);
     const manage = btn('Manage saved sites ›');
     manage.onclick = () => { closePanel(); openManagePanel(); };
-    box.append(manage);
+    togBox.append(manage);
 
     box.append(hr(), sectionTitle('Pill'));
     const pillBox = document.createElement('div'); box.append(pillBox);

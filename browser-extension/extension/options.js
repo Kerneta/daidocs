@@ -7,7 +7,7 @@ const DEFAULTS = {
   port: 41100, token: '',
   chatToggles: { chatgpt: true, claude: true, gemini: true },
   browseToggles: {},            // { x: bool, 'web:<host>': bool }
-  allWebsites: false,
+  allWebsites: true,
   showPill: true,
   encrypt: false,
 };

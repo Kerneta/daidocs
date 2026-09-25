@@ -9,7 +9,7 @@
 //
 // No em dashes in this file, per project rule.
 
-const DEFAULTS = { port: 41100, token: '', encrypt: false, allWebsites: false, browseToggles: {} };
+const DEFAULTS = { port: 41100, token: '', encrypt: false, allWebsites: true, browseToggles: {} };
 
 function settings() {
   return new Promise(res => chrome.storage.sync.get(DEFAULTS, res));
@@ -47,7 +47,14 @@ async function getJson(pathName) {
 
 const DYN_ID = 'daidocs-browse-dyn';
 const CHAT_HOSTS = ['chatgpt.com', 'chat.openai.com', 'claude.ai', 'gemini.google.com'];
-const STATIC_BROWSE = ['x.com', 'twitter.com', 'mobile.twitter.com'];
+// Every host that already has a static content_scripts entry in manifest.json.
+// The dynamic <all_urls> registration must exclude all of them, subdomains
+// included, or these sites get the content scripts injected twice.
+const STATIC_BROWSE = [
+  'x.com', 'twitter.com', 'mobile.twitter.com',
+  'youtube.com', 'linkedin.com', 'instagram.com',
+  'reddit.com', 'tiktok.com', 'threads.net', 'threads.com',
+];
 
 async function syncDynamicScripts() {
   const s = await settings();
@@ -65,7 +72,9 @@ async function syncDynamicScripts() {
     s.allWebsites ? { origins: ['<all_urls>'] } : { origins: wanted }
   );
   if (!granted) return;   // options page requests the permission; until then, nothing runs
-  const exclude = CHAT_HOSTS.concat(STATIC_BROWSE).map(h => `*://${h}/*`);
+  // Both the bare host and any subdomain, so www./m. variants are excluded too.
+  const exclude = CHAT_HOSTS.concat(STATIC_BROWSE)
+    .flatMap(h => [`*://${h}/*`, `*://*.${h}/*`]);
   await chrome.scripting.registerContentScripts([{
     id: DYN_ID,
     matches: wanted,
@@ -117,6 +126,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   if (msg && msg.type === 'vault_status') {
     getJson('/vault/status').then(sendResponse);
+    return true;
+  }
+  if (msg && msg.type === 'perm_all_urls') {
+    // Content scripts cannot read chrome.permissions, so the pill asks here.
+    chrome.permissions.contains({ origins: ['<all_urls>'] }, granted => sendResponse({ ok: true, granted }));
     return true;
   }
   if (msg && msg.type === 'open_options') {
