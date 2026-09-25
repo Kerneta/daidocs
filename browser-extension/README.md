@@ -24,6 +24,10 @@ No em dashes are used in this project, per the repo rule.
 - `GETTING-STARTED.md`, `PRIVACY.md`, `TERMS.md`, `ACCEPTABLE-USE.md`,
   `COMPLIANCE-CHECKLIST.md` the user and legal documents.
 
+# Quick Demo on X
+
+https://x.com/AminRigi_/status/2103517647404929119
+
 ## Quick start
 
 1. Start the capture server from this folder (no `npm install` needed):
