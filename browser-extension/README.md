@@ -26,6 +26,8 @@ No em dashes are used in this project, per the repo rule.
 
 # Quick Demo on X
 
+https://github.com/user-attachments/assets/1c203cd1-9776-4e37-8936-cb4cb740e0d5
+
 https://x.com/AminRigi_/status/2103517647404929119
 
 ## Quick start
