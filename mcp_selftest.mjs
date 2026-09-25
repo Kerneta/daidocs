@@ -1,6 +1,7 @@
 // Self-test for the DaiDocs MCP server: spawns it over stdio exactly as Claude
 // would, saves a sample conversation, then verifies recall returns context
-// containing the saved facts. Costs ~$0.002 (one gpt-4.1-mini ingest + router).
+// containing the saved facts. Runs offline: no API key, no cost, because the
+// extraction is supplied inline (see "understanding" below).
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import fs from 'fs';
@@ -27,7 +28,35 @@ const sample = `[USER]: I finally booked the summer trip! Flying to Valletta on 
 [ASSISTANT]: Noted on the passport. For day trips: Sintra with the Pena Palace is the classic, Cascais for beaches, and Óbidos for the medieval walls.
 [USER]: Sintra it is. Booking the 9am train from Rossio on the 16th.`;
 
-const save = await client.callTool({ name: 'save_memory', arguments: { title: 'Valletta trip planning chat', content: sample, date: '2026-07-20', type: 'chat' } });
+// The extraction the observer would produce, written out here so the self-test runs
+// with no API key and no cost: save_memory takes "understanding" and skips the observer
+// entirely. Without it, a clean clone with no OPENAI_API_KEY gets an isError from
+// save_memory, writes nothing, and every recall below fails for a reason that has
+// nothing to do with the code under test.
+const understanding = {
+  entities: { people: [], orgs: ['Casa do Rio'], dates: ['2026-08-14', '2026-11-03', '2026-08-16'], amounts: ['\u20ac780'], places: ['Valletta', 'Sintra', 'Rossio'] },
+  actions: ['booked the summer trip', 'booked the 9am train from Rossio'],
+  facts: [
+    { fact: 'Flying to Valletta on August 14th', date: '2026-08-14', kind: 'plan' },
+    { fact: 'Staying at the Casa do Rio guesthouse near the harbour for 6 nights', date: '2026-08-14', kind: 'plan' },
+    { fact: 'The trip cost 780 euros in total with the early-bird discount', date: '2026-07-20', kind: 'attribute' },
+    { fact: 'The passport expires November 3 and must be renewed before the trip', date: '2026-11-03', kind: 'attribute' },
+    { fact: 'Booked the 9am train from Rossio to Sintra on the 16th', date: '2026-08-16', kind: 'plan' },
+  ],
+  events: [
+    { date: '2026-08-14', cat: 'travel', what: 'Flight to Valletta' },
+    { date: '2026-08-16', cat: 'travel', what: 'Train to Sintra' },
+  ],
+  preferences: ['prefers day trips over packing advice'],
+  tags: ['travel'],
+  decisions: ['Chose Sintra for the day trip'],
+  topics: ['summer trip planning'],
+  summary: 'Booked a Valletta trip for August 14th, 6 nights at Casa do Rio for 780 euros, passport expires November 3 and needs renewing first, day trip to Sintra by the 9am Rossio train on the 16th.',
+  sentiment: 'positive',
+  open_questions: ['When exactly will the passport be renewed?'],
+};
+
+const save = await client.callTool({ name: 'save_memory', arguments: { title: 'Valletta trip planning chat', content: sample, date: '2026-07-20', type: 'chat', understanding } });
 console.log('\nsave_memory ->', save.content[0].text.slice(0, 200));
 
 const list = await client.callTool({ name: 'list_memories', arguments: {} });
