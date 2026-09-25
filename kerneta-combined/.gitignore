@@ -1,0 +1,9 @@
+# generated stores and caches (never committed)
+store-*/
+*.dai-store/
+.cai-store*/
+**/graphify-out/
+__pycache__/
+*.pyc
+.venv/
+.ingest-cache/
