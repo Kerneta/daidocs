@@ -193,6 +193,7 @@ async function main() {
       reason.push(`  ${c.segId}: ${c.raw || '(raw missing)'}${c.title ? '  (' + c.title.slice(0, 60) + ')' : ''}`);
     }
     if (carried.length > 6) reason.push(`  and ${carried.length - 6} more: node daidocs.js pending`);
+    reason.push('', 'For a backlog this size, also tell the user it is best done in a NEW session so the reading does not inflate this one: they can start a fresh session in this folder and ask you to convert the backlog there.');
   }
   reason.push('',
     'Writing the understanding yourself means no observer model is called, so this',
