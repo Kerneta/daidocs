@@ -2840,6 +2840,10 @@ if (wanted('version')) {
   // the offline harness and local runs work.
   const keyless = await runResolve({ DAIDOCS_OBSERVER: MOCK });
   ok('a keyless DAIDOCS_OBSERVER is always honoured', keyless.spec === MOCK, String(keyless.spec));
+  // The docs and --help offer bare `mock`. It once failed the keyless test for want of
+  // a colon, lost to the recorded choice, and the selftest failed with no reason given.
+  const bareMock = await runResolve({ DAIDOCS_OBSERVER: 'mock' });
+  ok('a bare keyless name (mock, no colon) is honoured too', bareMock.spec === 'mock', String(bareMock.spec));
 
   // A PAID env value that contradicts the recorded choice is treated as stale.
   const chosen = H2.resolveObserver().spec;
