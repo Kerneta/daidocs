@@ -21,7 +21,7 @@ const { VERSION, ENGINE_PATH } = require('./lib/version');
 const daidocs = require(ENGINE_PATH);
 const { getProviders } = require('./lib/providers');
 const { countTokens } = require('./lib/tokens');
-const { redact, summarize } = require('./lib/redact');
+const { redact, redactDeep, summarize } = require('./lib/redact');
 const { attribute } = require('./lib/convert');
 const { resolveObserver, subscriptionMode } = require('./lib/host');
 const { needsKey } = require('./lib/observers');
@@ -271,6 +271,19 @@ server.tool(
   },
   async ({ title, content, date, type, collection, understanding, session }) => {
     if (collection) title = `[${collection}] ${title}`;
+    // Everything the caller hands us is redacted, not only the content. The title lands in
+    // the frontmatter and the manifest, and a caller-supplied understanding is written into
+    // the .dai and every _index file as-is: a key copied into a fact would otherwise skip
+    // the redaction the content gets below.
+    {
+      const t = redact(title);
+      const u = understanding ? redactDeep(understanding) : { value: understanding, found: {} };
+      const found = { ...u.found };
+      for (const [k, n] of Object.entries(t.found)) found[k] = (found[k] || 0) + n;
+      if (Object.keys(found).length) console.error(`daidocs save_memory: redacted ${summarize(found)} from the title and understanding`);
+      title = t.text;
+      understanding = u.value;
+    }
     // The MCP client announces itself at the handshake, which is a better host
     // signal than the environment: it names the app actually calling us.
     const clientName = (server.server.getClientVersion && server.server.getClientVersion() || {}).name;
