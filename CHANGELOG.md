@@ -11,6 +11,12 @@ other scales are marked as such and are not comparable.
 
 ### Fixed
 
+- **The convert hint after setup works from any directory.** A silent install
+  printed `node daidocs.js convert`, which only resolves if the shell is already
+  in the install directory. After `npx daidocs setup` it is not, so the command
+  fails with `MODULE_NOT_FOUND`. The hint now prints `npx daidocs convert`, the
+  same entry point as the documented install.
+
 - **Setup no longer leaves its project files for `git add .` to take.** A
   silent install writes `AGENTS.md`, `GEMINI.md`, `.cursorrules` and
   `.mcp.json` into the working directory. The store keeps itself out of git

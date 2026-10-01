@@ -1,0 +1,11 @@
+{
+  "name": "daidocs-browser-extension",
+  "version": "0.6.9",
+  "private": true,
+  "description": "DaiDocs Memory Capture: a browser extension plus a local capture server that save the pages and chats you choose to plain files on your own computer.",
+  "type": "commonjs",
+  "scripts": {
+    "capture": "node capture_server.mjs"
+  },
+  "license": "SEE LICENSE IN ../LICENSE"
+}
