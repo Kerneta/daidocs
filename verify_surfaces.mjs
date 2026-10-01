@@ -627,6 +627,27 @@ if (wanted('convert')) {
   section('convert: choose history, choose store');
   const C = require('./lib/convert');
 
+  // AskUserQuestion is where the user's own decisions live, and both halves are tool
+  // blocks the renderer otherwise drops (#10). The question, the declined options and
+  // the answer must all survive, attributed to the right side.
+  {
+    const tp = path.join(TMP, 'ask.jsonl');
+    const q = 'Which database should we use?';
+    const rows = [
+      { type: 'user', message: { content: 'set up the app' } },
+      { type: 'assistant', message: { content: [{ type: 'text', text: 'One decision first.' }, { type: 'tool_use', id: 'toolu_ask1', name: 'AskUserQuestion', input: { questions: [{ question: q, header: 'DB', multiSelect: false, options: [{ label: 'PostgreSQL', description: 'server' }, { label: 'SQLite', description: 'file' }] }] } }] } },
+      { type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 'toolu_ask1', content: `Your questions have been answered: "${q}"="PostgreSQL".` }] }, toolUseResult: { questions: [], answers: { [q]: 'PostgreSQL' } } },
+      { type: 'assistant', message: { content: [{ type: 'tool_use', id: 'toolu_bash1', name: 'Bash', input: { command: 'ls' } }] } },
+      { type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 'toolu_bash1', content: 'SECRET_LISTING_OUTPUT' }] } },
+    ];
+    fs.mkdirSync(TMP, { recursive: true });
+    fs.writeFileSync(tp, rows.map(r => JSON.stringify(r)).join('\n') + '\n');
+    const t = C.renderClaudeTranscript(tp).text;
+    ok('an AskUserQuestion keeps the question and every option, declined ones included', t.includes(`[ASSISTANT]: Asked the user: ${q} Options: PostgreSQL; SQLite.`), t.slice(0, 300));
+    ok('the answer is attributed to the user', t.includes(`[USER]: Answered "${q}": PostgreSQL`), t.slice(0, 300));
+    ok('other tool results are still dropped', !t.includes('SECRET_LISTING_OUTPUT'));
+  }
+
   // Selection parsing, the part people will type by hand.
   ok('pick "all"', C.parsePick('all', 5).join(',') === '0,1,2,3,4');
   ok('pick a list and a range', C.parsePick('1,3,5-7', 9).join(',') === '0,2,4,5,6');
