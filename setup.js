@@ -174,6 +174,37 @@ function ignoreStoreInGit(cfgDir) {
   } catch (e) { log(`Could not write .daidocs/.gitignore (${e.message}). Add "*" to it by hand.`); }
 }
 
+// AGENTS.md, GEMINI.md, .cursorrules and .mcp.json sit at the project root. The store
+// keeps itself out of git with a nested .daidocs/.gitignore, on purpose, without touching
+// the project's own .gitignore. These four cannot be covered that way, so a repo has to
+// name them. Only a git repo, only the names that are not already there, never a folder
+// that is not a repo, never the install folder itself.
+const SETUP_GITIGNORE = ['AGENTS.md', 'GEMINI.md', '.cursorrules', '.mcp.json'];
+const SETUP_GITIGNORE_COMMENT = '# Written by DaiDocs setup. These are local copies of the reading protocol and MCP config.';
+
+function ignoreSetupFilesInGit(dir) {
+  if (path.resolve(dir) === path.resolve(HERE)) return;
+  let inRepo = false;
+  try {
+    inRepo = execSync('git rev-parse --is-inside-work-tree', { cwd: dir, stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString().trim() === 'true';
+  } catch { return; }
+  if (!inRepo) return;
+  const fp = path.join(dir, '.gitignore');
+  try {
+    const cur = fs.existsSync(fp) ? fs.readFileSync(fp, 'utf8') : '';
+    const have = new Set(cur.split(/\r?\n/).map(l => l.trim()));
+    const missing = SETUP_GITIGNORE.filter(n => !have.has(n));
+    if (!missing.length) return;
+    const head = have.has(SETUP_GITIGNORE_COMMENT) ? missing : [SETUP_GITIGNORE_COMMENT, ...missing];
+    let out = cur;
+    if (out && !out.endsWith('\n')) out += '\n';
+    if (out.trim()) out += '\n';
+    fs.writeFileSync(fp, out + head.join('\n') + '\n');
+    log('Updated .gitignore so the reading protocol and .mcp.json are never committed.');
+  } catch (e) { log(`Could not update .gitignore (${e.message}). Add AGENTS.md, GEMINI.md, .cursorrules and .mcp.json by hand.`); }
+}
+
 // The two things .gitignore can't do, checked at declaration: it doesn't untrack an
 // already-committed store (silently useless), and it says nothing to OneDrive/Dropbox/backup
 // agents. Neither is fixable here, so both are reported.
@@ -245,6 +276,7 @@ function setupCode(projectDir) {
   cfg.mcpServers['daidocs-mcp'] = { command: NODE, args: [SERVER] };
   fs.writeFileSync(fp, JSON.stringify(cfg, null, 2));
   log(`Claude Code: .mcp.json written in ${dir}. Approve "daidocs-mcp" on next session`);
+  ignoreSetupFilesInGit(dir);
   return true;
 }
 
@@ -449,6 +481,7 @@ function installAllInstructions(projectDir, undo) {
     if (installInstructions(t.fp, undo)) n++;
   }
   log(`Reading protocol ${undo ? 'removed from' : 'installed for'} ${n} target(s): Claude Code, Codex/AGENTS.md, Gemini CLI, Cursor.`);
+  if (!undo && n > 0) ignoreSetupFilesInGit(projectDir || process.cwd());
   return n > 0;
 }
 
