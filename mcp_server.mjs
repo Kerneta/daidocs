@@ -300,9 +300,13 @@ server.tool(
       // caller already read — ask the caller to write the extraction instead.
       return { content: [{ type: 'text', text: 'save_memory: call this again with "understanding" filled in. You have read this conversation, so write the extraction yourself: it is free on the subscription, and no API key is used. The schema is in the description of this tool.' }], isError: true };
     } else {
-      spec = resolveObserver(clientName).spec;
+      const r = resolveObserver(clientName);
+      spec = r.spec;
       [observer] = getProviders([spec]);
-      if (typeof observer.available === 'function' && !observer.available()) return { content: [{ type: 'text', text: `save_memory: observer "${spec}" is not available. Set the matching API key (OPENAI_API_KEY / ANTHROPIC_API_KEY), point DAIDOCS_OBSERVER at a model whose key you have, or pass "understanding" and write the extraction yourself for free.` }], isError: true };
+      // Name the model that was asked for when it was set aside: an error that blames only
+      // the recorded choice leaves the real cause in a settings file nobody knows to open.
+      const why = r.overrode ? ` "${spec}" is the model recorded at install; DAIDOCS_OBSERVER="${r.overrode}" was set aside as a possibly stale variable. To use it for real, also set DAIDOCS_USE_API=1.` : '';
+      if (typeof observer.available === 'function' && !observer.available()) return { content: [{ type: 'text', text: `save_memory: observer "${spec}" is not available.${why} Set the matching API key (OPENAI_API_KEY / ANTHROPIC_API_KEY), point DAIDOCS_OBSERVER at a model whose key you have, or pass "understanding" and write the extraction yourself for free.` }], isError: true };
     }
     const when = (date || new Date().toISOString().slice(0, 10)).replace(/\//g, '-');
     // The id must be unique: a 40-char title slug alone collides when two same-day titles

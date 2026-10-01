@@ -84,8 +84,9 @@ Resolution order, first match wins:
 
 1. the model you chose at install. `node setup.js --observer <spec>` changes it,
    and that one choice applies to conversion, the hooks, the MCP server and the CLI
-2. `DAIDOCS_OBSERVER`, but only when it names a keyless backend (`mock:`,
-   `manual:`) or when no model was chosen. A stale override that disagrees with
+2. `DAIDOCS_OBSERVER`, but only when it names a keyless backend (`mock`,
+   `manual`), when no model was chosen, or when `DAIDOCS_USE_API=1` is also set
+   (that pair is a deliberate choice for this run). A stale override that disagrees with
    your chosen model is ignored, and the run says so, because a store written by
    two different observers is a store with two levels of detail in it
 3. the host's default when nothing was chosen: Opus under Claude, GPT-4.1 mini
@@ -374,7 +375,7 @@ one surface at a time with `node verify_surfaces.mjs cli`, `api`, `mcp`, `hook`,
 | Variable | Default | Effect |
 |---|---|---|
 | `DAIDOCS_STORE` | `~/DaiDocs` | where memory lives |
-| `DAIDOCS_OBSERVER` | the model chosen at install | overrides it for one run: keyless backends only, or when nothing was chosen |
+| `DAIDOCS_OBSERVER` | the model chosen at install | overrides it for one run: keyless backends, when nothing was chosen, or with `DAIDOCS_USE_API=1` |
 | `DAIDOCS_USE_API` | unset | `1` makes hooks call the API on a Claude host instead of the free in-session save |
 | `DAIDOCS_DISABLE` | unset | switches every hook off |
 | `DAIDOCS_CAP_TOKENS` | 25000 | head and tail cap when indexing a long session |

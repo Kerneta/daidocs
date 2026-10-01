@@ -2856,6 +2856,11 @@ if (wanted('version')) {
     ok('a stale paid DAIDOCS_OBSERVER loses to the recorded choice', true, 'no recorded choice on this machine, skipped');
     ok('and the override is reported, not hidden', true, 'no recorded choice on this machine, skipped');
   }
+  // With DAIDOCS_USE_API=1 the user has opted into paying, so a paid env value is a
+  // decision, not an accident, and must not be swapped for the recorded choice (#13).
+  const deliberate = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', DAIDOCS_USE_API: '1' });
+  ok('DAIDOCS_USE_API=1 makes a paid DAIDOCS_OBSERVER win', deliberate.spec === 'openai:gpt-4.1-mini' && !deliberate.overrode, JSON.stringify(deliberate));
+  ok('save_memory names a set-aside DAIDOCS_OBSERVER in its error', /r\.overrode \?[^\n]*DAIDOCS_USE_API=1/.test(fs.readFileSync(path.join(here, 'mcp_server.mjs'), 'utf8')));
   ok('resolution agrees with itself across processes', typeof chosen === 'string' && chosen.includes(':'), chosen);
 
   // Conversion outside a session cannot use the subscription, so it must offer
