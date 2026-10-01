@@ -308,8 +308,11 @@ server.tool(
     // The id must be unique: a 40-char title slug alone collides when two same-day titles
     // share a prefix (the .dai is written by id, so the second save would overwrite the
     // first), so a short hash of the WHOLE title carries the uniqueness the slug can't.
+    // The content goes into the hash too: two different saves under the same title on the
+    // same day are two memories, and the second must not replace the first original.
+    // Saving identical content again still lands on the same id.
     const slug = title.toLowerCase().replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'memory';
-    const stamp = crypto.createHash('sha256').update(title + '|' + when).digest('hex').slice(0, 6);
+    const stamp = crypto.createHash('sha256').update(title + '|' + when + '|' + content).digest('hex').slice(0, 6);
     const baseId = `${slug}_${when.replace(/-/g, '')}_${stamp}`;
     // losslessness: verbatim original first, before any model call
     // Redact before the lossless copy is written, not after. Same reasoning as
