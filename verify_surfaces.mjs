@@ -161,6 +161,24 @@ if (wanted('api')) {
   ok('classifies a counting question as tally', r3.kind === 'tally', r3.kind);
 }
 
+// 2d. taxonomy tagging: whole words, not substrings
+if (wanted('taxonomy')) {
+  section('taxonomy tags match whole words, not substrings');
+  const { candidateTags } = require('./lib/taxonomy');
+  // A coding session must not pull in travel/vehicles/family from substrings inside
+  // technical words (script->trip, scarce->car, rapid->api, reason/person->son).
+  const coding = 'The script strips markdown before the rapid API call; the reason the person refactored it is a scarce edge case in the parser.';
+  const codeTags = candidateTags(coding, 10);
+  ok('a coding sentence does not tag travel.trip from "script"', !codeTags.includes('travel.trip'), codeTags.join(','));
+  ok('nor vehicles.car from "scarce"', !codeTags.includes('vehicles.car'), codeTags.join(','));
+  ok('nor family.parenting/relatives from "reason" or "person"', !codeTags.includes('family.relatives') && !codeTags.includes('family.parenting'), codeTags.join(','));
+  ok('but it still tags technology.coding', codeTags.includes('technology.coding'), codeTags.join(','));
+  // Real whole-word hits still land, including the hyphenated and multi-word keywords.
+  ok('a real keyword still matches', candidateTags('I booked a flight for the trip').includes('travel.trip'));
+  ok('a hyphenated keyword still matches', candidateTags('I bought an e-bike').includes('vehicles.bike'));
+  ok('a multi-word keyword still matches', candidateTags('time for an oil change').includes('vehicles.maintenance'));
+}
+
 // 3. MCP
 if (wanted('mcp')) {
   section('MCP server over stdio');
