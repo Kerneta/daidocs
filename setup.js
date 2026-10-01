@@ -947,7 +947,7 @@ function ensureDependencies() {
   } else {
     // The one thing a silent install must not do on its own: it can run for a
     // long time, and with an API key it spends money.
-    log('Your existing chat history is not converted yet. When you want it: node daidocs.js convert');
+    log('Your existing chat history is not converted yet. When you want it: npx daidocs convert');
   }
   V.recordEvent(action, { version: VERSION, from: previous ? previous.version : null, installPath: HERE, surfaces, observer });
 
