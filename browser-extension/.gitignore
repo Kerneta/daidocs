@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Runtime + logs (never commit local machine state)
+*.log
+.daidocs-capture.json
+
+# Captured data and vault stores must never be committed
+_raw/
+_pending/
+_unconverted/
+_vault/
+chat_*/
+browse_*/
+*-store/
+.selftest-store/
+DaiDocs/

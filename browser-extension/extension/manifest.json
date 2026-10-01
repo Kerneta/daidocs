@@ -1,0 +1,77 @@
+{
+  "manifest_version": 3,
+  "name": "DaiDocs Memory Capture",
+  "version": "0.6.12",
+  "description": "Captures your AI chats, and (opt-in) your X timeline and websites you choose, into your local DaiDocs memory store. Browsing history lands in an encrypted Vault. Everything stays on your machine.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage", "scripting"],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "hello@kerneta.com",
+      "strict_min_version": "128.0"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": ["content/exclusions.js", "content/adapters.js", "content/capture.js", "content/pill.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*",
+        "https://mobile.twitter.com/*",
+        "https://youtube.com/*",
+        "https://*.youtube.com/*",
+        "https://linkedin.com/*",
+        "https://*.linkedin.com/*",
+        "https://instagram.com/*",
+        "https://*.instagram.com/*",
+        "https://reddit.com/*",
+        "https://*.reddit.com/*",
+        "https://tiktok.com/*",
+        "https://*.tiktok.com/*",
+        "https://threads.net/*",
+        "https://*.threads.net/*",
+        "https://threads.com/*",
+        "https://*.threads.com/*"
+      ],
+      "js": ["content/exclusions.js", "content/browse.js", "content/pill.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_title": "DaiDocs capture",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options.html"
+}
