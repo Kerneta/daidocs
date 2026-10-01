@@ -59,6 +59,16 @@ tally 400. Longer answers are not better answers: a raised budget invites
 hedging, and a hedged reply that lists a wrong candidate beside the right one
 serves nobody. Commit to the answer the evidence supports.
 
+### Converting captured sessions to memory
+
+When DaiDocs reports captured-but-unconverted sessions (a "waiting" backlog),
+convert them with the assistant writing the understanding itself: one save_memory
+call per session, reading the named raw file and passing its session id. This is
+the default: free, no observer model, no API key. Use the standalone observer
+(daidocs.js ingest --observer) only when the user asks or when no assistant is in
+the loop. A large backlog is best cleared in a fresh session, so the reading does
+not inflate the current one; suggest that when you flag the backlog.
+
 ### If you are writing code that reads a store
 
 When you build an integration that calls a model API against a `.dai` store, rather than

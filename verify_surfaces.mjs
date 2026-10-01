@@ -455,6 +455,37 @@ if (wanted('autosave')) {
   require('./lib/registry').forgetFolder(genDir);
 
   ok('it never blocks the session on error', (await fire({ transcript_path: 'C:/does/not/exist.jsonl' })).code === 0);
+
+  // The cost reminder: once per band of context size, never twice within a band. The band is
+  // set from the fixture's own size, so the check is about the decision, not the token counter.
+  // The save threshold is set out of reach, so only the reminder can speak.
+  section('the cost reminder speaks once per band');
+  const cs = store('cost-reminder');
+  fs.mkdirSync(path.join(cs, '_raw'), { recursive: true });
+  const ctp = path.join(TMP, 'cost-reminder.jsonl');
+  const unit = require('./lib/tokens').countTokens(LONG);
+  const costEnv = { DAIDOCS_STORE: cs, DAIDOCS_OBSERVER: MOCK, DAIDOCS_AUTOSAVE_TOKENS: '100000000', DAIDOCS_COST_REMINDER_TOKENS: String(unit * 2) };
+  const costFire = (sid, extraEnv = {}) => runNode('session_autosave.mjs', [], { ...costEnv, ...extraEnv },
+    JSON.stringify({ session_id: sid, transcript_path: ctp, cwd: 'C:/work/atlas' }));
+  const turns = n => { const t = [['user', 'Record the sweep result.']]; for (let i = 0; i < n; i++) t.push(['assistant', LONG]); return t; };
+  const reminded = r => { try { return /grown large/.test(JSON.parse(r.out).reason); } catch { return false; } };
+
+  writeTranscript(ctp, turns(1));
+  const c0 = await costFire('cost-0001');
+  ok('stays quiet below the first band', c0.out.trim() === '', c0.out.slice(0, 60));
+  writeTranscript(ctp, turns(3));
+  const c1 = await costFire('cost-0001');
+  ok('reminds once the context crosses a band', reminded(c1), c1.out.slice(0, 80));
+  ok('and names the folder to reopen', /C:\/work\/atlas/.test(c1.out));
+  writeTranscript(ctp, [...turns(3), ['user', 'One more small question.']]);
+  const c2 = await costFire('cost-0001');
+  ok('stays quiet within the same band', c2.out.trim() === '', c2.out.slice(0, 60));
+  writeTranscript(ctp, turns(5));
+  const c3 = await costFire('cost-0001');
+  ok('reminds again at the next band', reminded(c3), c3.out.slice(0, 80));
+  writeTranscript(ctp, turns(3));
+  const c4 = await costFire('cost-0002', { DAIDOCS_COST_REMINDER_DISABLE: '1' });
+  ok('DAIDOCS_COST_REMINDER_DISABLE switches it off', c4.out.trim() === '', c4.out.slice(0, 60));
 }
 
 // 4bc. per-project stores and types
