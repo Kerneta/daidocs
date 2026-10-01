@@ -21,7 +21,7 @@ const { VERSION, ENGINE_PATH } = require('./lib/version');
 const daidocs = require(ENGINE_PATH);
 const { getProviders } = require('./lib/providers');
 const { countTokens } = require('./lib/tokens');
-const { redact, summarize } = require('./lib/redact');
+const { redact, redactDeep, summarize } = require('./lib/redact');
 const { attribute } = require('./lib/convert');
 const { resolveObserver, subscriptionMode } = require('./lib/host');
 const { needsKey } = require('./lib/observers');
@@ -271,6 +271,19 @@ server.tool(
   },
   async ({ title, content, date, type, collection, understanding, session }) => {
     if (collection) title = `[${collection}] ${title}`;
+    // Everything the caller hands us is redacted, not only the content. The title lands in
+    // the frontmatter and the manifest, and a caller-supplied understanding is written into
+    // the .dai and every _index file as-is: a key copied into a fact would otherwise skip
+    // the redaction the content gets below.
+    {
+      const t = redact(title);
+      const u = understanding ? redactDeep(understanding) : { value: understanding, found: {} };
+      const found = { ...u.found };
+      for (const [k, n] of Object.entries(t.found)) found[k] = (found[k] || 0) + n;
+      if (Object.keys(found).length) console.error(`daidocs save_memory: redacted ${summarize(found)} from the title and understanding`);
+      title = t.text;
+      understanding = u.value;
+    }
     // The MCP client announces itself at the handshake, which is a better host
     // signal than the environment: it names the app actually calling us.
     const clientName = (server.server.getClientVersion && server.server.getClientVersion() || {}).name;
@@ -287,16 +300,23 @@ server.tool(
       // caller already read — ask the caller to write the extraction instead.
       return { content: [{ type: 'text', text: 'save_memory: call this again with "understanding" filled in. You have read this conversation, so write the extraction yourself: it is free on the subscription, and no API key is used. The schema is in the description of this tool.' }], isError: true };
     } else {
-      spec = resolveObserver(clientName).spec;
+      const r = resolveObserver(clientName);
+      spec = r.spec;
       [observer] = getProviders([spec]);
-      if (typeof observer.available === 'function' && !observer.available()) return { content: [{ type: 'text', text: `save_memory: observer "${spec}" is not available. Set the matching API key (OPENAI_API_KEY / ANTHROPIC_API_KEY), point DAIDOCS_OBSERVER at a model whose key you have, or pass "understanding" and write the extraction yourself for free.` }], isError: true };
+      // Name the model that was asked for when it was set aside: an error that blames only
+      // the recorded choice leaves the real cause in a settings file nobody knows to open.
+      const why = r.overrode ? ` "${spec}" is the model recorded at install; DAIDOCS_OBSERVER="${r.overrode}" was set aside as a possibly stale variable. To use it for real, also set DAIDOCS_USE_API=1.` : '';
+      if (typeof observer.available === 'function' && !observer.available()) return { content: [{ type: 'text', text: `save_memory: observer "${spec}" is not available.${why} Set the matching API key (OPENAI_API_KEY / ANTHROPIC_API_KEY), point DAIDOCS_OBSERVER at a model whose key you have, or pass "understanding" and write the extraction yourself for free.` }], isError: true };
     }
     const when = (date || new Date().toISOString().slice(0, 10)).replace(/\//g, '-');
     // The id must be unique: a 40-char title slug alone collides when two same-day titles
     // share a prefix (the .dai is written by id, so the second save would overwrite the
     // first), so a short hash of the WHOLE title carries the uniqueness the slug can't.
+    // The content goes into the hash too: two different saves under the same title on the
+    // same day are two memories, and the second must not replace the first original.
+    // Saving identical content again still lands on the same id.
     const slug = title.toLowerCase().replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'memory';
-    const stamp = crypto.createHash('sha256').update(title + '|' + when).digest('hex').slice(0, 6);
+    const stamp = crypto.createHash('sha256').update(title + '|' + when + '|' + content).digest('hex').slice(0, 6);
     const baseId = `${slug}_${when.replace(/-/g, '')}_${stamp}`;
     // losslessness: verbatim original first, before any model call
     // Redact before the lossless copy is written, not after. Same reasoning as

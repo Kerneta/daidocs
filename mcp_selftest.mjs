@@ -114,6 +114,43 @@ for (const spec of ['mock:mock', 'openai:gpt-4.1-mini']) {
   check(`provider contract: ${spec.split(':')[0]} implements available()`, ok, why);
 }
 
+// A caller-supplied understanding is written into the .dai and the indexes as-is, so it
+// must be redacted like the content is. A fake key in the title, a fact and the summary
+// must appear nowhere in the store afterwards.
+console.log('\nredaction of caller-supplied fields:');
+const secret = 'sk-proj-' + 'Q'.repeat(44);
+const leakyU = {
+  ...understanding,
+  facts: [{ fact: `The deploy key is ${secret}`, date: '2026-07-21', kind: 'attribute' }],
+  summary: `Set up the deploy with key ${secret}.`,
+};
+await client.callTool({ name: 'save_memory', arguments: { title: `Deploy notes ${secret}`, content: 'Set up the deploy today.', date: '2026-07-21', type: 'note', understanding: leakyU } });
+const leaked = [];
+const walk = d => {
+  for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    const p = path.join(d, e.name);
+    if (e.isDirectory()) walk(p);
+    else if (fs.readFileSync(p, 'utf8').includes(secret)) leaked.push(path.relative(storeDir, p));
+  }
+};
+walk(storeDir);
+check('a key in the title or understanding appears nowhere in the store', leaked.length === 0, leaked.join(', '));
+check('the redacted fact is still stored', fs.readFileSync(path.join(storeDir, '_index', 'facts.jsonl'), 'utf8').includes('The deploy key is [OPENAI_KEY REDACTED'));
+
+// Two different saves under the same title on the same day are two memories: the second
+// once reused the first one's id and overwrote its original and its .dai.
+console.log('\nsame title, same day, different content:');
+const twinIds = [];
+for (const marker of ['FIRST_ONLY_819', 'SECOND_ONLY_824']) {
+  const r = await client.callTool({ name: 'save_memory', arguments: { title: 'Deployment decision', content: `Synthetic decision, marker ${marker}.`, date: '2026-07-22', type: 'note', understanding: { ...understanding, facts: [], events: [], summary: `Decision ${marker}` } } });
+  twinIds.push((r.content[0].text.match(/memory: (\S+?) \(/) || [])[1]);
+}
+check('the two saves get different ids', twinIds[0] && twinIds[1] && twinIds[0] !== twinIds[1], twinIds.join(' vs '));
+for (const [id, marker] of [[twinIds[0], 'FIRST_ONLY_819'], [twinIds[1], 'SECOND_ONLY_824']]) {
+  const rawFile = path.join(storeDir, '_raw', `${id}.txt`);
+  check(`the original holding ${marker} survives`, !!id && fs.existsSync(rawFile) && fs.readFileSync(rawFile, 'utf8').includes(marker));
+}
+
 console.log(`\n${pass} pass, ${fail} fail`);
 await client.close();
 process.exit(fail ? 1 : 0);

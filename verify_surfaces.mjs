@@ -627,6 +627,27 @@ if (wanted('convert')) {
   section('convert: choose history, choose store');
   const C = require('./lib/convert');
 
+  // AskUserQuestion is where the user's own decisions live, and both halves are tool
+  // blocks the renderer otherwise drops (#10). The question, the declined options and
+  // the answer must all survive, attributed to the right side.
+  {
+    const tp = path.join(TMP, 'ask.jsonl');
+    const q = 'Which database should we use?';
+    const rows = [
+      { type: 'user', message: { content: 'set up the app' } },
+      { type: 'assistant', message: { content: [{ type: 'text', text: 'One decision first.' }, { type: 'tool_use', id: 'toolu_ask1', name: 'AskUserQuestion', input: { questions: [{ question: q, header: 'DB', multiSelect: false, options: [{ label: 'PostgreSQL', description: 'server' }, { label: 'SQLite', description: 'file' }] }] } }] } },
+      { type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 'toolu_ask1', content: `Your questions have been answered: "${q}"="PostgreSQL".` }] }, toolUseResult: { questions: [], answers: { [q]: 'PostgreSQL' } } },
+      { type: 'assistant', message: { content: [{ type: 'tool_use', id: 'toolu_bash1', name: 'Bash', input: { command: 'ls' } }] } },
+      { type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 'toolu_bash1', content: 'SECRET_LISTING_OUTPUT' }] } },
+    ];
+    fs.mkdirSync(TMP, { recursive: true });
+    fs.writeFileSync(tp, rows.map(r => JSON.stringify(r)).join('\n') + '\n');
+    const t = C.renderClaudeTranscript(tp).text;
+    ok('an AskUserQuestion keeps the question and every option, declined ones included', t.includes(`[ASSISTANT]: Asked the user: ${q} Options: PostgreSQL; SQLite.`), t.slice(0, 300));
+    ok('the answer is attributed to the user', t.includes(`[USER]: Answered "${q}": PostgreSQL`), t.slice(0, 300));
+    ok('other tool results are still dropped', !t.includes('SECRET_LISTING_OUTPUT'));
+  }
+
   // Selection parsing, the part people will type by hand.
   ok('pick "all"', C.parsePick('all', 5).join(',') === '0,1,2,3,4');
   ok('pick a list and a range', C.parsePick('1,3,5-7', 9).join(',') === '0,2,4,5,6');
@@ -2840,6 +2861,10 @@ if (wanted('version')) {
   // the offline harness and local runs work.
   const keyless = await runResolve({ DAIDOCS_OBSERVER: MOCK });
   ok('a keyless DAIDOCS_OBSERVER is always honoured', keyless.spec === MOCK, String(keyless.spec));
+  // The docs and --help offer bare `mock`. It once failed the keyless test for want of
+  // a colon, lost to the recorded choice, and the selftest failed with no reason given.
+  const bareMock = await runResolve({ DAIDOCS_OBSERVER: 'mock' });
+  ok('a bare keyless name (mock, no colon) is honoured too', bareMock.spec === 'mock', String(bareMock.spec));
 
   // A PAID env value that contradicts the recorded choice is treated as stale.
   const chosen = H2.resolveObserver().spec;
@@ -2852,6 +2877,11 @@ if (wanted('version')) {
     ok('a stale paid DAIDOCS_OBSERVER loses to the recorded choice', true, 'no recorded choice on this machine, skipped');
     ok('and the override is reported, not hidden', true, 'no recorded choice on this machine, skipped');
   }
+  // With DAIDOCS_USE_API=1 the user has opted into paying, so a paid env value is a
+  // decision, not an accident, and must not be swapped for the recorded choice (#13).
+  const deliberate = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', DAIDOCS_USE_API: '1' });
+  ok('DAIDOCS_USE_API=1 makes a paid DAIDOCS_OBSERVER win', deliberate.spec === 'openai:gpt-4.1-mini' && !deliberate.overrode, JSON.stringify(deliberate));
+  ok('save_memory names a set-aside DAIDOCS_OBSERVER in its error', /r\.overrode \?[^\n]*DAIDOCS_USE_API=1/.test(fs.readFileSync(path.join(here, 'mcp_server.mjs'), 'utf8')));
   ok('resolution agrees with itself across processes', typeof chosen === 'string' && chosen.includes(':'), chosen);
 
   // Conversion outside a session cannot use the subscription, so it must offer
