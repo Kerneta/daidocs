@@ -1,0 +1,48 @@
+{
+  "generatedBy": "bench_local.mjs",
+  "tokenizer": "gpt-tokenizer@3.4.0",
+  "scores": {
+    "ALL": {
+      "n": 84,
+      "recall": 0.976,
+      "ctx": 1416,
+      "files": 5
+    },
+    "single-session-user": {
+      "n": 30,
+      "recall": 0.967,
+      "ctx": 1387,
+      "files": 5
+    },
+    "single-session-assistant": {
+      "n": 15,
+      "recall": 1,
+      "ctx": 1416,
+      "files": 5
+    },
+    "single-session-preference": {
+      "n": 6,
+      "recall": 1,
+      "ctx": 1379,
+      "files": 5
+    },
+    "temporal-reasoning": {
+      "n": 15,
+      "recall": 0.933,
+      "ctx": 1385,
+      "files": 5
+    },
+    "multi-session": {
+      "n": 12,
+      "recall": 1,
+      "ctx": 1564,
+      "files": 5
+    },
+    "knowledge-update": {
+      "n": 6,
+      "recall": 1,
+      "ctx": 1373,
+      "files": 5
+    }
+  }
+}

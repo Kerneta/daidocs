@@ -528,6 +528,7 @@ talk, and the assistant calls them. They are listed so you know what it can do.
 | `npm run selftest` | Check the MCP server answers correctly |
 | `npm run verify` | The full offline suite. No API key, no network |
 | `npm run check` | The keyless checks plus the unit tests |
+| `npm run bench-local` | Free, deterministic recall@K and context-token check over a tiny bundled fixture (mock models). Reports drift vs `benchmark/bench-baseline.json`; `--update` to re-record it |
 | `npm test` | The unit tests alone |
 | `npm run numbers` | Check every published figure still agrees with the run artifacts |
 | `npm run charts` | Regenerate the benchmark charts |

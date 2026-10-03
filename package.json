@@ -30,7 +30,8 @@
     "unlock": "node lock.js unlock",
     "lock-status": "node lock.js status",
     "dashboard": "node tools/dashboard/build_dashboard.mjs",
-    "dashboard-live": "node tools/dashboard/build_dashboard.mjs --watch"
+    "dashboard-live": "node tools/dashboard/build_dashboard.mjs --watch",
+    "bench-local": "node benchmark/bench_local.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
