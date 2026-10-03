@@ -53,6 +53,18 @@ const backup = fp => {
   recordTouched(fp, existed);
 };
 
+// A plain log of every file setup changed on this machine, read from the same
+// record --restore uses, so the user can see exactly what happened and that
+// nothing outside these paths was touched.
+function printChangeLog() {
+  const touched = (readJson(STATE_FILE).touched) || {};
+  const paths = Object.keys(touched).sort();
+  if (!paths.length) { console.log('Changed on this machine: nothing (no files were modified).'); return; }
+  console.log(`Changed on this machine (${paths.length} file${paths.length === 1 ? '' : 's'}):`);
+  for (const fp of paths) console.log(`  ${touched[fp].existedBefore ? 'updated' : 'created'}  ${fp}`);
+  console.log('Nothing outside these paths was touched, and your .dai store is never one of them.');
+}
+
 function restoreAll() {
   const state = readJson(STATE_FILE);
   const touched = state.touched || {};
@@ -736,6 +748,8 @@ function printStatus() {
   console.log('    Undo the lot:                         node setup.js --restore');
   console.log('    Map of what you have stored:          npm run dashboard');
   console.log('');
+  printChangeLog();
+  console.log('');
 }
 
 const safeRead = fp => { try { return fs.readFileSync(fp, 'utf8'); } catch { return ''; } };
@@ -987,6 +1001,9 @@ function ensureDependencies() {
   closeAsk();
   const store = process.env.DAIDOCS_STORE || path.join(os.homedir(), 'DaiDocs');
   console.log(`\nDone. DaiDocs ${VERSION} installed. Your memory lives in plain files at: ${store}`);
+  console.log('');
+  printChangeLog();
+  console.log('');
   console.log('Restart your assistant once (Claude Desktop or Code) so the memory server and hooks load. After that every new session just works.');
   console.log('Sessions now save themselves as you work, with no API key.');
   console.log('Try it: keep working, then open a NEW chat and ask about this one.');
