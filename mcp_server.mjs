@@ -262,7 +262,7 @@ server.tool(
   'Convert a conversation, note, or document into the user\'s permanent .dai memory store. Call when the user asks to remember something, or at the end of a conversation worth keeping. Pass the FULL text to preserve; it is stored losslessly (original kept verbatim) and indexed for later recall.',
   {
     title: z.string().describe('Short descriptive title, e.g. "chat about bike trip plans"'),
-    content: z.string().describe('The full text to remember (conversation transcript, note, or document)'),
+    content: z.string().optional().describe('The text to remember (a note, or a document). For a captured session, omit this and pass "session": the Stop hook has already written the new part of the transcript to the store, and save_memory reads it from there, so you never retransmit the conversation. A value here overrides that, for a note or a deliberately synthesized save.'),
     date: z.string().optional().describe('ISO date YYYY-MM-DD the content is from (default: today)'),
     type: z.string().optional().describe('chat | note | doc (default: chat)'),
     collection: z.string().optional().describe('Optional collection name to file this under (e.g. "personal", "client-a"): recall can then scope to it'),
@@ -271,6 +271,27 @@ server.tool(
   },
   async ({ title, content, date, type, collection, understanding, session }) => {
     if (collection) title = `[${collection}] ${title}`;
+    // #15: a captured session's new transcript is already on disk. The Stop hook wrote
+    // _unconverted/<id>.txt = everything after the last saved mark, so read the slice from
+    // there instead of making the caller retransmit the whole conversation. Resolve the
+    // session's own store first (the one that holds its raw), wherever this server runs.
+    // An explicit content argument overrides, for a note or a synthesized save.
+    let here = currentStore();
+    if (session && here.source !== 'DAIDOCS_STORE') {
+      const owner = storeForSession(session, here);
+      if (owner) { here = owner; for (const d of ['_index', '_raw']) fs.mkdirSync(path.join(here.storeDir, d), { recursive: true }); }
+    }
+    let sessionLen = null;
+    if (session) {
+      const sid = cleanId(session);
+      try { const m = JSON.parse(fs.readFileSync(path.join(here.storeDir, '_raw', sid + '.meta.json'), 'utf8')); sessionLen = Number(m.len || 0); } catch { }
+      if (content == null || content === '') {
+        try { const slice = fs.readFileSync(path.join(here.storeDir, UNCONVERTED, sid + '.txt'), 'utf8'); if (slice && slice.trim()) content = slice; } catch { }
+      }
+    }
+    if (content == null || content === '') {
+      return { content: [{ type: 'text', text: 'save_memory: nothing to save. Pass "content" with the text to remember, or a "session" whose transcript the Stop hook has captured.' }], isError: true };
+    }
     // Everything the caller hands us is redacted, not only the content. The title lands in
     // the frontmatter and the manifest, and a caller-supplied understanding is written into
     // the .dai and every _index file as-is: a key copied into a fact would otherwise skip
@@ -323,19 +344,8 @@ server.tool(
     // the archiver: a credential in the conversation must never reach disk or
     // the observer API, and this is the last point where both are still ahead.
     //
-    // A capture converts where it was captured. When a session id is given,
-    // the store that holds that session's raw is the store this save belongs
-    // to, wherever this server process happens to be running. DAIDOCS_STORE
-    // stays an explicit override: the hooks wrote there too, so the search
-    // would only find the same place.
-    let here = currentStore();
-    if (session && here.source !== 'DAIDOCS_STORE') {
-      const owner = storeForSession(session, here);
-      if (owner) {
-        here = owner;
-        for (const d of ['_index', '_raw']) fs.mkdirSync(path.join(here.storeDir, d), { recursive: true });
-      }
-    }
+    // The session's store was resolved at the top (where the transcript slice is read),
+    // so this save lands with that session's raw wherever this server process runs.
     const w = S.canWrite(here);
     if (!w.ok) return { content: [{ type: 'text', text: `save_memory: ${w.reason}` }], isError: true };
     const STORE_DIR = here.storeDir;
@@ -364,8 +374,10 @@ server.tool(
       }
       written.push(id);
     }
-    // Everything the Stop hook had captured for this session is now indexed.
-    if (session) { try { markSaved(STORE_DIR, session); } catch { } }
+    // Mark the session saved only as far as the transcript this save actually reached
+    // (sessionLen, read when the slice was taken). A tail the hook appended meanwhile
+    // stays waiting rather than being silently marked saved.
+    if (session) { try { markSaved(STORE_DIR, session, sessionLen); } catch { } }
     return { content: [{ type: 'text', text: `Saved to .dai memory: ${written.join(', ')} (${countTokens(norm)} tokens → indexed; original preserved in _raw/${baseId}.txt). Store: ${STORE_DIR}` }] };
   }
 );

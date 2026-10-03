@@ -179,18 +179,18 @@ async function main() {
     '',
     'Call save_memory once for this conversation, with:',
     `  title:   a short description of what this session was about${project ? `, prefixed "[${project}] "` : ''}`,
-    '  content: the conversation so far, as [USER]: / [ASSISTANT]: lines',
     '  understanding: the extraction, written by you',
     `  session: "${id}"`,
     '',
-    'The session id is what stops this hook asking again: save_memory records',
-    'how much of the transcript is saved, and only what comes after it counts.',
+    'Do not pass the conversation text. save_memory reads this session\'s new transcript',
+    'from the store itself, so you never have to retransmit it. The session id is also what',
+    'stops this hook asking again, and only what comes after the saved mark counts.',
   ];
   if (carried.length) {
     reason.push('', 'Then convert the waiting sessions the same way, one save_memory call each,',
-      'reading the text from the file named and passing that session id:');
+      'passing that session id (save_memory reads each one\'s text from the store itself):');
     for (const c of carried.slice(0, 6)) {
-      reason.push(`  ${c.segId}: ${c.raw || '(raw missing)'}${c.title ? '  (' + c.title.slice(0, 60) + ')' : ''}`);
+      reason.push(`  ${c.segId}${c.raw ? '' : '  (raw missing)'}${c.title ? '  (' + c.title.slice(0, 60) + ')' : ''}`);
     }
     if (carried.length > 6) reason.push(`  and ${carried.length - 6} more: node daidocs.js pending`);
     reason.push('', 'For a backlog this size, also tell the user it is best done in a NEW session so the reading does not inflate this one: they can start a fresh session in this folder and ask you to convert the backlog there.');
