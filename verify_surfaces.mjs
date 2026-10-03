@@ -656,6 +656,26 @@ if (wanted('convert')) {
   section('convert: choose history, choose store');
   const C = require('./lib/convert');
 
+  // #22: a session over the index budget used to keep only head and tail, dropping the
+  // middle. capText now samples across the whole session and always anchors the midpoint,
+  // so a mid-session needle still reaches the index (the full text is always in _raw).
+  {
+    const { countTokens } = require('./lib/tokens');
+    const line = n => `[USER]: turn ${n} about ${n % 7 === 3 ? 'WIDGET_' + n : 'routine chatter padding the transcript so that it is a genuinely long multi session history'}.\n[ASSISTANT]: acknowledged reply number ${n} with some filler words to add weight.`;
+    const N = 3000;
+    const turns = [];
+    for (let n = 0; n < N; n++) turns.push(line(n));
+    const middleNeedle = 'MIDSESSION_DECISION_XYZ we chose the Fly.io deployment at the midpoint';
+    turns[Math.floor(N / 2)] = `[USER]: ${middleNeedle}.\n[ASSISTANT]: noted.`;
+    const longText = turns.join('\n');
+    ok('the long fixture really exceeds the index budget', countTokens(longText) > 25000, String(countTokens(longText)));
+    const capped = C.capText(longText, 25000);
+    ok('capText keeps a mid-session needle (middle is indexed, not dropped)', capped.includes('MIDSESSION_DECISION_XYZ'), capped.slice(0, 80));
+    ok('capText still fits the budget', countTokens(capped) <= 25000);
+    ok('capText marks the gaps it skipped', /session continues/.test(capped));
+    ok('a short session is returned whole by capText', C.capText('[USER]: hi\n[ASSISTANT]: hello', 25000) === '[USER]: hi\n[ASSISTANT]: hello');
+  }
+
   // AskUserQuestion is where the user's own decisions live, and both halves are tool
   // blocks the renderer otherwise drops (#10). The question, the declined options and
   // the answer must all survive, attributed to the right side.
