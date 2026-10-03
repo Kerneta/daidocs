@@ -365,11 +365,13 @@ server.tool(
         if (f.path.startsWith('_index/')) fs.appendFileSync(p, attribute(f.path, f.content, id));
         else fs.writeFileSync(p, f.content);
       }
-      // The .dai raw: pointer names _raw/<engine id>, known only after ingest, so write the
-      // addressable copy now (the verbatim pre-write above already survives a failed extraction).
+      // The .dai raw: pointer names _raw/<engine id>, known only after ingest. Point it at the
+      // VERBATIM original, not the unwrap()-normalised copy, so following the pointer gives the
+      // true source (#MK2). For a single-part save that is `safe`; a chunked save keeps the
+      // per-part text, with the whole verbatim still in _raw/<baseId>.txt.
       const daiOut = res.files.find(f => f.path.endsWith('.dai'));
       if (daiOut) {
-        fs.writeFileSync(path.join(STORE_DIR, '_raw', path.basename(daiOut.path, '.dai')), parts[i]);
+        fs.writeFileSync(path.join(STORE_DIR, '_raw', path.basename(daiOut.path, '.dai')), parts.length === 1 ? safe : parts[i]);
       }
       written.push(id);
     }
