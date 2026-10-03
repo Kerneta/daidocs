@@ -423,6 +423,13 @@ if (wanted('autosave')) {
     const nothingNew = await c.callTool({ name: 'save_memory', arguments: { title: 'retry decision again', session: sid, understanding: u2 } });
     ok('saving the same session again with nothing waiting is refused, not silent', nothingNew.isError === true, (nothingNew.content[0].text || '').slice(0, 70));
   }
+
+  // #F8b: type is an enum now, so a client sending a bogus type is told the valid set
+  // rather than having it silently stored.
+  let badType = false;
+  try { const r = await c.callTool({ name: 'save_memory', arguments: { title: 'bad type', content: `note ${LONG}`, type: 'bogus', understanding } }); badType = !!r.isError; }
+  catch (_) { badType = true; }
+  ok('save_memory rejects an out-of-enum type', badType);
   await c.close();
 
   // The Stop hook: quiet until there is enough new material, then one instruction.
@@ -625,6 +632,13 @@ if (wanted('stores')) {
   ok('a frozen project refuses writes and says to copy it',
     !S.canWrite(S.resolveStore(frozen)).ok && /copy it/i.test(S.canWrite(S.resolveStore(frozen)).reason),
     S.canWrite(S.resolveStore(frozen)).reason);
+
+  // #F3: a mistyped or unknown type must fail closed (confidential), never open to normal.
+  const typo = mk('typo-type', { type: 'confidentail', label: 'Typo' });
+  ok('an unknown store type fails closed to confidential', S.resolveStore(typo).type === 'confidential', S.resolveStore(typo).type);
+  ok('a fail-closed store is not externally readable', S.resolveStore(typo).rules.external === false);
+  const reachTypo = mk('reach-typo', { type: 'normal', label: 'RT', reads: ['self', path.resolve(typo, '.daidocs', 'store')] });
+  ok('so no other store can reach a fail-closed one', !S.readCandidates(S.resolveStore(reachTypo)).some(c => c.label === 'Typo'));
 
   // reads
   const own = S.readCandidates(S.resolveStore(parent));
