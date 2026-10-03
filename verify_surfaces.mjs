@@ -1469,6 +1469,10 @@ if (wanted('version')) {
   ok('recall\'s scope description matches the code', /"project" \(the default\)/.test(rdDoc('mcp_server.mjs')));
   ok('INTEGRATION does not pin a stale version', !/V4\.4n\d+ as it currently behaves/.test(rdDoc('docs/INTEGRATION.md')));
   ok('INTEGRATION documents DAIDOCS_USE_API', /DAIDOCS_USE_API/.test(rdDoc('docs/INTEGRATION.md')));
+  ok('INTEGRATION says DAIDOCS_USE_API also enables semantic ranking in the live reader', (() => {
+    const d = rdDoc('docs/INTEGRATION.md');
+    return /live connection|live reader/i.test(d) && /recall/i.test(d) && /(semantic|embedding)/i.test(d) && /DAIDOCS_USE_API/.test(d);
+  })());
   ok('no document names a per-surface observer default', !/\(session archiver\)/.test(rdDoc('README.md')));
   ok('no document offers a local model as the observer',
     !/or nothing with a local model/.test(rdDoc('docs/RESULTS.md')) && !/free with a local model/.test(rdDoc('README.md')));
