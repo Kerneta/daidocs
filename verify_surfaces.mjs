@@ -2507,6 +2507,11 @@ if (wanted('version')) {
     (silentRun.out.match(/[^\n]*estart your assistant[^\n]*/) || [''])[0]);
   ok('and names the one command that puts everything back', /setup\.js --restore/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*--restore[^\n]*/) || [''])[0]);
+  ok('and logs what changed on this machine', /Changed on this machine/.test(silentRun.out),
+    (silentRun.out.match(/[^\n]*Changed on this machine[^\n]*/) || [''])[0]);
+  ok('and the change log names each touched file as created or updated',
+    /\n\s+(created|updated)\s+\S/.test(silentRun.out),
+    (silentRun.out.match(/[^\n]*\b(created|updated)\s+\S[^\n]*/) || [''])[0]);
   // These four land at the project root. A nested .daidocs/.gitignore cannot cover them,
   // but creating a .gitignore in a folder that is not a repo is not setup's job.
   ok('a silent install into a folder that is not a git repo does not create .gitignore',
