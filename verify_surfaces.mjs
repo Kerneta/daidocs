@@ -674,7 +674,24 @@ if (wanted('convert')) {
     const t = C.renderClaudeTranscript(tp).text;
     ok('an AskUserQuestion keeps the question and every option, declined ones included', t.includes(`[ASSISTANT]: Asked the user: ${q} Options: PostgreSQL; SQLite.`), t.slice(0, 300));
     ok('the answer is attributed to the user', t.includes(`[USER]: Answered "${q}": PostgreSQL`), t.slice(0, 300));
-    ok('other tool results are still dropped', !t.includes('SECRET_LISTING_OUTPUT'));
+    // #16: tool calls and results are no longer dropped, they are kept compactly so a
+    // coding session's edits, commands and output become recallable.
+    ok('a shell tool call is kept compactly', t.includes('[tool: Bash] ls'), t.slice(-300));
+    ok('and its tool result is kept, not dropped', t.includes('[tool result] SECRET_LISTING_OUTPUT'), t.slice(-300));
+    ok('the AskUserQuestion tool_result is not also rendered as a raw tool result',
+      (t.match(/\[tool result\]/g) || []).length === 1, t.slice(-300));
+  }
+  {
+    // A long tool result is truncated, so a big test log cannot bloat the store.
+    const tp = path.join(TMP, 'bigtool.jsonl');
+    const big = 'X'.repeat(2000);
+    fs.writeFileSync(tp, [
+      { type: 'user', message: { content: 'run it' } },
+      { type: 'assistant', message: { content: [{ type: 'tool_use', id: 'b2', name: 'Bash', input: { command: 'make test' } }] } },
+      { type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 'b2', content: big }] } },
+    ].map(r => JSON.stringify(r)).join('\n') + '\n');
+    const t = require('./lib/convert').renderClaudeTranscript(tp).text;
+    ok('a long tool result is truncated with a marker', /\[tool result\] X{500} \[\.\.\.\]/.test(t) && !t.includes('X'.repeat(600)), t.slice(-80));
   }
 
   // Selection parsing, the part people will type by hand.
