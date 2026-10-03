@@ -265,6 +265,24 @@ session saves itself:
 So the only thing you do is work. [The guide](docs/GUIDE.md) has the detail, and
 the diagram further down shows the whole path.
 
+### Changed your mind? Put it back
+
+One command reverses everything setup did:
+
+```
+npx daidocs setup --restore
+```
+
+Setup backs up every file it touches before changing it, so `--restore` puts
+each one back exactly as it was: the hooks come out of `~/.claude/settings.json`,
+the memory server comes out of your assistant's MCP config, and the reading
+protocol (`AGENTS.md`, `GEMINI.md`, `.cursorrules`) is removed. Files setup
+created that were not there before are deleted. Restart your assistant once
+afterwards so it drops the server and hooks.
+
+Your memory is never touched: the `.dai` store stays on disk as plain files, so
+you lose nothing and can reinstall later and pick up where you left off.
+
 ---
 
 ## What you get
