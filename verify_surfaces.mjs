@@ -185,6 +185,28 @@ if (wanted('mcp')) {
   const s = store('mcp');
   fs.mkdirSync(path.join(s, '_index'), { recursive: true });
   fs.mkdirSync(path.join(s, '_raw'), { recursive: true });
+
+  // #11: a recall context over the client's cap must keep the engine's structured sections
+  // (event table, fact timeline) and trim only the large verbatim dump the engine appends
+  // for a small store. The old head+tail trim dropped exactly those middle sections.
+  {
+    const { capRecallContext } = require('./lib/recall_cap');
+    const manifest = '# Manifest scan (3 stored files)\n' + '{"id":"a"}\n'.repeat(40);
+    const eventTable = '# Event table\nEVENT_TABLE_NEEDLE: 4 trips in order\n' + 'row\n'.repeat(20);
+    const timeline = '# Facts timeline\nFACT_TIMELINE_NEEDLE: decided in session two\n' + 'fact\n'.repeat(20);
+    const dump = '# Complete original content (store fits the budget, full verbatim read)\n' + 'RAW_DUMP_FILLER '.repeat(5000);
+    const ctx = [manifest, eventTable, timeline, dump].join('\n\n');
+    const capped = capRecallContext(ctx, 20000);
+    ok('a long recall context is trimmed to the cap', capped.length <= 20000 && ctx.length > 20000, `${capped.length} of ${ctx.length}`);
+    ok('the event table survives truncation', /EVENT_TABLE_NEEDLE/.test(capped));
+    ok('the fact timeline survives truncation', /FACT_TIMELINE_NEEDLE/.test(capped));
+    ok('the raw content dump is the part trimmed', /complete original content trimmed/.test(capped) && !capped.includes('RAW_DUMP_FILLER '.repeat(5000)));
+    ok('a context under the cap is returned unchanged', capRecallContext('short context', 20000) === 'short context');
+    const big = '# Manifest scan (900 stored files)\nHEAD_NEEDLE\n' + 'scan\n'.repeat(8000) + '\nTAIL_NEEDLE_relevant_material';
+    const bigCapped = capRecallContext(big, 20000);
+    ok('with no dump, the head and the tail are both kept', /HEAD_NEEDLE/.test(bigCapped) && /TAIL_NEEDLE_relevant_material/.test(bigCapped) && bigCapped.length <= 20000, String(bigCapped.length));
+  }
+
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [path.join(here, 'mcp_server.mjs')],

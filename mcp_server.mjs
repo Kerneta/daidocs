@@ -27,6 +27,7 @@ const { resolveObserver, subscriptionMode } = require('./lib/host');
 const { needsKey } = require('./lib/observers');
 const S = require('./lib/stores');
 const { markSaved, unconvertedFor, cleanId, UNCONVERTED } = require('./lib/session_marks');
+const { capRecallContext } = require('./lib/recall_cap');
 const Reg = require('./lib/registry');
 
 // Resolved per call, not once at startup: one server serves every project, and
@@ -238,14 +239,12 @@ Ask the user to allow or refuse each, then call recall_memory again with allow: 
     // return the CONTEXT portion (between "CONTEXT:" and "QUESTION:") to the caller
     const m = captured.prompt.match(/CONTEXT:\n([\s\S]*)\n\nQUESTION:/);
     let ctx = m ? m[1] : captured.prompt;
-    // MCP clients cap tool-result size, and the index scan grows with the
-    // store (~130 tok/file). Keep the TAIL: the retrieved segments, facts
-    // timeline, and anchors sit at the end; the front is the raw index scan.
+    // MCP clients cap tool-result size. Trim the raw "complete original content" dump the
+    // engine appends for a small store, never its structured sections (event table, fact
+    // timeline, anchors, understanding) which are the whole point of the read; for a large
+    // store with no dump, keep the manifest-scan head and the retrieved tail. See #11.
     const MAX = parseInt(process.env.DAIDOCS_RECALL_MAX_CHARS || '20000', 10);
-    if (ctx.length > MAX) {
-      const head = ctx.slice(0, 1500);
-      ctx = head + `\n[... index scan truncated (${ctx.length} chars total; store has grown), most relevant material below ...]\n` + ctx.slice(-(MAX - head.length - 120));
-    }
+    ctx = capRecallContext(ctx, MAX);
     return {
       content: [{
         type: 'text',
