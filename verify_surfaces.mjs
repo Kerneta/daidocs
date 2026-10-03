@@ -2500,6 +2500,10 @@ if (wanted('version')) {
   ok('the model is chosen, not prompted for', /Observer: \S+/.test(silentRun.out) && !/Choose 1 to/.test(silentRun.out),
     (silentRun.out.match(/Observer: \S+/) || [''])[0]);
   ok('and the run says where to change any of it', /node setup\.js --status/.test(silentRun.out));
+  ok('and tells the user to restart their assistant once', /[Rr]estart your assistant/.test(silentRun.out),
+    (silentRun.out.match(/[^\n]*estart your assistant[^\n]*/) || [''])[0]);
+  ok('and names the one command that puts everything back', /setup\.js --restore/.test(silentRun.out),
+    (silentRun.out.match(/[^\n]*--restore[^\n]*/) || [''])[0]);
   // These four land at the project root. A nested .daidocs/.gitignore cannot cover them,
   // but creating a .gitignore in a folder that is not a repo is not setup's job.
   ok('a silent install into a folder that is not a git repo does not create .gitignore',

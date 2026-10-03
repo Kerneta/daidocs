@@ -987,9 +987,11 @@ function ensureDependencies() {
   closeAsk();
   const store = process.env.DAIDOCS_STORE || path.join(os.homedir(), 'DaiDocs');
   console.log(`\nDone. DaiDocs ${VERSION} installed. Your memory lives in plain files at: ${store}`);
+  console.log('Restart your assistant once (Claude Desktop or Code) so the memory server and hooks load. After that every new session just works.');
   console.log('Sessions now save themselves as you work, with no API key.');
   console.log('Try it: keep working, then open a NEW chat and ask about this one.');
   console.log('Change any of it, or see what is on: node setup.js --status');
+  console.log('Changed your mind? Put every file back the way it was with: node setup.js --restore (your memory store is kept).');
   console.log('See what has been installed over time with: node setup.js --versions');
 
   // One-time, opt-in install ping. Off by default; never blocks or breaks setup.
