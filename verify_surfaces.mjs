@@ -379,6 +379,28 @@ if (wanted('autosave')) {
   ok('the supplied summary reaches the file', /recorded 74\.00 for v1\.9\.6/.test(body));
   ok('the supplied fact reaches facts.jsonl', /recorded 74\.00/.test(fs.readFileSync(path.join(s, '_index', 'facts.jsonl'), 'utf8')));
   ok('a supplied understanding is not chunked into parts', !/_p1/.test(dai.join(',')), dai.join(','));
+
+  // #15: a captured session's new transcript is read from the store, so save_memory needs
+  // no content argument. Stage a session the way the Stop hook would, then save it by id.
+  {
+    const rj = f => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } };
+    const sid = 'cc_slice-0001';
+    const slice = `[USER]: SLICEONLY_NEEDLE what did we decide about retries?\n[ASSISTANT]: capped at three.\n${LONG}`;
+    for (const d of ['_unconverted', '_pending']) fs.mkdirSync(path.join(s, d), { recursive: true });
+    fs.writeFileSync(path.join(s, '_raw', sid + '.txt'), slice);
+    fs.writeFileSync(path.join(s, '_raw', sid + '.meta.json'), JSON.stringify({ hash: 'h', len: slice.length, cwd: 'C:/work/atlas' }));
+    fs.writeFileSync(path.join(s, '_unconverted', sid + '.txt'), slice);
+    fs.writeFileSync(path.join(s, '_pending', sid + '.json'), JSON.stringify({ id: sid, segId: sid, cwd: 'C:/work/atlas', tokens: 50, reason: 'live' }));
+    const u2 = { ...understanding, summary: 'decided retries are capped at three', facts: [{ fact: 'retries capped at three', date: '2026-09-01', kind: 'event' }] };
+    const bySession = await c.callTool({ name: 'save_memory', arguments: { title: 'retry decision', date: '2026-09-01', session: sid, understanding: u2 } });
+    ok('save_memory saves a session with no content argument', !bySession.isError, (bySession.content[0].text || '').slice(0, 80));
+    const daiNow = fs.readdirSync(s).filter(f => f.endsWith('.dai')).map(f => fs.readFileSync(path.join(s, f), 'utf8')).join('\n');
+    ok('the verbatim slice from the store reaches the index', /SLICEONLY_NEEDLE/.test(daiNow));
+    ok('and the session mark advances once it is saved', ((rj(path.join(s, '_raw', sid + '.meta.json')) || {}).savedLen || 0) > 0);
+    ok('and the unconverted tail is cleared', !fs.existsSync(path.join(s, '_unconverted', sid + '.txt')));
+    const nothingNew = await c.callTool({ name: 'save_memory', arguments: { title: 'retry decision again', session: sid, understanding: u2 } });
+    ok('saving the same session again with nothing waiting is refused, not silent', nothingNew.isError === true, (nothingNew.content[0].text || '').slice(0, 70));
+  }
   await c.close();
 
   // The Stop hook: quiet until there is enough new material, then one instruction.
@@ -431,6 +453,32 @@ if (wanted('autosave')) {
   ok('and records how much of the transcript is saved', (readJsonT(metaFile) || {}).savedLen > 0);
   const quiet = await fire(base, { DAIDOCS_AUTOSAVE_TOKENS: '10' });
   ok('a saved session with nothing new stays quiet at any threshold', quiet.out.trim() === '', quiet.out.slice(0, 60));
+
+  // #15 data-loss guard: a save that covers only part of the capture must not mark the rest
+  // as saved. markSaved advances the mark to coveredLen, keeps the remainder waiting, and
+  // only retires the markers once everything is covered. A legacy 2-arg call still saves all.
+  {
+    const rjp = f => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } };
+    const pid = 'cc_partial-0001';
+    const full = 'A'.repeat(400) + 'B'.repeat(600);
+    fs.writeFileSync(path.join(s, '_raw', pid + '.txt'), full);
+    fs.writeFileSync(path.join(s, '_raw', pid + '.meta.json'), JSON.stringify({ hash: 'h', len: full.length }));
+    fs.mkdirSync(path.join(s, '_unconverted'), { recursive: true });
+    fs.writeFileSync(path.join(s, '_unconverted', pid + '.txt'), full);
+    fs.writeFileSync(path.join(s, '_pending', pid + '.json'), JSON.stringify({ id: pid, segId: pid, cwd: base.cwd, reason: 'live' }));
+    Marks.markSaved(s, pid, 400);
+    ok('a partial save advances the mark only to what was covered', (rjp(path.join(s, '_raw', pid + '.meta.json')) || {}).savedLen === 400);
+    ok('a partial save keeps the pending marker up', fs.existsSync(path.join(s, '_pending', pid + '.json')));
+    ok('a partial save keeps only the unsaved remainder waiting', fs.readFileSync(path.join(s, '_unconverted', pid + '.txt'), 'utf8') === 'B'.repeat(600));
+    Marks.markSaved(s, pid, 1000);
+    ok('covering the rest retires the pending marker', !fs.existsSync(path.join(s, '_pending', pid + '.json')));
+    ok('covering the rest clears the unconverted tail', !fs.existsSync(path.join(s, '_unconverted', pid + '.txt')));
+    ok('the mark never moves backwards', (rjp(path.join(s, '_raw', pid + '.meta.json')) || {}).savedLen === 1000);
+    fs.writeFileSync(path.join(s, '_raw', pid + '.meta.json'), JSON.stringify({ hash: 'h', len: 500, savedLen: 0 }));
+    fs.writeFileSync(path.join(s, '_pending', pid + '.json'), JSON.stringify({ id: pid, reason: 'live' }));
+    Marks.markSaved(s, pid);
+    ok('a legacy call with no coveredLen marks the whole capture saved', (rjp(path.join(s, '_raw', pid + '.meta.json')) || {}).savedLen === 500 && !fs.existsSync(path.join(s, '_pending', pid + '.json')));
+  }
 
   // An earlier session from the same folder, still waiting, counts towards the bar.
   fs.writeFileSync(path.join(s, '_raw', 'cc_earlier-0001.txt'), LONG);
