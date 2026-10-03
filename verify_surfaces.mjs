@@ -2488,6 +2488,9 @@ if (wanted('version')) {
   ok('a bare install finishes with nothing typed', silentRun.code === 0 && /Done\. DaiDocs/.test(silentRun.out),
     silentRun.out.split(String.fromCharCode(10)).filter(Boolean).slice(-1)[0] || String(silentRun.code));
   ok('and asks no questions at all', !/\[Y\/n\]/.test(silentRun.out), (silentRun.out.match(/[^\n]*\[Y\/n\][^\n]*/) || [''])[0]);
+  ok('a non-interactive install is never offered the Express/Custom choice, so it cannot hang',
+    !/How would you like to set up/.test(silentRun.out),
+    (silentRun.out.match(/[^\n]*How would you like[^\n]*/) || [''])[0]);
   ok('it registers the hooks it used to ask about',
     /SessionStart hook registered/.test(silentRun.out) && /Stop hook registered/.test(silentRun.out));
   ok('and installs the reading protocol', /Reading protocol installed/.test(silentRun.out));
