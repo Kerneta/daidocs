@@ -489,9 +489,18 @@ the history stops fitting, and the `.dai` store is what keeps the answers
 available. The background conversion runs either way, every 4,000 tokens, so by
 the time you cross that line the store is already there.
 
-**Agent traces are the one shape it does not handle well.** Tool calls, stack
-traces and file dumps look nothing like conversation, and converting them today
-produces poor stores. That is a real gap and it is being worked on.
+**There is a small fixed cost per session.** When the start hook loads your memory
+index, a session begins with roughly 2,000 to 3,000 tokens of context before you
+ask anything. It is flat, it does not grow with your history, and it is what makes
+the first question answerable from memory. On a very short session it is a cost with
+little to offset it, which is the other half of why a short history is better left
+in the window.
+
+**Agent traces are kept compactly, not in full.** Tool calls and their results are
+no longer dropped: each is reduced to the tool name, its most telling input and a
+truncated result, so a coding session's edits, commands and output become
+recallable. Long results are summarised rather than stored verbatim, and richer
+structure for agent traces is still open.
 
 **Want it run for you?** The engine here is the whole engine and always will be,
 self-hosted and free under Apache-2.0. If you would rather not operate it, we
@@ -613,6 +622,24 @@ issue you can open**, and we will say so publicly rather than quietly editing th
 | [`CHANGELOG.md`](CHANGELOG.md) | what changed, per release |
 | [`SECURITY.md`](SECURITY.md) | how to report something, and what is in scope |
 | [`RUNBOOK.md`](RUNBOOK.md) | the release run, step by step |
+
+---
+
+## Evaluating it safely
+
+If you are reviewing DaiDocs rather than adopting it, run it where a mistake cannot
+reach your real setup:
+
+- **Back up your Claude data and config first.** Setup records every file it writes and
+  `node setup.js --restore` puts them all back, but a backup is the belt to that pair of
+  braces.
+- **Test from a separate OS user profile**, so the hooks, the MCP config and the store
+  land in a home directory that is not your own.
+- **Start with synthetic conversations**, not your real history, until you trust what gets
+  captured and stored.
+- **For full isolation, use a disposable VM or a container snapshot.** The most thorough
+  external review so far ran the whole thing in an isolated, offline, read-only container
+  with synthetic data only, which is the safest baseline to copy.
 
 ---
 
