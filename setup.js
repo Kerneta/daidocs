@@ -26,7 +26,7 @@ const opt = (n, d) => { const i = argv.indexOf('--' + n); return i >= 0 ? argv[i
 const ALL = has('all');
 // A bare run configures everything; --ask brings back per-surface questions. Nothing is
 // one-way: --status lists every switch, and --restore puts the machine back.
-const ASK = has('ask');
+let ASK = has('ask');
 const log = (s) => console.log('  ' + s);
 const readJson = fp => { try { return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch { return {}; } };
 
@@ -787,7 +787,8 @@ function ensureDependencies() {
   const anyFlag = ['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'icon',
     'observer', 'key', 'all', 'project', 'project-type', 'store'].some(has);
   // A bare run configures everything (EVERY); --ask restores the per-question flow.
-  const EVERY = ALL || (!anyFlag && !ASK);
+  // The Express/Custom choice below can flip ASK on, so both are recomputed then.
+  let EVERY = ALL || (!anyFlag && !ASK);
 
   // Declaring a folder type is not an install: falling through to the main flow would hit the
   // "remove previous install" branch and tear down the user's hooks/configs. So a
@@ -895,6 +896,19 @@ function ensureDependencies() {
 
   const surfaces = [];
   const did = (name, fn) => { try { fn(); surfaces.push(name); } catch (e) { log(`${name} failed: ${e.message}`); } };
+
+  // Express or Custom. Offered only on a bare interactive install: a specific flag,
+  // --ask, --yes, or a non-interactive run (CI, a pipe, npm run setup in a script)
+  // all skip it and take the recommended path, so an automated install never hangs.
+  // Custom is the existing per-surface flow, so this just surfaces --ask up front.
+  if (EVERY && !has('yes') && process.stdin.isTTY && process.stdout.isTTY) {
+    console.log('How would you like to set up?');
+    console.log('  1. Recommended: configure everything for you (fastest, reversible with --restore)');
+    console.log('  2. Walk me through it, approving each step');
+    console.log('');
+    if ((await ask('Choose [1]: ')).trim() === '2') { ASK = true; EVERY = false; }
+    console.log('');
+  }
 
   if (EVERY || has('desktop') || (ASK && (await ask('Configure Claude Desktop? [Y/n] ')).toLowerCase() !== 'n')) did('desktop', setupDesktop);
   if (EVERY || has('code') || (ASK && (await ask('Configure Claude Code in current folder? [Y/n] ')).toLowerCase() !== 'n')) did('code', () => setupCode(opt('project', null)));
