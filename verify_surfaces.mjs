@@ -402,6 +402,16 @@ if (wanted('autosave')) {
   ok('the supplied fact reaches facts.jsonl', /recorded 74\.00/.test(fs.readFileSync(path.join(s, '_index', 'facts.jsonl'), 'utf8')));
   ok('a supplied understanding is not chunked into parts', !/_p1/.test(dai.join(',')), dai.join(','));
 
+  // #MK2: the .dai raw: pointer must resolve to the VERBATIM original, not the unwrap()-normalised
+  // copy. The verbatim keeps the original newline before the filler; the unwrapped copy would
+  // have joined it to a space, so the pointed-at file must still carry that raw newline.
+  {
+    const rawRel = (body.match(/raw:\s*"([^"]+)"/) || [])[1];
+    ok('the .dai raw pointer names a file that exists', !!rawRel && fs.existsSync(path.join(s, rawRel)), String(rawRel));
+    let pointed = ''; try { pointed = fs.readFileSync(path.join(s, rawRel), 'utf8'); } catch { }
+    ok('and it resolves to the verbatim original, not the unwrapped copy', /v1\.9\.6\.\n/.test(pointed), JSON.stringify(pointed.slice(40, 60)));
+  }
+
   // #15: a captured session's new transcript is read from the store, so save_memory needs
   // no content argument. Stage a session the way the Stop hook would, then save it by id.
   {
