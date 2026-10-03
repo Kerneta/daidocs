@@ -710,6 +710,30 @@ if (wanted('convert')) {
   ok('converts a folder of mixed exports', r4.code === 0 && /2 converted/.test(r4.out), r4.out.split('\n').slice(-1)[0]);
   ok('can write the store next to the source', fs.existsSync(path.join(folder, '.dai-store', '_index', 'manifest.jsonl')));
 
+  // #20: the subscription handoff must stage EXACTLY the selection into the
+  // destination store, so the free in-session conversion converts what was
+  // picked rather than whatever the folder's own backlog already holds.
+  {
+    const staged = store('convert-stage');
+    fs.mkdirSync(staged, { recursive: true });
+    const picked = C.listClaudeSessions({ projectsDir: path.join(home, '.claude', 'projects'), minBytes: 0, project: 'Alpha' });
+    const ids = C.stageForConversion(picked, staged);
+    ok('stages the selected session as pending', ids.length === 1, String(ids.length));
+    const pend = C.listRawCaptures(staged);
+    ok('the staged item is now in the destination backlog', pend.length === 1 && /alpha launch/.test(pend[0].title), (pend[0] || {}).title);
+    ok('its raw text is written for the in-session convert to read', fs.existsSync(path.join(staged, '_raw', ids[0] + '.txt')));
+    C.stageForConversion(picked, staged);
+    ok('re-staging the same selection does not duplicate it', C.listRawCaptures(staged).length === 1);
+
+    // Through the CLI: a subscription run with a key-needing observer queues the
+    // pick instead of converting here, and writes no .dai.
+    const dest2 = store('convert-stage-cli');
+    const handoff = await runNode('daidocs.js', ['convert', '--source', 'claude', '--min-kb', '0', '--pick', '1', '--to', dest2],
+      { HOME: home, USERPROFILE: home, DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', DAIDOCS_USE_API: '', OPENAI_API_KEY: '' });
+    ok('the handoff queues the selection instead of converting here', /convert my pending daidocs sessions/.test(handoff.out) && /queued in/.test(handoff.out), handoff.out.split('\n').slice(-6).join(' | '));
+    ok('and it staged one pending item with no .dai written', fs.existsSync(dest2) && C.listRawCaptures(dest2).length === 1 && !fs.readdirSync(dest2).some(f => f.endsWith('.dai')), String(C.listRawCaptures(dest2).length));
+  }
+
   // The backlog case: a session the hook captured but could not convert.
   const backlogStore = path.join(home, 'DaiDocs');
   for (const d of ['_raw', '_pending', '_index']) fs.mkdirSync(path.join(backlogStore, d), { recursive: true });
