@@ -102,6 +102,14 @@ Opus free, then a hook with no share in the subscription called the API with
 whatever key it could find and reported the failure as a key problem. Set
 `DAIDOCS_USE_API=1` to opt out deliberately and use a key from a hook.
 
+The same switch governs the **live connection**, not only conversion. On a Claude
+subscription `recall_memory` ranks lexically and skips the meaning-based
+(embedding) shortlist, so nothing is billed, even when an `OPENAI_API_KEY` is
+present. To get semantic ranking in the live reader, set both `OPENAI_API_KEY`
+and `DAIDOCS_USE_API=1` for the MCP server (the same pair that enables it for
+`convert`). With a key but without `DAIDOCS_USE_API=1`, recall stays lexical by
+design.
+
 Under Claude the install menu leads with Opus 5. Elsewhere it leads with GPT-4.1
 mini, the observer behind every published number. Only hosted providers are
 offered.
