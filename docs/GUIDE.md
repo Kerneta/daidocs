@@ -513,6 +513,11 @@ talk, and the assistant calls them. They are listed so you know what it can do.
 | `declare_project` | Makes the current folder a project, with a type, its own store, and what it may read (`reads`). This is what answers "make this folder confidential" |
 | `brief_parent` | Hands a summary up from a part of a project to the project itself |
 
+A couple of worked examples, in the words you would actually use:
+
+- *"Make this folder confidential"* calls `declare_project` with `type: "confidential"`, so the folder gets its own store that no wider recall can read.
+- *"Summarise for the main project what we settled here"* calls `brief_parent`, which writes a short briefing from this part up to the project it belongs to, without copying the detail.
+
 ---
 
 ## Script reference
