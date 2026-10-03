@@ -41,8 +41,12 @@ method earns its place above roughly 10k to 20k tokens of history, and below
 that we recommend pasting the history instead, which is simpler and usually
 more accurate. The docs say so wherever the choice comes up.
 
-**Agent traces are not handled.** Tool calls, stack traces and file dumps have a
-different shape from conversation. Converting them today produces poor stores.
+**Agent traces are kept compactly, not in full.** Tool calls and their results are
+no longer dropped: each is reduced to one line (the tool name plus its most telling
+input, and a truncated result) so a coding session's edits, commands and output
+become recallable. A long result is truncated, so full file dumps and stack traces
+are summarised rather than stored verbatim, and the extraction prompts still read
+them as conversation. Better structure for agent traces is still open.
 
 **English only.** The extraction prompts, the routing regexes and the taxonomy
 are English. Nothing about the format prevents other languages; nothing about
