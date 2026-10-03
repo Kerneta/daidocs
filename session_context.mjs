@@ -75,6 +75,7 @@ function backlog() {
 
 // The backlog line, built on its own so an empty store can still carry it.
 function backlogLine() {
+  if (RESUMING) return '';
   const { pending, errors } = backlog();
   if (!pending) return '';
   const n = `${pending} archived session${pending === 1 ? '' : 's'} ${pending === 1 ? 'is' : 'are'} captured but not yet indexed`;
@@ -95,6 +96,7 @@ function backlogLine() {
 // 2k tokens is in front of the assistant when the next one opens here. Not
 // searchable until converted, and the section says so once.
 function unconvertedSection() {
+  if (RESUMING) return '';
   const items = unconvertedFor(STORE_DIR, CWD);
   if (!items.length) return '';
   const n = items.length;
@@ -121,6 +123,13 @@ let CWD = null;
 let RESOLVED = null;
 // set when this session gave the folder its store
 let DECLARED = null;
+// Claude Code's SessionStart 'source': startup | resume | clear | compact. On resume
+// and compact the prior conversation, including whatever was still unconverted, is
+// already in the model's context from the restored transcript, so re-injecting the
+// tail duplicates it and repeats the convert offer (#17). Fresh starts (startup,
+// clear) keep the full injection, so a new session still opens exactly where the
+// last one left off.
+let RESUMING = false;
 function declareLine() {
   return DECLARED ? 'FOR YOUR FIRST REPLY: ' + folderNotice(DECLARED.storeDir) : '';
 }
@@ -180,6 +189,7 @@ async function main() {
   if (process.env.DAIDOCS_DISABLE) return;
   let j = {};
   try { j = JSON.parse(await readStdin()) || {}; } catch { j = {}; }
+  RESUMING = j.source === 'resume' || j.source === 'compact';
   const project = projectName(j.cwd);
   // Before anything is read: an undeclared folder becomes a project now, so
   // this session already writes into it rather than into the shared store.
