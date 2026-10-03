@@ -125,7 +125,7 @@ def main(argv=None):
     # DAIDOCS_SURFACE (lib/install_ping.js).
     env = {**os.environ, "DAIDOCS_SURFACE": "pip"}
     try:
-        return subprocess.call([npx, "-y", "daidocs@latest", *args], env=env)
+        return subprocess.call([npx, "-y", "daidocs@^4.4", *args], env=env)
     except KeyboardInterrupt:  # pragma: no cover
         return 130
 

@@ -263,7 +263,7 @@ server.tool(
     title: z.string().describe('Short descriptive title, e.g. "chat about bike trip plans"'),
     content: z.string().optional().describe('The text to remember (a note, or a document). For a captured session, omit this and pass "session": the Stop hook has already written the new part of the transcript to the store, and save_memory reads it from there, so you never retransmit the conversation. A value here overrides that, for a note or a deliberately synthesized save.'),
     date: z.string().optional().describe('ISO date YYYY-MM-DD the content is from (default: today)'),
-    type: z.string().optional().describe('chat | note | doc (default: chat)'),
+    type: z.enum(['chat', 'note', 'doc']).optional().describe('chat | note | doc (default: chat)'),
     collection: z.string().optional().describe('Optional collection name to file this under (e.g. "personal", "client-a"): recall can then scope to it'),
     session: z.string().optional().describe('The Claude Code session this content came from; the Stop hook supplies it. Records how much of that session is now saved, so the hook stops asking, and clears its backlog marker.'),
     understanding: z.object({}).passthrough().optional().describe('The extraction, if you write it yourself: {entities:{people,orgs,dates,amounts,places}, actions:[], facts:[{fact,date,kind:"event"|"attribute"|"preference"|"plan"}], events:[{date,cat,what}], preferences:[], tags:[], decisions:[], topics:[], summary, sentiment, open_questions:[]}. Resolve relative dates against the content date. Supplying this skips the observer entirely: no API key, no cost.'),

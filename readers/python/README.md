@@ -73,7 +73,7 @@ daidocs setup
 daidocs convert
 ```
 
-These run `npx -y daidocs@latest <args>` underneath, so they behave exactly
+These run `npx -y daidocs@^4.4 <args>` underneath, so they behave exactly
 like the Node engine. Node 18+ is required: if Node is missing or older, the
 command says so and offers to install it for you (after you confirm), rather
 than silently falling back. Once Node is present, run `daidocs setup` to get the

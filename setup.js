@@ -713,7 +713,11 @@ function printStatus() {
   const home = os.homedir();
   const state = readJson(STATE_FILE);
   const claudeSettings = readJson(path.join(home, '.claude', 'settings.json'));
-  const hookOn = ev => JSON.stringify((claudeSettings.hooks || {})[ev] || []).includes('daidocs');
+  // Match the hook script names, not the substring "daidocs": a scoped or renamed install
+  // runs the same scripts from a path that need not contain "daidocs", and the old check
+  // reported those hooks off when they were on.
+  const HOOK_SCRIPTS = ['session_context.mjs', 'session_autosave.mjs', 'session_archiver.mjs', 'daidocs'];
+  const hookOn = ev => { const j = JSON.stringify((claudeSettings.hooks || {})[ev] || []); return HOOK_SCRIPTS.some(s => j.includes(s)); };
   const desktopCfg = readJson(desktopConfigPath());
   const rows = [
     ['Claude Desktop', !!(desktopCfg.mcpServers || {})['daidocs-mcp'], 'node setup.js --desktop'],
