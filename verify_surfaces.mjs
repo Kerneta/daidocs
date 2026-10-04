@@ -3219,23 +3219,41 @@ if (wanted('version')) {
   const bareMock = await runResolve({ DAIDOCS_OBSERVER: 'mock' });
   ok('a bare keyless name (mock, no colon) is honoured too', bareMock.spec === 'mock', String(bareMock.spec));
 
-  // A PAID env value that contradicts the recorded choice is treated as stale.
+  // A PAID env value that contradicts the recorded choice, with NO key for it, is treated as
+  // stale: that is the only case that could cost money by accident. The key is cleared here so
+  // the check is deterministic on a machine that happens to have one set.
   const chosen = H2.resolveObserver().spec;
-  const stale = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini' });
+  const stale = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', OPENAI_API_KEY: '' });
   const record = (() => { try { return require('./lib/versioning').currentInstall(); } catch { return null; } })();
   if (record && record.observer && record.observer !== 'openai:gpt-4.1-mini') {
-    ok('a stale paid DAIDOCS_OBSERVER loses to the recorded choice', stale.spec === record.observer, String(stale.spec));
+    ok('a stale paid DAIDOCS_OBSERVER with no key loses to the recorded choice', stale.spec === record.observer, String(stale.spec));
     ok('and the override is reported, not hidden', stale.overrode === 'openai:gpt-4.1-mini', String(stale.overrode));
   } else {
-    ok('a stale paid DAIDOCS_OBSERVER loses to the recorded choice', true, 'no recorded choice on this machine, skipped');
+    ok('a stale paid DAIDOCS_OBSERVER with no key loses to the recorded choice', true, 'no recorded choice on this machine, skipped');
     ok('and the override is reported, not hidden', true, 'no recorded choice on this machine, skipped');
   }
+  // S3: the same paid env value WINS once its API key is present, with no DAIDOCS_USE_API needed.
+  // A model the user has a key for is a deliberate, affordable choice, not the stale accident.
+  const keyed = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', OPENAI_API_KEY: 'sk-test-present' });
+  ok('a paid DAIDOCS_OBSERVER wins when its key is present (S3)',
+    keyed.spec === 'openai:gpt-4.1-mini' && !keyed.overrode, JSON.stringify(keyed));
   // With DAIDOCS_USE_API=1 the user has opted into paying, so a paid env value is a
   // decision, not an accident, and must not be swapped for the recorded choice (#13).
-  const deliberate = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', DAIDOCS_USE_API: '1' });
+  const deliberate = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', DAIDOCS_USE_API: '1', OPENAI_API_KEY: '' });
   ok('DAIDOCS_USE_API=1 makes a paid DAIDOCS_OBSERVER win', deliberate.spec === 'openai:gpt-4.1-mini' && !deliberate.overrode, JSON.stringify(deliberate));
   ok('save_memory names a set-aside DAIDOCS_OBSERVER in its error', /r\.overrode \?[^\n]*DAIDOCS_USE_API=1/.test(fs.readFileSync(path.join(here, 'mcp_server.mjs'), 'utf8')));
   ok('resolution agrees with itself across processes', typeof chosen === 'string' && chosen.includes(':'), chosen);
+
+  // S7: DAIDOCS_HOST forces host detection for CI and clean test environments, over env markers
+  // and installed tools; an invalid value is ignored rather than obeyed; "none" forces no host.
+  const detectWith = env => new Promise(res => {
+    const p = spawn(process.execPath, ['-e', "process.stdout.write(String(require('./lib/host').detectHost() || 'none'))"],
+      { cwd: here, env: { ...process.env, ...env } });
+    let out = ''; p.stdout.on('data', d => out += d); p.on('close', () => res(out.trim()));
+  });
+  ok('DAIDOCS_HOST forces the host over env markers (S7)', (await detectWith({ DAIDOCS_HOST: 'openai', CLAUDECODE: '1' })) === 'openai');
+  ok('DAIDOCS_HOST=none forces no host (S7)', (await detectWith({ DAIDOCS_HOST: 'none', CLAUDECODE: '1' })) === 'none');
+  ok('an invalid DAIDOCS_HOST is ignored, not obeyed', (await detectWith({ DAIDOCS_HOST: 'bogus', CLAUDECODE: '1' })) === 'anthropic');
 
   // Conversion outside a session cannot use the subscription, so it must offer
   // the free route rather than quietly billing.
