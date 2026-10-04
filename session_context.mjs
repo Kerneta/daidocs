@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // DaiDocs session context: Claude Code SessionStart hook. The archiver pushes sessions INTO
 // the store at the end; nothing read them back at the start, so a fresh session opened with
-// no memory in context. This injects zoom 1 (the manifest digest) and nothing more — pure
+// no memory in context. This injects zoom 1 (the manifest digest) and nothing more: pure
 // file reads, no model call. Deeper zooms stay on demand through the MCP tools.
 // Env: DAIDOCS_STORE, DAIDOCS_DISABLE, DAIDOCS_CONTEXT_ENTRIES (30),
 // DAIDOCS_CONTEXT_MAX_CHARS (4000), DAIDOCS_UNCONVERTED_MAX_CHARS (6000). Never throws or
@@ -14,7 +14,7 @@ import { createRequire } from 'module';
 const { projectName } = createRequire(import.meta.url)('./lib/convert');
 const S = createRequire(import.meta.url)('./lib/stores');
 const { subscriptionMode } = createRequire(import.meta.url)('./lib/host');
-const { unconvertedFor, autoDeclare, folderNotice } = createRequire(import.meta.url)('./lib/session_marks');
+const { unconvertedFor, pendingFor, autoDeclare, folderNotice } = createRequire(import.meta.url)('./lib/session_marks');
 let STORE_DIR = S.SHARED_STORE();
 
 const MAX_ENTRIES = parseInt(process.env.DAIDOCS_CONTEXT_ENTRIES || '30', 10);
@@ -66,11 +66,15 @@ function trim(s, n) {
 function backlog() {
   const dir = path.join(STORE_DIR, '_pending');
   if (!fs.existsSync(dir)) return { pending: 0, errors: 0 };
-  const files = fs.readdirSync(dir);
+  // Count only what this folder would also SHOW: pendingFor and unconvertedSection share one
+  // project-root filter, so the "N captured" promise can never name sessions the text below
+  // does not include (B3). The shared store holds many folders' sessions; a raw count over all
+  // of _pending would over-promise here.
+  const pending = pendingFor(STORE_DIR, CWD, null).length;
   let errors = 0;
   const log = path.join(dir, 'errors.log');
   if (fs.existsSync(log)) errors = fs.readFileSync(log, 'utf8').trim().split('\n').filter(Boolean).length;
-  return { pending: files.filter(f => f.endsWith('.json')).length, errors };
+  return { pending, errors };
 }
 
 // The backlog line, built on its own so an empty store can still carry it.
