@@ -634,7 +634,9 @@ if (wanted('autosave')) {
     const projA = path.join(TMP, 'mcp-projA'); fs.mkdirSync(projA, { recursive: true });
     const projB = path.join(TMP, 'mcp-projB'); fs.mkdirSync(projB, { recursive: true });
     const projC = path.join(TMP, 'mcp-projC'); fs.mkdirSync(projC, { recursive: true });
-    const nrm = p => String(p).replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
+    // realpath-normalize: on macOS process.cwd() returns /private/var while the temp path is
+    // /var (a symlink), so a plain string compare would spuriously differ.
+    const nrm = p => { let r = String(p); try { r = fs.realpathSync(r); } catch { /* may not exist yet */ } return r.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase(); };
     const base = { ...process.env, HOME: hHome, USERPROFILE: hHome, CLAUDE_PROJECT_DIR: '', CLAUDE_CODE_SESSION_ID: '' };
     const runPD = (env, cwd) => new Promise(res => {
       const p = spawn(process.execPath, ['-e', 'process.stdout.write(require(process.argv[1]).resolveProjectDir())', smLib], { cwd, env: { ...base, ...env } });
