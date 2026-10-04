@@ -293,6 +293,16 @@ if (wanted('hook')) {
   const r3 = await runNode('session_archiver.mjs', [], env, JSON.stringify({ ...base, reason: 'exit' }));
   ok('an unchanged transcript is skipped', /already-saved|unchanged/.test(r3.err), r3.err.trim());
 
+  // SL4: resuming a session re-renders the same transcript, so re-archiving it must not duplicate
+  // an already-indexed memory. The hash-unchanged guard skips it, so the .dai count does not grow.
+  // (The start hook's matching guard, not re-injecting the prior context on resume, is checked in
+  // the #17 section below.)
+  const daiBeforeResume = fs.readdirSync(s).filter(f => f.endsWith('.dai')).length;
+  const rResume = await runNode('session_archiver.mjs', [], env, JSON.stringify({ ...base, reason: 'exit', source: 'resume' }));
+  const daiAfterResume = fs.readdirSync(s).filter(f => f.endsWith('.dai')).length;
+  ok('resuming and re-archiving an unchanged transcript adds no duplicate memory',
+    daiAfterResume === daiBeforeResume, `${daiBeforeResume} -> ${daiAfterResume}: ${rResume.err.trim()}`);
+
   const raws = fs.existsSync(path.join(s, '_raw')) ? fs.readdirSync(path.join(s, '_raw')) : [];
   ok('the full text is preserved in _raw', raws.some(f => f.endsWith('.txt')));
   const manifest = path.join(s, '_index', 'manifest.jsonl');
