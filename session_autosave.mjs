@@ -15,7 +15,7 @@ import path from 'path';
 const require = createRequire(import.meta.url);
 const { countTokens } = require('./lib/tokens');
 const { projectName, renderClaudeTranscript } = require('./lib/convert');
-const { pendingFor, readJson, writeUnconverted, autoDeclare } = require('./lib/session_marks');
+const { pendingFor, readJson, writeUnconverted, autoDeclare, captureIgnored } = require('./lib/session_marks');
 const S = require('./lib/stores');
 
 const THRESHOLD = parseInt(process.env.DAIDOCS_AUTOSAVE_TOKENS || '4000', 10);
@@ -94,6 +94,9 @@ async function main() {
   // Resolve the folder's store FIRST, so a declared folder finds what it wrote (not the
   // shared store's meta) and doesn't recount the whole transcript at each stop. autoDeclare
   // gives an undeclared folder its own store too, so a save never lands in the shared store.
+  // A .daiignore at the project root can exclude this folder's sessions from capture (H2):
+  // say nothing, write nothing, before the store is even touched.
+  if (captureIgnored(j.cwd)) return;
   autoDeclare(j.cwd, S.resolveStore(j.cwd));
   const here = S.resolveStore(j.cwd);
   // locked or frozen: say nothing, write nothing

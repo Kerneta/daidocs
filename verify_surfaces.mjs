@@ -2748,6 +2748,30 @@ if (wanted('version')) {
     !fs.existsSync(path.join(psRepo, '.gitignore')));
   ok('--project-scope changes nothing machine-wide',
     !fs.existsSync(path.join(dHome, '.claude', 'settings.json')) && !fs.existsSync(path.join(dHome, '.claude.json')));
+
+  // H2: a per-project .daiignore excludes a folder's sessions from capture entirely, on top of the
+  // credential redaction that already runs on every capture.
+  {
+    const Mi = require('./lib/session_marks');
+    ok('matchIgnore matches a folder name as prefix, suffix or any segment',
+      Mi.matchIgnore('secrets', 'secrets') && Mi.matchIgnore('secrets/x', 'secrets') && Mi.matchIgnore('a/secrets/b', 'secrets'));
+    ok('matchIgnore handles a path prefix and globs',
+      Mi.matchIgnore('vendor/pkg', 'vendor/') && Mi.matchIgnore('logs/today.txt', 'logs/*') && Mi.matchIgnore('deep/x/y', 'deep/**'));
+    ok('matchIgnore does not match an unrelated or partial name',
+      !Mi.matchIgnore('src/app', 'secrets') && !Mi.matchIgnore('secretsauce', 'secrets'));
+    const ig = path.join(TMP, 'daiignore-proj');
+    fs.mkdirSync(path.join(ig, 'secrets', 'inner'), { recursive: true });
+    fs.mkdirSync(path.join(ig, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(ig, '.git'), { recursive: true }); // make ig the project root
+    fs.writeFileSync(path.join(ig, '.daiignore'), '# keep secrets out of memory\nsecrets/\n');
+    ok('captureIgnored excludes a session under an ignored folder', Mi.captureIgnored(path.join(ig, 'secrets', 'inner')));
+    ok('captureIgnored allows a session elsewhere in the same project', !Mi.captureIgnored(path.join(ig, 'src')));
+    ok('captureIgnored is false when there is no .daiignore', !Mi.captureIgnored(dWork));
+    ok('the autosave hook consults .daiignore before writing',
+      /captureIgnored\(j\.cwd\)/.test(fs.readFileSync(path.join(here, 'session_autosave.mjs'), 'utf8')));
+    ok('the SessionEnd archiver consults .daiignore before capturing',
+      /captureIgnored\(j\.cwd\)/.test(fs.readFileSync(path.join(here, 'session_archiver.mjs'), 'utf8')));
+  }
   ok('and names the one command that puts everything back', /setup\.js --restore/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*--restore[^\n]*/) || [''])[0]);
   ok('and logs what changed on this machine', /Changed on this machine/.test(silentRun.out),
