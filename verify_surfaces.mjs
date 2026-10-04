@@ -542,6 +542,40 @@ if (wanted('autosave')) {
   ok("another folder's pending does not count", other.out.trim() === '', other.out.slice(0, 60));
   fs.unlinkSync(path.join(s, '_pending', 'cc_elsewhere-001.json'));
 
+  // B3: capture is scoped by PROJECT ROOT (nearest .daidocs/.git ancestor), not the live shell
+  // cwd, so a mid-session cd inside one project keeps its capture together, and the backlog count
+  // shares that one filter with the text shown, so the start-context promise cannot be false.
+  {
+    const M = require('./lib/session_marks');
+    const proj = path.join(TMP, 'b3proj');
+    const sub = path.join(proj, 'pkg', 'inner');
+    fs.mkdirSync(path.join(proj, '.git'), { recursive: true });
+    fs.mkdirSync(sub, { recursive: true });
+    const nrm = p => String(p).replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
+    ok('project root is the nearest .git/.daidocs ancestor', nrm(M.projectRoot(sub)) === nrm(proj));
+    ok('a cd inside a project stays the same project', M.sameProject(sub, proj));
+    const other = path.join(TMP, 'b3other');
+    fs.mkdirSync(path.join(other, '.git'), { recursive: true });
+    ok('a different project is not the same', !M.sameProject(other, proj));
+
+    const bs = path.join(TMP, 'b3store');
+    for (const d of ['_pending', '_unconverted', '_raw']) fs.mkdirSync(path.join(bs, d), { recursive: true });
+    const mk = (id, cwd) => {
+      fs.writeFileSync(path.join(bs, '_pending', id + '.json'), JSON.stringify({ id, segId: id, cwd, tokens: 10, reason: 'live', at: '2026-10-04T00:00:00Z' }));
+      fs.writeFileSync(path.join(bs, '_unconverted', id + '.txt'), 'tail ' + id);
+    };
+    mk('cc_b3-root', proj);
+    mk('cc_b3-sub', sub);     // same project, captured from a subdir after a cd
+    mk('cc_b3-other', other); // a different project in the same (shared) store
+    ok('a session captured from a subdir is carried to its project root',
+      M.unconvertedFor(bs, proj).some(u => u.id === 'cc_b3-sub'));
+    ok('backlog and unconverted share one filter (count matches what is shown)',
+      M.pendingFor(bs, proj, null).length === M.unconvertedFor(bs, proj).length);
+    ok("another project's capture in the same store is not counted here",
+      !M.unconvertedFor(bs, proj).some(u => u.id === 'cc_b3-other')
+      && !M.pendingFor(bs, proj, null).some(p => p.id === 'cc_b3-other'));
+  }
+
   // The folder question, enforced by the Stop hook. In an askable folder the
   // first stop blocks with the question, once; the next stop (same transcript,
   // flag set) is quiet; a recorded 'general' answer keeps it quiet for a fresh
@@ -2586,7 +2620,7 @@ if (wanted('version')) {
       summary: 'a summary long enough to eat into the context budget '.repeat(3) }));
   }
   fs.writeFileSync(path.join(bigStore, '_index', 'manifest.jsonl'), many.join(String.fromCharCode(10)) + String.fromCharCode(10));
-  fs.writeFileSync(path.join(bigStore, '_pending', 'a.json'), '{}');
+  fs.writeFileSync(path.join(bigStore, '_pending', 'a.json'), JSON.stringify({ id: 'a', cwd: bigStore }));
   const bigCtx = await new Promise(res => {
     const p = spawn(process.execPath, ['session_context.mjs'],
       // The Claude marker, because the line this checks for is the subscription
@@ -3015,12 +3049,12 @@ if (wanted('version')) {
   const quietCtx = await runCtx();
   ok('says nothing when there is no backlog', !/ACTION FOR YOU/.test(quietCtx));
 
-  fs.writeFileSync(path.join(ctxStore, '_pending', 'one.json'), '{}');
+  fs.writeFileSync(path.join(ctxStore, '_pending', 'one.json'), JSON.stringify({ id: 'one', cwd: ctxStore }));
   const oneCtx = await runCtx();
   ok('tells the assistant to raise a backlog of one', /ACTION FOR YOU: 1 archived session/.test(oneCtx), oneCtx.slice(-120));
   ok('and gets the singular right', /is captured but not yet indexed, so it cannot be searched yet/.test(oneCtx));
 
-  fs.writeFileSync(path.join(ctxStore, '_pending', 'two.json'), '{}');
+  fs.writeFileSync(path.join(ctxStore, '_pending', 'two.json'), JSON.stringify({ id: 'two', cwd: ctxStore }));
   const twoCtx = await runCtx();
   ok('counts correctly with more than one', /ACTION FOR YOU: 2 archived sessions/.test(twoCtx), twoCtx.slice(-120));
   ok('and does not repeat the count twice in one sentence',
