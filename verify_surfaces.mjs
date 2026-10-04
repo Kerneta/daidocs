@@ -3159,8 +3159,15 @@ if (wanted('version')) {
   ok('the icon asset it points at exists', fs.existsSync(path.join(here, 'assets', 'brand', 'dai-file.ico')));
 
   section('the folder system is reachable without reading the source');
-  // Interactive setup must offer to declare a project; without the offer everything lands in the shared store.
-  ok('interactive setup offers to declare a project', /Declare this folder as a project/.test(setupSrc));
+  // Interactive setup must offer this folder its own dedicated store by DEFAULT, with the shared
+  // global store as an explicit opt-out, so "chose the global store, got a project-local one"
+  // cannot happen silently (A6). Enter maps to a dedicated normal store; only 'g' skips to global.
+  ok('interactive setup offers this folder its own dedicated store', /its OWN dedicated memory store/.test(setupSrc));
+  ok('Enter defaults to a dedicated normal store', /'': 'normal'/.test(setupSrc));
+  ok('the global store is an explicit opt-out, not a silent default',
+    /'g' for the global store/.test(setupSrc) && /pick === 'g' \|\| pick === 'global'/.test(setupSrc));
+  ok('the install summary reports the resolved store, not always the global one',
+    /S\.resolveStore\(opt\('project', null\) \|\| process\.cwd\(\)\)\.storeDir/.test(setupSrc));
   ok('the offer lists every type', ['normal', 'confidential', 'shared', 'temporary', 'locked', 'frozen', 'connected']
     .every(t => setupSrc.includes(`. ${t} `)), 'all seven listed');
   ok('the offer maps each number to a real type',

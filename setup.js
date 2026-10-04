@@ -32,7 +32,7 @@ const readJson = fp => { try { return JSON.parse(fs.readFileSync(fp, 'utf8')); }
 
 // Undo. Setup edits files the user didn't create (Claude Desktop config, ~/.claude
 // settings, CLAUDE.md), so every touched path is recorded here with whether it EXISTED
-// beforehand — a .bak can't express that: a file we created from nothing is undone by
+// beforehand: a .bak can't express that, since a file we created from nothing is undone by
 // deleting it, not restoring a backup.
 const STATE_FILE = V.STATE_FILE;
 
@@ -455,7 +455,7 @@ function setupAutosaveHook() {
 }
 
 // The reading protocol: how to READ a store well once reachable. Registering the MCP server
-// says the store EXISTS but not how to read it — whole-file reads cost ~15x the tokens of
+// says the store EXISTS but not how to read it, and whole-file reads cost ~15x the tokens of
 // the three zooms, and an unrouted question type was the biggest source of wrong answers.
 // Installed into ~/.claude/CLAUDE.md, marker-delimited so a re-run replaces the block and
 // --unregister can lift it out.
@@ -553,7 +553,7 @@ function alreadyPersisted(key) {
 }
 
 // Persist env vars to the OS user environment so every terminal and hook sees them, not
-// just the shell that ran setup — otherwise DAIDOCS_OBSERVER lives in one process and the
+// just the shell that ran setup, otherwise DAIDOCS_OBSERVER lives in one process and the
 // archiver silently uses its default everywhere else.
 function persistVars(vars) {
   const entries = Object.entries(vars).filter(([, v]) => v);
@@ -707,7 +707,7 @@ function registerLinux(undo) {
   log(undo ? 'Removed the .dai file association.' : 'Registered .dai with the DaiDocs icon.');
 }
 
-// What's on now, and the command that changes each — the settings page, since install asks
+// What's on now, and the command that changes each, for the settings page, since install asks
 // nothing.
 function printStatus() {
   const home = os.homedir();
@@ -767,7 +767,7 @@ function ensureDependencies() {
   if (fs.existsSync(path.join(HERE, 'node_modules', '@modelcontextprotocol', 'sdk'))) return;
   log('Installing dependencies (first run only)...');
   const { spawnSync } = require('child_process');
-  // npm's own JS entry point, run by this node — not `npm` (reaches npm.ps1) or `npm.cmd`
+  // npm's own JS entry point, run by this node, not `npm` (reaches npm.ps1) or `npm.cmd`
   // (node refuses to spawn .cmd since the 2024 arg-injection fix, EINVAL). Same npm either way.
   const cli = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
   const args = ['install', '--no-audit', '--no-fund'];
@@ -864,7 +864,7 @@ function ensureDependencies() {
   }
 
   // The install folder must not BE the memory store. `git clone .../daidocs` from home makes
-  // ~/daidocs, and the default store is ~/DaiDocs — one directory on Windows/macOS. Then the
+  // ~/daidocs, and the default store is ~/DaiDocs, one directory on Windows/macOS. Then the
   // source tree and every memory share a folder, and deleting the checkout deletes the memory.
   // Compared by inode where available, since case isn't the only way two paths collide.
   const sharedStore = S.SHARED_STORE();
@@ -932,21 +932,32 @@ function ensureDependencies() {
     const target = opt('project', null) || process.cwd();
     if (path.resolve(target) !== path.resolve(HERE)) {
       console.log('');
-      console.log(`  A project can keep its memories in its own folder instead of the shared store,`);
-      console.log(`  which is what keeps separate clients' work apart. This would declare:`);
+      console.log(`  By default this folder gets its OWN dedicated memory store, kept separate`);
+      console.log(`  from your other projects. Pick the type below, or choose 'g' to use the one`);
+      console.log(`  shared global store instead. This would declare:`);
       console.log(`    ${target}`);
       console.log('');
-      console.log('    1. normal        writable, and readable by projects you connect to it');
-      console.log('    2. confidential  never included in any wider search, whoever asks');
-      console.log('    3. shared        the multi-project default');
-      console.log('    4. temporary     for testing; never becomes permanent memory');
-      console.log('    5. locked        read-only until you unlock it');
-      console.log('    6. frozen        read-only for good; change it by copying it');
-      console.log('    7. connected     linked to another project, agreed at both ends');
+      console.log('    1. normal (standard)  writable, and readable by projects you connect to it');
+      console.log('    2. confidential       never included in any wider search, whoever asks');
+      console.log('    3. shared             a dedicated store that connected projects can read');
+      console.log('    4. temporary          for testing; never becomes permanent memory');
+      console.log('    5. locked             read-only until you unlock it');
+      console.log('    6. frozen             read-only for good; change it by copying it');
+      console.log('    7. connected          linked to another project, agreed at both ends');
       console.log('');
-      const pick = (await ask('  Declare this folder as a project? [1-7, or Enter to skip] ')).trim();
-      ptype = { 1: 'normal', 2: 'confidential', 3: 'shared', 4: 'temporary', 5: 'locked', 6: 'frozen', 7: 'connected' }[pick] || null;
-      if (ptype) log(`This folder will be declared ${ptype}.`);
+      console.log(`    g. global             no dedicated store; this folder shares the global`);
+      console.log(`                          memory store (${S.SHARED_STORE()}) with your other folders`);
+      console.log('');
+      // Default is a dedicated store (Enter = normal); the global store is the deliberate
+      // opt-out, so "chose global, got a project-local store" cannot happen silently.
+      const pick = (await ask("  This folder's own store type [Enter for 1 (normal)], or 'g' for the global store: ")).trim().toLowerCase();
+      if (pick === 'g' || pick === 'global') {
+        ptype = null;
+        log(`This folder will use the shared global memory store (${S.SHARED_STORE()}), not a dedicated store of its own.`);
+      } else {
+        ptype = { '': 'normal', 1: 'normal', 2: 'confidential', 3: 'shared', 4: 'temporary', 5: 'locked', 6: 'frozen', 7: 'connected' }[pick] || 'normal';
+        log(`This folder will be declared ${ptype}, with its own dedicated memory store.`);
+      }
     }
   }
   if (ptype || pstore) did('project', () => setupProject(opt('project', null), ptype, pstore));
@@ -1017,7 +1028,9 @@ function ensureDependencies() {
   V.recordEvent(action, { version: VERSION, from: previous ? previous.version : null, installPath: HERE, surfaces, observer });
 
   closeAsk();
-  const store = process.env.DAIDOCS_STORE || path.join(os.homedir(), 'DaiDocs');
+  // Report where memory ACTUALLY goes, not always the global store: a folder declared
+  // with its own store resolves to that store, so saying ~/DaiDocs would be wrong.
+  const store = S.resolveStore(opt('project', null) || process.cwd()).storeDir;
   console.log(`\nDone. DaiDocs ${VERSION} installed. Your memory lives in plain files at: ${store}`);
   console.log('');
   printChangeLog();
