@@ -3255,6 +3255,24 @@ if (wanted('version')) {
   ok('DAIDOCS_HOST=none forces no host (S7)', (await detectWith({ DAIDOCS_HOST: 'none', CLAUDECODE: '1' })) === 'none');
   ok('an invalid DAIDOCS_HOST is ignored, not obeyed', (await detectWith({ DAIDOCS_HOST: 'bogus', CLAUDECODE: '1' })) === 'anthropic');
 
+  // S4: embeddings route through DAIDOCS_EMBED_BASE_URL or OPENAI_BASE_URL (for a proxy or an
+  // OpenAI-compatible gateway) instead of a hardcoded endpoint, and the lexical fallback the
+  // reader takes when embeddings are unavailable is logged loudly rather than silently.
+  {
+    const E = require('./lib/embeddings');
+    const saveB = process.env.OPENAI_BASE_URL, saveD = process.env.DAIDOCS_EMBED_BASE_URL;
+    delete process.env.OPENAI_BASE_URL; delete process.env.DAIDOCS_EMBED_BASE_URL;
+    ok('embeddings default to the public OpenAI endpoint', E.embedUrl() === 'https://api.openai.com/v1/embeddings', E.embedUrl());
+    process.env.OPENAI_BASE_URL = 'https://proxy.example/v1';
+    ok('embeddings honor OPENAI_BASE_URL (S4)', E.embedUrl() === 'https://proxy.example/v1/embeddings', E.embedUrl());
+    process.env.DAIDOCS_EMBED_BASE_URL = 'https://gw.example/v1/';
+    ok('a dedicated DAIDOCS_EMBED_BASE_URL wins over OPENAI_BASE_URL (S4)', E.embedUrl() === 'https://gw.example/v1/embeddings', E.embedUrl());
+    if (saveB === undefined) delete process.env.OPENAI_BASE_URL; else process.env.OPENAI_BASE_URL = saveB;
+    if (saveD === undefined) delete process.env.DAIDOCS_EMBED_BASE_URL; else process.env.DAIDOCS_EMBED_BASE_URL = saveD;
+    ok('the lexical fallback is logged loudly when embeddings are unavailable (S4)',
+      /manifest shortlist disabled/.test(fs.readFileSync(path.join(here, 'lib', 'methods', 'daidocs-reader', 'method.js'), 'utf8')));
+  }
+
   // Conversion outside a session cannot use the subscription, so it must offer
   // the free route rather than quietly billing.
   ok('ingest refuses to bill a subscription silently', /subscriptionMode\(\) && needsKey\(pick\.spec\)/.test(cliSrc));
