@@ -2699,6 +2699,34 @@ if (wanted('version')) {
   ok('and tells the user to restart their assistant once', /[Rr]estart your assistant/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*estart your assistant[^\n]*/) || [''])[0]);
 
+  // S2: a full install exports the model and claims autosave (it installed it); a scoped run does
+  // neither; and --restore takes back the DAIDOCS_OBSERVER a full install wrote. silentRun above is
+  // the full-install baseline (its env has DAIDOCS_NO_PERSIST, so persistVars logs "Would save").
+  ok('a full install exports DAIDOCS_OBSERVER', /Would save:[^\n]*DAIDOCS_OBSERVER/.test(silentRun.out),
+    (silentRun.out.match(/Would save:[^\n]*/) || [''])[0]);
+  ok('a full install says autosave is on, because it installed it', /save themselves as you work/.test(silentRun.out));
+  const s2Home = path.join(TMP, 's2-home');
+  const s2Work = path.join(s2Home, 'work');
+  fs.mkdirSync(s2Work, { recursive: true });
+  const s2Env = { ...process.env, HOME: s2Home, USERPROFILE: s2Home,
+    APPDATA: path.join(s2Home, 'AppData', 'Roaming'), LOCALAPPDATA: path.join(s2Home, 'AppData', 'Local'),
+    DAIDOCS_NO_PERSIST: '1', DAIDOCS_STORE: path.join(s2Home, 'DaiDocs'), DAIDOCS_OBSERVER: '' };
+  const runS2 = args => new Promise(res => {
+    const p4 = spawn(process.execPath, [path.join(here, 'setup.js'), ...args], { cwd: s2Work, env: s2Env });
+    let out = ''; p4.stdout.on('data', d => out += d); p4.stderr.on('data', d => out += d);
+    p4.stdin.end(''); p4.on('close', code => res({ out, code }));
+  });
+  const scopedRun = await runS2(['--icon']);
+  ok('a scoped run does not export DAIDOCS_OBSERVER machine-wide (S2)',
+    !/Would save:[^\n]*DAIDOCS_OBSERVER/.test(scopedRun.out) && /left out of your machine environment/.test(scopedRun.out),
+    scopedRun.out.slice(-200));
+  ok('a scoped run does not falsely claim autosave is on (S2)', !/save themselves as you work/.test(scopedRun.out));
+  await runS2([]); // a full install, so there is a recorded env var to take back
+  const restoredRun = await runS2(['--restore']);
+  ok('--restore takes back the DAIDOCS_OBSERVER it wrote (S2)',
+    /environment:[^\n]*DAIDOCS_OBSERVER/i.test(restoredRun.out),
+    (restoredRun.out.match(/[^\n]*DAIDOCS_OBSERVER[^\n]*/) || [''])[0]);
+
   // A8/A9/H1: --dry-run prints every file a full install would touch and changes nothing. A fresh
   // home proves the "touches nothing" claim (silentRun above already wrote into its own home).
   const dHome = path.join(TMP, 'dryRun-home');

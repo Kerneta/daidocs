@@ -585,6 +585,33 @@ function persistVars(vars) {
   return true;
 }
 
+// S2: undo the environment entries setup wrote. setx and the shell profile reach outside the
+// files restoreAll tracks, so on Windows the variable survived a --restore. Only DAIDOCS_OBSERVER
+// is removed: it is unambiguously ours, whereas a provider API key (OPENAI_API_KEY and the like)
+// may be the user's own and is left untouched.
+function removePersistedVars(names) {
+  if (!names.length) return;
+  if (process.env.DAIDOCS_NO_PERSIST) {
+    log(`Would remove from your environment: ${names.join(', ')} (DAIDOCS_NO_PERSIST is set, nothing changed).`);
+    return;
+  }
+  if (process.platform === 'win32') {
+    for (const n of names) { try { execSync(`reg delete HKCU\\Environment /v ${n} /f`, { stdio: 'ignore' }); } catch (_) { /* not set */ } }
+    log(`Removed from your Windows user environment: ${names.join(', ')}. Open a new terminal to pick it up.`);
+  } else {
+    const prof = path.join(os.homedir(), process.env.SHELL && process.env.SHELL.includes('zsh') ? '.zshrc' : '.bashrc');
+    try {
+      if (fs.existsSync(prof)) {
+        let txt = fs.readFileSync(prof, 'utf8');
+        txt = txt.replace(/\n# DaiDocs memory\n(?:export \w+=.*\n)+/g, '\n');
+        for (const n of names) txt = txt.replace(new RegExp(`^export ${n}=.*$\\n?`, 'gm'), '');
+        fs.writeFileSync(prof, txt);
+      }
+    } catch (_) { /* leave the profile alone if it cannot be rewritten */ }
+    log(`Removed from ${prof} if present: ${names.join(', ')}. Open a new shell.`);
+  }
+}
+
 function setupKey(key, observer, explicitProvider, extraVars = {}) {
   const name = detectProvider(key, explicitProvider);
   if (!name) {
@@ -913,6 +940,9 @@ function setupProjectScope(projectDir) {
     const cur = V.currentInstall();
     registerFileType(true);
     const did = restoreAll();
+    // S2: also take back the environment variable setup wrote, so --restore is a true clean
+    // uninstall rather than leaving DAIDOCS_OBSERVER behind (the file restore cannot reach setx).
+    removePersistedVars(['DAIDOCS_OBSERVER']);
     if (did && cur) V.recordEvent('uninstall', { version: cur.version, from: null, installPath: cur.installPath, observer: cur.observer });
     return;
   }
@@ -1080,17 +1110,23 @@ function setupProjectScope(projectDir) {
 
   const extraVars = {};
   if (baseUrl) extraVars.OPENAI_BASE_URL = baseUrl;
-  if (!keyVar) {
-    persistVars({ DAIDOCS_OBSERVER: observer, ...extraVars });
-    log(`${observer} needs no API key. Nothing is sent to a third party at ingest.`);
-  } else if (key && !keyIsExplicit && alreadyPersisted(key)) {
-    persistVars({ DAIDOCS_OBSERVER: observer, ...extraVars });
-    log('A key is already saved in your user environment; leaving it alone. Pass --key to replace it.');
-  } else if (key) {
+  // S2: export DAIDOCS_OBSERVER to the machine environment only when the model was part of the
+  // request, a full install (bare or --ask) or an explicit --observer/--key. A narrow surface run
+  // (e.g. --icon or --code) records its choice in the install state, which the hooks read, without
+  // writing the variable machine-wide. An explicit key the user hands us is always persisted.
+  const persistModel = EVERY || ASK || has('observer') || has('key');
+  if (key && keyIsExplicit) {
     setupKey(key, observer, opt('provider', null), extraVars);
-  } else {
+  } else if (!keyVar) {
+    if (persistModel) persistVars({ DAIDOCS_OBSERVER: observer, ...extraVars });
+    log(`${observer} needs no API key. Nothing is sent to a third party at ingest.`);
+  } else if (persistModel) {
     persistVars({ DAIDOCS_OBSERVER: observer, ...extraVars });
-    log(`No ${keyVar} set. Sessions still archive losslessly; set the key and run "npm run catch-up" to index them.`);
+    log(key && alreadyPersisted(key)
+      ? 'A key is already saved in your user environment; leaving it alone. Pass --key to replace it.'
+      : `No ${keyVar} set. Sessions still archive losslessly; set the key and run "npm run catch-up" to index them.`);
+  } else {
+    log(`Observer recorded as ${observer}; left out of your machine environment on this scoped run (the hooks read the recorded choice).`);
   }
 
   V.writeState({ version: VERSION, installPath: HERE, installedAt: new Date().toISOString(), surfaces, observer });
@@ -1120,8 +1156,12 @@ function setupProjectScope(projectDir) {
   printChangeLog();
   console.log('');
   console.log('Restart your assistant once (Claude Desktop or Code) so the memory server and hooks load. After that every new session just works.');
-  console.log('Sessions now save themselves as you work, with no API key.');
-  console.log('Try it: keep working, then open a NEW chat and ask about this one.');
+  // S2: only claim autosave is on when the autosave (Stop) hook was actually configured this run.
+  // A scoped run that did not install it used to print this anyway (a false success message).
+  if (surfaces.includes('autosave')) {
+    console.log('Sessions now save themselves as you work, with no API key.');
+    console.log('Try it: keep working, then open a NEW chat and ask about this one.');
+  }
   console.log('Change any of it, or see what is on: node setup.js --status');
   console.log('Changed your mind? Put every file back the way it was with: node setup.js --restore (your memory store is kept).');
   console.log('See what has been installed over time with: node setup.js --versions');
