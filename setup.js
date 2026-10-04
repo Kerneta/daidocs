@@ -99,6 +99,13 @@ const ARCHIVER = path.join(HERE, 'session_archiver.mjs');
 const CONTEXT = path.join(HERE, 'session_context.mjs');
 const AUTOSAVE = path.join(HERE, 'session_autosave.mjs');
 
+// N1: a project-scoped install can reference the PUBLISHED package through npx instead of this
+// machine's absolute paths, so a committed .claude config resolves on every teammate's machine.
+// These map to the package's bin entries (see package.json): daidocs-context / -autosave / -archive
+// / -server.
+const NPX_PKG = 'daidocs';
+const npxHookCommand = bin => `npx -y -p ${NPX_PKG} ${bin}`;
+
 function desktopConfigPath() {
   if (process.platform === 'win32') return path.join(process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'), 'Claude', 'claude_desktop_config.json');
   if (process.platform === 'darwin') return path.join(os.homedir(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
@@ -275,7 +282,7 @@ IconResource=${ico},0
   } catch (e) { log(`Folder icon not set: ${e.message}`); }
 }
 
-function setupCode(projectDir, share) {
+function setupCode(projectDir, share, portable) {
   const dir = projectDir || process.cwd();
   if (path.resolve(dir) === path.resolve(HERE)) {
     log('Refusing to write .mcp.json into the install folder. Pass --project <your work folder>.');
@@ -285,7 +292,11 @@ function setupCode(projectDir, share) {
   backup(fp);
   const cfg = readJson(fp);
   cfg.mcpServers = cfg.mcpServers || {};
-  cfg.mcpServers['daidocs-mcp'] = { command: NODE, args: [SERVER] };
+  // portable (N1): reference the published package through npx so a committed .mcp.json works on a
+  // teammate's machine; otherwise point at this install's absolute server path.
+  cfg.mcpServers['daidocs-mcp'] = portable
+    ? { command: 'npx', args: ['-y', '-p', NPX_PKG, 'daidocs-server'] }
+    : { command: NODE, args: [SERVER] };
   fs.writeFileSync(fp, JSON.stringify(cfg, null, 2));
   log(`Claude Code: .mcp.json written in ${dir}. Approve "daidocs-mcp" on next session`);
   // A project-scoped install (share) is meant to be committed with the repo, so its files are NOT
@@ -409,7 +420,7 @@ function setupOtherClients() {
 // Register one Claude Code hook, replacing a stale entry from an older or moved install.
 // Match on THIS install's PATH, not just the script name: a name match would report a moved
 // install's hook as "already present" and never repoint it. Unrelated hooks are untouched.
-function registerHook(event, scriptPath, scriptName, description, settingsPath) {
+function registerHook(event, scriptPath, scriptName, description, settingsPath, commandOverride) {
   // Default: the user-scope settings (every folder). A project-scoped install passes the repo's
   // own .claude/settings.json instead, so the hooks live with the repo and nothing is machine-wide.
   const fp = settingsPath || path.join(os.homedir(), '.claude', 'settings.json');
@@ -417,7 +428,9 @@ function registerHook(event, scriptPath, scriptName, description, settingsPath) 
   backup(fp);
   const cfg = readJson(fp);
   cfg.hooks = cfg.hooks || {};
-  const cmd = `"${NODE}" "${scriptPath}"`;
+  // commandOverride lets a portable (npx-based) project-scoped install reference the published
+  // package instead of this machine's absolute script path (N1).
+  const cmd = commandOverride || `"${NODE}" "${scriptPath}"`;
   const list = cfg.hooks[event] = cfg.hooks[event] || [];
 
   const refersToOurs = e => new RegExp(scriptName).test(JSON.stringify(e));
@@ -440,22 +453,25 @@ function registerHook(event, scriptPath, scriptName, description, settingsPath) 
   return true;
 }
 
-function setupHook(settingsPath) {
-  return registerHook('SessionEnd', ARCHIVER, 'session_archiver', 'every Claude Code session saves itself', settingsPath);
+function setupHook(settingsPath, portable) {
+  return registerHook('SessionEnd', ARCHIVER, portable ? 'daidocs-archive' : 'session_archiver',
+    'every Claude Code session saves itself', settingsPath, portable ? npxHookCommand('daidocs-archive') : null);
 }
 
 // The other half of the loop. Without this, memory is written but never read
 // back at the start of a session, so the assistant begins every conversation
 // unaware that a store exists.
-function setupContextHook(settingsPath) {
-  return registerHook('SessionStart', CONTEXT, 'session_context', 'your memory index loads at the start of every session', settingsPath);
+function setupContextHook(settingsPath, portable) {
+  return registerHook('SessionStart', CONTEXT, portable ? 'daidocs-context' : 'session_context',
+    'your memory index loads at the start of every session', settingsPath, portable ? npxHookCommand('daidocs-context') : null);
 }
 
 // Converting while the session is still live, using the assistant you are
 // already talking to. The SessionEnd archiver cannot do that: it is a detached
 // process, so its only route is a paid API call.
-function setupAutosaveHook(settingsPath) {
-  return registerHook('Stop', AUTOSAVE, 'session_autosave', 'sessions save themselves as you work, with no API key', settingsPath);
+function setupAutosaveHook(settingsPath, portable) {
+  return registerHook('Stop', AUTOSAVE, portable ? 'daidocs-autosave' : 'session_autosave',
+    'sessions save themselves as you work, with no API key', settingsPath, portable ? npxHookCommand('daidocs-autosave') : null);
 }
 
 // The reading protocol: how to READ a store well once reachable. Registering the MCP server
@@ -870,21 +886,29 @@ function setupProjectScope(projectDir) {
     return false;
   }
   if (!fs.existsSync(dir)) { log(`${dir} does not exist. Pass --project <your repo>.`); return false; }
+  // N1: portable (npx) by default so the committed config resolves the published package on every
+  // teammate's machine; --local pins it to this machine's absolute paths (faster, single-machine).
+  const portable = !has('local');
   const settingsPath = path.join(dir, '.claude', 'settings.json');
   const done = [];
   const step = (label, fn) => { try { fn(); done.push(label); } catch (e) { log(`${label} failed: ${e.message}`); } };
-  step('SessionStart', () => setupContextHook(settingsPath));
-  step('Stop', () => setupAutosaveHook(settingsPath));
-  step('SessionEnd', () => setupHook(settingsPath));
-  step('.mcp.json', () => setupCode(dir, true));
+  step('SessionStart', () => setupContextHook(settingsPath, portable));
+  step('Stop', () => setupAutosaveHook(settingsPath, portable));
+  step('SessionEnd', () => setupHook(settingsPath, portable));
+  step('.mcp.json', () => setupCode(dir, true, portable));
   step('CLAUDE.md', () => installInstructions(path.join(dir, 'CLAUDE.md')));
   console.log('');
-  log(`Project-scoped install for ${dir}:`);
+  log(`Project-scoped install for ${dir} (${portable ? 'portable, via npx' : 'local paths'}):`);
   log(`  hooks     ${settingsPath}  (${done.filter(d => /Session|Stop/.test(d)).join(', ')})`);
   log(`  reading   ${path.join(dir, 'CLAUDE.md')}`);
   log(`  server    ${path.join(dir, '.mcp.json')}`);
   log('Nothing machine-wide was changed: every other folder stays exactly as it was, so this');
   log('repo is the only one with DaiDocs on, which also gives you a clean with/without baseline.');
+  if (portable) {
+    log(`The config runs "npx -p ${NPX_PKG} ...", so a teammate who commits it needs only Node and`);
+    log('npx; the published package is fetched and cached on first use. Pass --local to pin absolute');
+    log('paths to this machine instead (faster, but not shareable).');
+  }
   log('Commit .claude/settings.json, CLAUDE.md and .mcp.json to share it with the repo. To undo,');
   log('remove those three files (a .daidocs-bak copy of any pre-existing one sits beside it).');
   return done.length > 0;

@@ -12,6 +12,10 @@ on:
 jobs:
   check:
     runs-on: ${{ matrix.os }}
+    # The verify suite spawns many child processes and keeps growing; give Node headroom so a
+    # memory spike does not flake the run. Runners have 7GB+, so 4GB is safe on all three OSes.
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
     strategy:
       fail-fast: false
       matrix:

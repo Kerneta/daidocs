@@ -222,6 +222,20 @@ server.tool(
   async ({ question, scope, allow, refuse }) => {
     const here = currentStore();
     const candidates = S.readCandidates(here);
+    // Parent auto-offer: even when this project does not declare reads:["parent"], a declared,
+    // externally-readable parent project above it is offered as a candidate (so recall can suggest
+    // it and, on an explicit yes, search it) without the user editing config first. It still goes
+    // through the permission gate like any other non-self store; a confidential parent is never
+    // offered. Nothing widens silently.
+    if (here.config) {
+      try {
+        const parent = S.parentProject(here.config);
+        const same = a => path.resolve(a).toLowerCase() === path.resolve(parent.storeDir).toLowerCase();
+        if (parent && parent.rules.external && !candidates.some(c => same(c.storeDir))) {
+          candidates.push({ storeDir: parent.storeDir, label: parent.label, type: parent.type, why: 'parent project (offered, not yet declared)' });
+        }
+      } catch (_) { /* parent discovery is best-effort */ }
+    }
     // The user's answer to the permission question, recorded before the
     // partition below so this very call can proceed on it. Matching is by the
     // label the question showed, or the folder name, or the store path.
