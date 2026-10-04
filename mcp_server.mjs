@@ -165,6 +165,42 @@ function chunkText(text, target = 3000) {
 const unwrap = t => String(t).replace(/\r\n/g, '\n').split(/\n\n+/)
   .map(p => (/^\s*([-*#>]|\d+\.)/.test(p) ? p : p.replace(/\n(?![-*#>]|\d+\.)/g, ' '))).join('\n\n');
 
+// F8a: validate a caller-supplied understanding at write time and coerce it to the shape the
+// engine and the _index files expect, so a malformed extraction (facts as a string, entities not
+// an object, a missing summary) cannot throw mid-ingest, leaving an un-indexed raw, or append
+// garbage rows to the append-only indexes. Unknown fields are kept; the typed ones are repaired.
+// Lossless fallback: if nothing usable survives, a minimal summary is taken from the text, so the
+// memory is still searchable rather than empty. The raw verbatim is written separately regardless.
+function sanitizeUnderstanding(u, text) {
+  const arr = v => (Array.isArray(v) ? v : []);
+  const str = v => (typeof v === 'string' ? v : (v == null ? '' : String(v)));
+  const o = (u && typeof u === 'object' && !Array.isArray(u)) ? u : {};
+  const ent = (o.entities && typeof o.entities === 'object' && !Array.isArray(o.entities)) ? o.entities : {};
+  const facts = arr(o.facts).map(f => {
+    if (typeof f === 'string') return { fact: f, date: null, kind: 'event' };
+    if (f && typeof f === 'object') return { fact: str(f.fact), date: typeof f.date === 'string' ? f.date : null, kind: str(f.kind) || 'event' };
+    return null;
+  }).filter(f => f && f.fact);
+  const events = arr(o.events)
+    .map(e => (e && typeof e === 'object') ? { date: typeof e.date === 'string' ? e.date : null, cat: str(e.cat), what: str(e.what) } : null)
+    .filter(Boolean);
+  const out = {
+    ...o,
+    entities: {
+      people: arr(ent.people), orgs: arr(ent.orgs), dates: arr(ent.dates),
+      amounts: arr(ent.amounts), places: arr(ent.places),
+    },
+    actions: arr(o.actions), facts, events,
+    preferences: arr(o.preferences), decisions: arr(o.decisions),
+    topics: arr(o.topics), tags: arr(o.tags), open_questions: arr(o.open_questions),
+    summary: str(o.summary), sentiment: str(o.sentiment) || 'neutral',
+  };
+  if (!out.summary && !out.facts.length && !out.topics.length) {
+    out.summary = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 300);
+  }
+  return out;
+}
+
 const server = new McpServer({ name: 'daidocs-mcp', version: VERSION });
 
 server.tool(
@@ -304,6 +340,9 @@ server.tool(
       title = t.text;
       understanding = u.value;
     }
+    // F8a: repair a malformed caller-supplied understanding before it reaches the engine, so a bad
+    // shape cannot throw mid-ingest or write garbage rows to the indexes. The raw is kept either way.
+    if (understanding) understanding = sanitizeUnderstanding(understanding, content);
     // The MCP client announces itself at the handshake, which is a better host
     // signal than the environment: it names the app actually calling us.
     const clientName = (server.server.getClientVersion && server.server.getClientVersion() || {}).name;

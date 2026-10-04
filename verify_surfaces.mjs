@@ -442,6 +442,22 @@ if (wanted('autosave')) {
     ok('and the unconverted tail is cleared', !fs.existsSync(path.join(s, '_unconverted', sid + '.txt')));
     const nothingNew = await c.callTool({ name: 'save_memory', arguments: { title: 'retry decision again', session: sid, understanding: u2 } });
     ok('saving the same session again with nothing waiting is refused, not silent', nothingNew.isError === true, (nothingNew.content[0].text || '').slice(0, 70));
+
+    // F8a: a malformed understanding (facts as a string, entities not an object, no summary) must
+    // not throw or poison the index. It is repaired, the memory still indexes, and the raw is kept.
+    const daiBeforeBad = fs.readdirSync(s).filter(f => f.endsWith('.dai')).length;
+    const bad = await c.callTool({ name: 'save_memory', arguments: {
+      title: 'malformed shape note', date: '2026-09-03',
+      content: `F8A_NEEDLE the deploy window is Tuesday 09:00 UTC.\n${LONG}`,
+      understanding: { facts: 'not-a-list', entities: 'nope', events: [{ what: 42 }], summary: null, topics: 'x' } } });
+    ok('save_memory accepts a malformed understanding instead of failing (F8a)', !bad.isError, (bad.content[0].text || '').slice(0, 100));
+    const daiAfterBad = fs.readdirSync(s).filter(f => f.endsWith('.dai'));
+    ok('the malformed save still produced an indexed .dai (F8a)', daiAfterBad.length === daiBeforeBad + 1, `${daiBeforeBad} -> ${daiAfterBad.length}`);
+    ok('and its verbatim content is preserved and reaches the index (F8a)',
+      daiAfterBad.map(f => fs.readFileSync(path.join(s, f), 'utf8')).join('\n').includes('F8A_NEEDLE'));
+    const idxFacts = path.join(s, '_index', 'facts.jsonl');
+    ok('the facts index stays valid JSON lines after a malformed save (F8a)',
+      !fs.existsSync(idxFacts) || fs.readFileSync(idxFacts, 'utf8').split('\n').filter(Boolean).every(l => { try { JSON.parse(l); return true; } catch { return false; } }));
   }
 
   // #F8b: type is an enum now, so a client sending a bogus type is told the valid set
