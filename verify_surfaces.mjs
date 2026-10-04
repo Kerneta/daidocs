@@ -2698,6 +2698,37 @@ if (wanted('version')) {
   ok('and the run says where to change any of it', /node setup\.js --status/.test(silentRun.out));
   ok('and tells the user to restart their assistant once', /[Rr]estart your assistant/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*estart your assistant[^\n]*/) || [''])[0]);
+
+  // A8/A9/H1: --dry-run prints every file a full install would touch and changes nothing. A fresh
+  // home proves the "touches nothing" claim (silentRun above already wrote into its own home).
+  const dHome = path.join(TMP, 'dryRun-home');
+  const dWork = path.join(dHome, 'work');
+  fs.mkdirSync(dWork, { recursive: true });
+  const dEnv = { ...process.env, HOME: dHome, USERPROFILE: dHome,
+    APPDATA: path.join(dHome, 'AppData', 'Roaming'), LOCALAPPDATA: path.join(dHome, 'AppData', 'Local'),
+    DAIDOCS_NO_PERSIST: '1', DAIDOCS_STORE: path.join(dHome, 'DaiDocs'), DAIDOCS_OBSERVER: '' };
+  const runDry = (args, cwd) => new Promise(res => {
+    const p3 = spawn(process.execPath, [path.join(here, 'setup.js'), ...args], { cwd, env: dEnv });
+    let out = ''; p3.stdout.on('data', d => out += d); p3.stderr.on('data', d => out += d);
+    p3.stdin.end(''); p3.on('close', code => res({ out, code }));
+  });
+  const dryRes = await runDry(['--dry-run'], dWork);
+  ok('--dry-run exits clean', dryRes.code === 0, String(dryRes.code));
+  ok('--dry-run announces itself and says it writes nothing',
+    /DRY RUN/.test(dryRes.out) && /Nothing below is written/.test(dryRes.out));
+  ok('--dry-run lists the user-scope Claude files',
+    /\.claude[\\/]settings\.json/.test(dryRes.out) && /\.claude\.json/.test(dryRes.out) && /CLAUDE\.md/.test(dryRes.out));
+  ok("--dry-run lists this project's .mcp.json", dryRes.out.includes(path.join(dWork, '.mcp.json')));
+  ok('--dry-run really touches nothing',
+    !fs.existsSync(path.join(dWork, '.mcp.json')) && !fs.existsSync(path.join(dHome, '.claude', 'settings.json'))
+    && !fs.existsSync(path.join(dHome, '.daidocs')),
+    fs.existsSync(path.join(dWork, '.mcp.json')) ? 'wrote .mcp.json' : 'clean');
+  // V5: inside the DaiDocs install folder itself, no per-project files are offered or written.
+  const drySelf = await runDry(['--dry-run'], here);
+  ok('--dry-run inside the install folder writes no project files there',
+    /install folder itself/.test(drySelf.out) && !/AGENTS\.md/.test(drySelf.out), drySelf.out.slice(-160));
+  ok('installAllInstructions skips per-project files in the install folder (V5)',
+    /!t\.global && inSelf/.test(fs.readFileSync(path.join(here, 'setup.js'), 'utf8')));
   ok('and names the one command that puts everything back', /setup\.js --restore/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*--restore[^\n]*/) || [''])[0]);
   ok('and logs what changed on this machine', /Changed on this machine/.test(silentRun.out),
@@ -2776,8 +2807,11 @@ if (wanted('version')) {
   await runGi(['--code', '--instructions'], giHere, path.join(giHere, 'setup.js'));
   ok('setup run from the install folder does not write a .gitignore there',
     !fs.existsSync(path.join(giHere, '.gitignore')));
-  ok('even when that folder is a git repo and the protocol files were written',
-    fs.existsSync(path.join(giHere, 'AGENTS.md')));
+  // V5: and no per-project instruction files land in the install folder either, even though it is
+  // a git repo. The machine-wide CLAUDE.md is still written (to ~/.claude), just not repo files.
+  ok('and writes no per-project instruction files into the install folder (V5)',
+    !fs.existsSync(path.join(giHere, 'AGENTS.md')) && !fs.existsSync(path.join(giHere, 'GEMINI.md'))
+    && !fs.existsSync(path.join(giHere, '.cursorrules')));
 
   // git clone .../daidocs from a home directory makes ~/daidocs; the default store is ~/DaiDocs,
   // and on Windows/macOS those are one folder. If the store is already there git refuses (which

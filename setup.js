@@ -482,18 +482,20 @@ function instructionTargets(projectDir) {
 }
 
 function installAllInstructions(projectDir, undo) {
-  if (projectDir && path.resolve(projectDir) === path.resolve(HERE)) {
-    log('Refusing to write assistant instructions into the install folder. Pass --project <your work folder>.');
-    return false;
-  }
+  const dir = projectDir || process.cwd();
+  // V5: when the "project" is the DaiDocs install folder itself (a clone run with no --project),
+  // skip the per-project files so the checkout never gets AGENTS.md/GEMINI.md/.cursorrules. The
+  // global Claude file lives in ~/.claude, so it is still written: it configures the machine, not
+  // the repo.
+  const inSelf = path.resolve(dir) === path.resolve(HERE);
   let n = 0;
   for (const t of instructionTargets(projectDir)) {
-    // Only create a project-level file if the user opted into this folder at all.
-    // The global Claude one is always written; the rest land beside their project.
+    if (!t.global && inSelf) continue;
     if (installInstructions(t.fp, undo)) n++;
   }
+  if (inSelf) log('In the DaiDocs install folder: wrote only the global reading protocol, no project files here.');
   log(`Reading protocol ${undo ? 'removed from' : 'installed for'} ${n} target(s): Claude Code, Codex/AGENTS.md, Gemini CLI, Cursor.`);
-  if (!undo && n > 0) ignoreSetupFilesInGit(projectDir || process.cwd());
+  if (!undo && n > 0 && !inSelf) ignoreSetupFilesInGit(dir);
   return n > 0;
 }
 
@@ -784,8 +786,53 @@ function ensureDependencies() {
   console.log('');
 }
 
+// --dry-run: print every file and setting a full install would create or modify, and change
+// nothing. Built from the same path logic the install uses, so it stays honest. Side-effect free
+// by construction: it enumerates, it never writes (A9/H1).
+function printDryRun() {
+  const home = os.homedir();
+  const project = opt('project', null) || process.cwd();
+  const inSelf = path.resolve(project) === path.resolve(HERE);
+  const L = [];
+  L.push('DRY RUN. These are the files and settings a full "node setup.js" would create or modify.');
+  L.push('Nothing below is written. Every file is backed up first and restorable with: node setup.js --restore');
+  L.push('');
+  L.push('Claude Desktop:');
+  L.push(`  ${desktopConfigPath()}   (daidocs-mcp server)`);
+  L.push('Claude Code, user scope (every folder on this machine):');
+  L.push(`  ${path.join(home, '.claude', 'settings.json')}   (SessionStart, Stop and autosave hooks)`);
+  L.push(`  ${path.join(home, '.claude.json')}   (daidocs-mcp server registration)`);
+  L.push(`  ${path.join(home, '.claude', 'CLAUDE.md')}   (reading protocol, machine-wide)`);
+  L.push('This folder:');
+  if (inSelf) {
+    L.push('  (this is the DaiDocs install folder itself, so no project files are written here)');
+  } else {
+    L.push(`  ${path.join(project, '.mcp.json')}   (daidocs-mcp for this project)`);
+    for (const t of instructionTargets(project)) if (!t.global) L.push(`  ${t.fp}   (${t.who})`);
+    L.push(`  ${path.join(project, '.gitignore')}   (only if this is a git repo: adds .mcp.json, AGENTS.md, GEMINI.md, .cursorrules)`);
+  }
+  L.push('Other MCP clients (only the ones installed on this machine):');
+  for (const c of otherMcpClients()) L.push(`  ${c.fp}   (${c.name}${fs.existsSync(c.dir) ? '' : ', not installed here so it would be skipped'})`);
+  L.push('File type / associations:');
+  L.push(process.platform === 'win32'
+    ? '  Windows registry HKCU\\Software\\Classes\\.dai   (the .dai file icon)'
+    : `  ${path.join(home, '.local', 'share', 'mime')} and the icon folders   (the .dai file type)`);
+  L.push('User environment:');
+  L.push(`  DAIDOCS_OBSERVER, and the provider key variable if you set one, via ${process.platform === 'win32' ? 'setx and HKCU\\Environment' : 'your shell profile'}`);
+  L.push('Memory store and install records:');
+  L.push(`  ${process.env.DAIDOCS_STORE || path.join(home, 'DaiDocs')}   (your memory; --restore never deletes it)`);
+  L.push(`  ${path.join(home, '.daidocs')}   (install state, ledger and permissions)`);
+  L.push('');
+  L.push('A specific flag narrows this (for example --code, --hook, --project <dir>); a bare run does all of it.');
+  L.push('Run it for real: node setup.js   (or node setup.js --ask to approve each step).');
+  console.log(L.join('\n'));
+}
+
 (async () => {
   console.log(`\nDaiDocs setup ${VERSION}: plain-text AI memory you own.\n`);
+  // Before anything that could mutate (including the project-only and install-removal branches
+  // below): --dry-run only prints what a full install would touch, then stops.
+  if (has('dry-run') || has('dryrun')) { printDryRun(); return; }
   // Every surface flag belongs here: a flag missing from this list makes setup fall into
   // interactive mode and block on the first question, so the flag alone would do nothing.
   const anyFlag = ['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'icon',
