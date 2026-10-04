@@ -7,9 +7,60 @@ Scores below are LongMemEval-S, 500 questions, GPT-4o answering, scored by the b
 authors' own `evaluate_qa.py` with judge snapshot `gpt-4o-2024-08-06`. Numbers measured on
 other scales are marked as such and are not comparable.
 
-## [Unreleased]
+## [4.4.36] - 2026-10-05
+
+**Update reliability, and the version on semver.** The release version is now a valid
+semver string (`4.4.36`), so `npm publish` accepts it. The benchmark provenance tag the
+published scores were recorded under stays `V4.4n32`: it moved to its own `PROVENANCE`
+constant in `lib/version.js`, so every cited number and document that names it is still
+correct. `FORMAT` (`4.4`) and the engine id (`daidocs-v44n`) are unchanged. This is also
+the first published release to carry the split-store fix (PR #51) and its follow-ups
+(PR #52), listed under Fixed below.
+
+### Added
+
+- **Version visibility.** The SessionStart hook now stamps the loaded DaiDocs version into
+  the context it injects, so every session states which build is running. A new
+  `daidocs doctor` command prints the version, the resolved project directory, the resolved
+  store path, and whether the store the server would SAVE to matches the one it would
+  RECALL from, warning if they diverge.
+- **Update check and `daidocs update`.** SessionStart does a non-blocking, once-per-day
+  cached check of the latest published version and prints a single line when a newer one
+  exists. It never blocks or fails the hook: on any error it prints nothing. `daidocs update`
+  reinstalls the latest (globally, when this copy is a global install) and re-runs setup to
+  refresh registrations, then reminds you to fully restart the host app so a long-lived MCP
+  server picks up the new code.
+- **MCP startup self-checks.** The server logs a one-line stderr warning when it falls back
+  to the shared store while a project `.daidocs/config.json` exists (guarding the split-store
+  regression fixed in PR #51), and another when the running server's version differs from the
+  installed package on disk (the "updated but did not restart" case). Both are best-effort and
+  never block startup.
+- **Python reader package (`daidocs` on PyPI, 0.1.0).** A pure-Python reader for
+  `.dai` stores at `readers/python/`: `from daidocs import Store` reads the
+  manifest, documents and index files with no Node. It also installs a `daidocs`
+  command that drives the Node engine (Node 18+ required; if Node is missing it
+  says so and offers to install it via the OS package manager).
+
+### Changed
+
+- **Project-scoped (portable) setup pins the version.** The committed hook and MCP commands
+  now run `npx -y -p daidocs@<version> <bin>` instead of floating `daidocs`, so a teammate who
+  commits the config resolves the exact build this install registered. `--local` still pins
+  absolute script paths to this machine.
 
 ### Fixed
+
+- **A conversion now lands beside its capture (split-store fix, PR #51).** The hooks resolve
+  the store from the session's own working directory, so a project folder keeps its raw captures
+  in its local `.daidocs/store`. `save_memory` resolved from the MCP server's own
+  `process.cwd()` instead, which is wherever the client was launched, so converting
+  a captured session wrote the `.dai` and index rows into the wrong store, usually
+  the general one, and the project's `_pending`/`_unconverted` markers never came
+  down. When a session id is given, `save_memory` now finds the store that already
+  holds that session's capture (current store, then every store the registry knows,
+  then the general store) and writes the conversion there. A session from a folder
+  with no project store still converts into the general store, exactly as before.
+  `DAIDOCS_STORE` remains an explicit override for both halves.
 
 - **The convert hint after setup works from any directory.** A silent install
   printed `node daidocs.js convert`, which only resolves if the shell is already
@@ -36,26 +87,6 @@ other scales are marked as such and are not comparable.
   regex reads only the page around the first embedded data script block. The test
   store deliberately mentions `fetch(` and `<link href=` so the distinction stays
   pinned down.
-
-- **A conversion now lands beside its capture.** The hooks resolve the store from
-  the session's own working directory, so a project folder keeps its raw captures
-  in its local `.daidocs/store`. `save_memory` resolved from the MCP server's own
-  `process.cwd()` instead, which is wherever the client was launched, so converting
-  a captured session wrote the `.dai` and index rows into the wrong store, usually
-  the general one, and the project's `_pending`/`_unconverted` markers never came
-  down. When a session id is given, `save_memory` now finds the store that already
-  holds that session's capture (current store, then every store the registry knows,
-  then the general store) and writes the conversion there. A session from a folder
-  with no project store still converts into the general store, exactly as before.
-  `DAIDOCS_STORE` remains an explicit override for both halves.
-
-### Added
-
-- **Python reader package (`daidocs` on PyPI, 0.1.0).** A pure-Python reader for
-  `.dai` stores at `readers/python/`: `from daidocs import Store` reads the
-  manifest, documents and index files with no Node. It also installs a `daidocs`
-  command that drives the Node engine (Node 18+ required; if Node is missing it
-  says so and offers to install it via the OS package manager).
 
 ## [V4.4n32] - 2026-09-12
 

@@ -10,12 +10,46 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { spawnSync } from 'child_process';
 import { createRequire } from 'module';
 const { projectName } = createRequire(import.meta.url)('./lib/convert');
 const S = createRequire(import.meta.url)('./lib/stores');
 const { subscriptionMode } = createRequire(import.meta.url)('./lib/host');
 const { unconvertedFor, pendingFor, autoDeclare, folderNotice, recordSessionCwd } = createRequire(import.meta.url)('./lib/session_marks');
+const { VERSION } = createRequire(import.meta.url)('./lib/version');
+const { updateAvailableLine } = createRequire(import.meta.url)('./lib/update_check');
 let STORE_DIR = S.SHARED_STORE();
+
+// The latest published version, cached under ~/.daidocs/ and refreshed from npm at most
+// once a day. Non-blocking: the refresh is a child process with a short timeout, and every
+// failure (offline, no npm, a slow registry) is swallowed so the hook prints nothing extra
+// and never fails. Set DAIDOCS_NO_UPDATE_CHECK to skip the network entirely.
+const UPDATE_CACHE = path.join(os.homedir(), '.daidocs', 'update-check.json');
+const UPDATE_TTL_MS = 24 * 60 * 60 * 1000;
+function latestPublished() {
+  let cache = null;
+  try { cache = JSON.parse(fs.readFileSync(UPDATE_CACHE, 'utf8')); } catch { cache = null; }
+  const fresh = cache && cache.at && (Date.now() - Date.parse(cache.at) < UPDATE_TTL_MS);
+  let latest = (cache && cache.latest) || null;
+  if (fresh || process.env.DAIDOCS_NO_UPDATE_CHECK) return latest;
+  try {
+    const r = spawnSync('npm', ['view', 'daidocs', 'version'],
+      { timeout: 1200, encoding: 'utf8', shell: process.platform === 'win32', stdio: ['ignore', 'pipe', 'ignore'] });
+    const out = String((r && r.stdout) || '').trim();
+    if (/^\d+\.\d+\.\d+/.test(out)) latest = out;
+    try {
+      fs.mkdirSync(path.dirname(UPDATE_CACHE), { recursive: true });
+      fs.writeFileSync(UPDATE_CACHE, JSON.stringify({ latest, at: new Date().toISOString() }));
+    } catch { /* an unwritable home just means we recheck next time */ }
+  } catch { /* offline or npm missing: the nudge simply does not appear */ }
+  return latest;
+}
+// One short line, version first, then an update nudge if there is one. Never throws.
+function versionLines() {
+  const out = [`DaiDocs ${VERSION} loaded.`];
+  try { const u = updateAvailableLine(VERSION, latestPublished()); if (u) out.push(u); } catch { /* best effort */ }
+  return out.join('\n');
+}
 
 const MAX_ENTRIES = parseInt(process.env.DAIDOCS_CONTEXT_ENTRIES || '30', 10);
 const MAX_CHARS = parseInt(process.env.DAIDOCS_CONTEXT_MAX_CHARS || '4000', 10);
@@ -209,8 +243,11 @@ async function main() {
   const context = build(project);
   // empty store: inject nothing rather than a stub
   if (!context) return;
+  // Version stamp (and an update nudge if one is due) ride in front of the index, so every
+  // session that gets context also states which build produced it. Cheap and never throws.
+  const full = `${versionLines()}\n\n${context}`;
   process.stdout.write(JSON.stringify({
-    hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: context },
+    hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: full },
   }));
 }
 

@@ -22,7 +22,7 @@
     <a href="docs/REPLICATION.md"><b>Reproduce it</b></a>
   </p>
 
-  <p><b>Launch release V4.4n32, 12 September 2026.</b> <a href="CHANGELOG.md">What is in it.</a></p>
+  <p><b>Launch release 4.4.36, 12 September 2026.</b> <a href="CHANGELOG.md">What is in it.</a></p>
 
   <p>
     <a href="https://github.com/Kerneta/daidocs/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Kerneta/daidocs?style=social"></a>

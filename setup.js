@@ -102,9 +102,11 @@ const AUTOSAVE = path.join(HERE, 'session_autosave.mjs');
 // N1: a project-scoped install can reference the PUBLISHED package through npx instead of this
 // machine's absolute paths, so a committed .claude config resolves on every teammate's machine.
 // These map to the package's bin entries (see package.json): daidocs-context / -autosave / -archive
-// / -server.
+// / -server. The version is PINNED (daidocs@<VERSION>) so a committed config fetches the exact
+// build this install registered, not whatever floats on npm when a teammate first runs it.
 const NPX_PKG = 'daidocs';
-const npxHookCommand = bin => `npx -y -p ${NPX_PKG} ${bin}`;
+const NPX_SPEC = `${NPX_PKG}@${VERSION}`;
+const npxHookCommand = bin => `npx -y -p ${NPX_SPEC} ${bin}`;
 
 function desktopConfigPath() {
   if (process.platform === 'win32') return path.join(process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'), 'Claude', 'claude_desktop_config.json');
@@ -295,7 +297,7 @@ function setupCode(projectDir, share, portable) {
   // portable (N1): reference the published package through npx so a committed .mcp.json works on a
   // teammate's machine; otherwise point at this install's absolute server path.
   cfg.mcpServers['daidocs-mcp'] = portable
-    ? { command: 'npx', args: ['-y', '-p', NPX_PKG, 'daidocs-server'] }
+    ? { command: 'npx', args: ['-y', '-p', NPX_SPEC, 'daidocs-server'] }
     : { command: NODE, args: [SERVER] };
   fs.writeFileSync(fp, JSON.stringify(cfg, null, 2));
   log(`Claude Code: .mcp.json written in ${dir}. Approve "daidocs-mcp" on next session`);
@@ -905,7 +907,7 @@ function setupProjectScope(projectDir) {
   log('Nothing machine-wide was changed: every other folder stays exactly as it was, so this');
   log('repo is the only one with DaiDocs on, which also gives you a clean with/without baseline.');
   if (portable) {
-    log(`The config runs "npx -p ${NPX_PKG} ...", so a teammate who commits it needs only Node and`);
+    log(`The config runs "npx -p ${NPX_SPEC} ...", so a teammate who commits it needs only Node and`);
     log('npx; the published package is fetched and cached on first use. Pass --local to pin absolute');
     log('paths to this machine instead (faster, but not shareable).');
   }
