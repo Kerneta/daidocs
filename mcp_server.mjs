@@ -28,6 +28,7 @@ const { needsKey } = require('./lib/observers');
 const S = require('./lib/stores');
 const { markSaved, unconvertedFor, cleanId, UNCONVERTED } = require('./lib/session_marks');
 const { capRecallContext } = require('./lib/recall_cap');
+const { appendIndex } = require('./lib/lock');
 const Reg = require('./lib/registry');
 
 // Resolved per call, not once at startup: one server serves every project, and
@@ -110,7 +111,7 @@ const manifestEntries = store => (store.files['_index/manifest.jsonl'] || '').tr
   .map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
 
 // Sessions captured but not yet indexed. _raw is lossless storage, not memory: nothing that
-// answers a question reads it, so an unconverted session is safe but unfindable — hence
+// answers a question reads it, so an unconverted session is safe but unfindable, hence
 // every read reports the backlog rather than answering as if it weren't there.
 function pendingCount(storeDir) {
   try { return fs.readdirSync(path.join(storeDir, '_pending')).filter(f => f.endsWith('.json')).length; }
@@ -348,7 +349,7 @@ server.tool(
     const clientName = (server.server.getClientVersion && server.server.getClientVersion() || {}).name;
 
     // Two ways to get an Understanding. The engine only asks a "provider" for a JSON string,
-    // so a caller that already read the conversation can supply its own extraction — free,
+    // so a caller that already read the conversation can supply its own extraction, free,
     // keyless, and the only route when the API has no credit. Otherwise the observer runs.
     let spec, observer;
     if (understanding) {
@@ -356,7 +357,7 @@ server.tool(
       observer = { id: 'inline', model: 'caller-supplied', live: false, available: () => true, complete: async () => JSON.stringify(understanding) };
     } else if (subscriptionMode(clientName) && needsKey(resolveObserver(clientName).spec)) {
       // On a subscription, don't spend API credit for a second model to re-read what the
-      // caller already read — ask the caller to write the extraction instead.
+      // caller already read, so ask the caller to write the extraction instead.
       return { content: [{ type: 'text', text: 'save_memory: call this again with "understanding" filled in. You have read this conversation, so write the extraction yourself: it is free on the subscription, and no API key is used. The schema is in the description of this tool.' }], isError: true };
     } else {
       const r = resolveObserver(clientName);
@@ -401,7 +402,7 @@ server.tool(
       }, observer);
       for (const f of res.files) {
         const p = path.join(STORE_DIR, f.path);
-        if (f.path.startsWith('_index/')) fs.appendFileSync(p, attribute(f.path, f.content, id));
+        if (f.path.startsWith('_index/')) appendIndex(p, attribute(f.path, f.content, id));
         else fs.writeFileSync(p, f.content);
       }
       // The .dai raw: pointer names _raw/<engine id>, known only after ingest. Point it at the
@@ -454,7 +455,7 @@ server.tool(
 
 // One deliberate summary sent UP to the parent store. A confidential part is never a read
 // candidate for anyone (including its parent), so when reading down is refused by design the
-// part decides what leaves, in a person's words. Not a digest — a readable parent gets a
+// part decides what leaves, in a person's words. Not a digest: a readable parent gets a
 // live one for free.
 server.tool(
   'brief_parent',
@@ -491,7 +492,7 @@ server.tool(
     const res = await daidocs.ingest({ id, sourceId: id, title, type: 'note', app: 'mcp', capturedAt: when, raw: body }, observer);
     for (const f of res.files) {
       const p = path.join(up.storeDir, f.path);
-      if (f.path.startsWith('_index/')) fs.appendFileSync(p, attribute(f.path, f.content, id));
+      if (f.path.startsWith('_index/')) appendIndex(p, attribute(f.path, f.content, id));
       else fs.writeFileSync(p, f.content);
     }
     const daiOut = res.files.find(f => f.path.endsWith('.dai'));
@@ -500,7 +501,7 @@ server.tool(
   }
 );
 
-// Give this folder its own memory, from the conversation — the per-project store system is
+// Give this folder its own memory, from the conversation: the per-project store system is
 // otherwise reachable only by a terminal command nobody runs.
 server.tool(
   'declare_project',

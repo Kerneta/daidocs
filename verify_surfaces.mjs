@@ -602,6 +602,27 @@ if (wanted('autosave')) {
       && !M.pendingFor(bs, proj, null).some(p => p.id === 'cc_b3-other'));
   }
 
+  // SK1: four processes can write one store's append-only indexes at once, and a multi-kilobyte
+  // append is not atomic, so without serialization two writers interleave a half-line into a
+  // .jsonl and break every later JSON.parse. appendIndex locks per file; this fires many large
+  // concurrent appends from separate processes and asserts every resulting line still parses.
+  {
+    const dir = path.join(TMP, 'sk1-concurrency');
+    fs.mkdirSync(dir, { recursive: true });
+    const idx = path.join(dir, 'facts.jsonl');
+    const lockLib = path.join(here, 'lib', 'lock.js');
+    const W = 6, N = 30;
+    const prog = "const {appendIndex}=require(process.argv[1]);const f=process.argv[2],w=process.argv[3],n=+process.argv[4];const pad='x'.repeat(6000);for(let i=0;i<n;i++)appendIndex(f,JSON.stringify({w,i,pad}));";
+    await Promise.all(Array.from({ length: W }, (_, w) => new Promise(res => {
+      const p = spawn(process.execPath, ['-e', prog, lockLib, idx, String(w), String(N)], { cwd: here });
+      p.on('close', () => res());
+    })));
+    const lines = fs.existsSync(idx) ? fs.readFileSync(idx, 'utf8').split('\n').filter(Boolean) : [];
+    const allValid = lines.every(l => { try { JSON.parse(l); return true; } catch { return false; } });
+    ok('concurrent writers never interleave a half-line into an index (SK1)',
+      allValid && lines.length === W * N, `${lines.length}/${W * N} lines, allValid=${allValid}`);
+  }
+
   // The folder question, enforced by the Stop hook. In an askable folder the
   // first stop blocks with the question, once; the next stop (same transcript,
   // flag set) is quiet; a recorded 'general' answer keeps it quiet for a fresh

@@ -42,6 +42,7 @@ function useStore(cwd) {
 for (const d of ['_index', '_raw', '_pending', '_unconverted']) fs.mkdirSync(path.join(STORE_DIR, d), { recursive: true });
 const { resolveObserver, subscriptionMode } = require('./lib/host');
 const { writeUnconverted, clearUnconverted, rawFor, captureIgnored } = require('./lib/session_marks');
+const { appendIndex } = require('./lib/lock');
 const { needsKey } = require('./lib/observers');
 // Host-aware observer (DAIDOCS_OBSERVER overrides). Chosen once at install so every entry
 // point writes a store with the same observer.
@@ -102,7 +103,7 @@ async function ingestOne(id, title, date, text, at) {
     }, observer);
     for (const f of res.files) {
       const p = path.join(STORE_DIR, f.path);
-      if (f.path.startsWith('_index/')) fs.appendFileSync(p, attribute(f.path, f.content, pid, at));
+      if (f.path.startsWith('_index/')) appendIndex(p, attribute(f.path, f.content, pid, at));
       else fs.writeFileSync(p, f.content);
     }
     // The .dai raw: pointer names _raw/<engine id>, known only after ingest; write the
