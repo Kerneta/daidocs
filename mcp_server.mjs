@@ -26,15 +26,21 @@ const { attribute } = require('./lib/convert');
 const { resolveObserver, subscriptionMode } = require('./lib/host');
 const { needsKey } = require('./lib/observers');
 const S = require('./lib/stores');
-const { markSaved, unconvertedFor, cleanId, UNCONVERTED } = require('./lib/session_marks');
+const { markSaved, unconvertedFor, cleanId, UNCONVERTED, resolveProjectDir } = require('./lib/session_marks');
 const { capRecallContext } = require('./lib/recall_cap');
 const { appendIndex } = require('./lib/lock');
 const Reg = require('./lib/registry');
 
 // Resolved per call, not once at startup: one server serves every project, and
 // each project may declare its own store. See lib/stores.js.
+//
+// The folder is NOT process.cwd(): the desktop app launches stdio MCP servers with cwd=$HOME, so
+// process.cwd() lands in the shared store while the hooks (which get the real cwd) wrote the
+// capture into the project store, splitting save from recall. resolveProjectDir() takes
+// CLAUDE_PROJECT_DIR, then the cwd the SessionStart hook recorded for this CLAUDE_CODE_SESSION_ID,
+// then process.cwd(), so this server resolves the SAME store the hooks did.
 function currentStore() {
-  const r = S.resolveStore(process.cwd());
+  const r = S.resolveStore(resolveProjectDir());
   for (const d of ['_index', '_raw']) fs.mkdirSync(path.join(r.storeDir, d), { recursive: true });
   return r;
 }
@@ -514,7 +520,7 @@ server.tool(
     reads: z.array(z.string()).optional().describe('What this folder may read besides itself: "self", "parent" (the project in the folder above), "children" (every declared part one level down), "all" (the general store), or a path. Use ["self", "children"] when the user says the project has parts or wants one folder per part; ["self", "parent"] when a part should be able to read the main project. Calling again on a declared folder updates this and keeps everything else.'),
   },
   async ({ type, dir, store: storePath, label, reads }) => {
-    const target = dir ? path.resolve(process.cwd(), dir) : process.cwd();
+    const target = dir ? path.resolve(resolveProjectDir(), dir) : resolveProjectDir();
     // The other answer to the session-start question. Nothing is declared;
     // the choice is recorded so the folder is not asked again.
     if (String(storePath || '').trim().toLowerCase() === 'general') {
