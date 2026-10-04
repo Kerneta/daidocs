@@ -2729,6 +2729,25 @@ if (wanted('version')) {
     /install folder itself/.test(drySelf.out) && !/AGENTS\.md/.test(drySelf.out), drySelf.out.slice(-160));
   ok('installAllInstructions skips per-project files in the install folder (V5)',
     /!t\.global && inSelf/.test(fs.readFileSync(path.join(here, 'setup.js'), 'utf8')));
+
+  // N1: --project-scope installs hooks, CLAUDE.md and MCP into one repo and nothing machine-wide,
+  // so a team can adopt on one repo and every other folder keeps a clean off-state.
+  const psRepo = path.join(dHome, 'scoped-repo');
+  fs.mkdirSync(psRepo, { recursive: true });
+  const ps = await runDry(['--project-scope', '--project', psRepo], dWork);
+  ok('--project-scope exits clean', ps.code === 0, String(ps.code));
+  ok('--project-scope writes the three hooks into the repo .claude/settings.json', (() => {
+    try { const h = JSON.parse(fs.readFileSync(path.join(psRepo, '.claude', 'settings.json'), 'utf8')).hooks || {};
+      return ['SessionStart', 'SessionEnd', 'Stop'].every(k => Array.isArray(h[k]) && h[k].length); } catch { return false; }
+  })(), ps.out.slice(-160));
+  ok('--project-scope writes the repo .mcp.json',
+    fs.existsSync(path.join(psRepo, '.mcp.json')) && /daidocs-mcp/.test(fs.readFileSync(path.join(psRepo, '.mcp.json'), 'utf8')));
+  ok('--project-scope writes the repo CLAUDE.md reading protocol',
+    fs.existsSync(path.join(psRepo, 'CLAUDE.md')) && /DAIDOCS READING PROTOCOL/.test(fs.readFileSync(path.join(psRepo, 'CLAUDE.md'), 'utf8')));
+  ok('--project-scope leaves the repo files committable (no .gitignore added)',
+    !fs.existsSync(path.join(psRepo, '.gitignore')));
+  ok('--project-scope changes nothing machine-wide',
+    !fs.existsSync(path.join(dHome, '.claude', 'settings.json')) && !fs.existsSync(path.join(dHome, '.claude.json')));
   ok('and names the one command that puts everything back', /setup\.js --restore/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*--restore[^\n]*/) || [''])[0]);
   ok('and logs what changed on this machine', /Changed on this machine/.test(silentRun.out),

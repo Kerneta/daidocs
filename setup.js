@@ -275,7 +275,7 @@ IconResource=${ico},0
   } catch (e) { log(`Folder icon not set: ${e.message}`); }
 }
 
-function setupCode(projectDir) {
+function setupCode(projectDir, share) {
   const dir = projectDir || process.cwd();
   if (path.resolve(dir) === path.resolve(HERE)) {
     log('Refusing to write .mcp.json into the install folder. Pass --project <your work folder>.');
@@ -288,7 +288,9 @@ function setupCode(projectDir) {
   cfg.mcpServers['daidocs-mcp'] = { command: NODE, args: [SERVER] };
   fs.writeFileSync(fp, JSON.stringify(cfg, null, 2));
   log(`Claude Code: .mcp.json written in ${dir}. Approve "daidocs-mcp" on next session`);
-  ignoreSetupFilesInGit(dir);
+  // A project-scoped install (share) is meant to be committed with the repo, so its files are NOT
+  // gitignored. The default per-user install keeps them out of git.
+  if (!share) ignoreSetupFilesInGit(dir);
   return true;
 }
 
@@ -407,8 +409,10 @@ function setupOtherClients() {
 // Register one Claude Code hook, replacing a stale entry from an older or moved install.
 // Match on THIS install's PATH, not just the script name: a name match would report a moved
 // install's hook as "already present" and never repoint it. Unrelated hooks are untouched.
-function registerHook(event, scriptPath, scriptName, description) {
-  const fp = path.join(os.homedir(), '.claude', 'settings.json');
+function registerHook(event, scriptPath, scriptName, description, settingsPath) {
+  // Default: the user-scope settings (every folder). A project-scoped install passes the repo's
+  // own .claude/settings.json instead, so the hooks live with the repo and nothing is machine-wide.
+  const fp = settingsPath || path.join(os.homedir(), '.claude', 'settings.json');
   fs.mkdirSync(path.dirname(fp), { recursive: true });
   backup(fp);
   const cfg = readJson(fp);
@@ -436,22 +440,22 @@ function registerHook(event, scriptPath, scriptName, description) {
   return true;
 }
 
-function setupHook() {
-  return registerHook('SessionEnd', ARCHIVER, 'session_archiver', 'every Claude Code session saves itself');
+function setupHook(settingsPath) {
+  return registerHook('SessionEnd', ARCHIVER, 'session_archiver', 'every Claude Code session saves itself', settingsPath);
 }
 
 // The other half of the loop. Without this, memory is written but never read
 // back at the start of a session, so the assistant begins every conversation
 // unaware that a store exists.
-function setupContextHook() {
-  return registerHook('SessionStart', CONTEXT, 'session_context', 'your memory index loads at the start of every session');
+function setupContextHook(settingsPath) {
+  return registerHook('SessionStart', CONTEXT, 'session_context', 'your memory index loads at the start of every session', settingsPath);
 }
 
 // Converting while the session is still live, using the assistant you are
 // already talking to. The SessionEnd archiver cannot do that: it is a detached
 // process, so its only route is a paid API call.
-function setupAutosaveHook() {
-  return registerHook('Stop', AUTOSAVE, 'session_autosave', 'sessions save themselves as you work, with no API key');
+function setupAutosaveHook(settingsPath) {
+  return registerHook('Stop', AUTOSAVE, 'session_autosave', 'sessions save themselves as you work, with no API key', settingsPath);
 }
 
 // The reading protocol: how to READ a store well once reachable. Registering the MCP server
@@ -828,11 +832,44 @@ function printDryRun() {
   console.log(L.join('\n'));
 }
 
+// N1: install scoped to ONE repo instead of the whole machine. The hooks go in the repo's own
+// .claude/settings.json, the reading protocol in the repo's CLAUDE.md, and the MCP server in the
+// repo's .mcp.json. Nothing user-global is touched, so every other folder keeps a clean off-state,
+// which is what lets a team adopt on one repo and makes a with/without baseline arm possible.
+function setupProjectScope(projectDir) {
+  const dir = path.resolve(projectDir || process.cwd());
+  if (dir === path.resolve(HERE)) {
+    log('Refusing to project-scope the install folder itself. Pass --project <your repo>.');
+    return false;
+  }
+  if (!fs.existsSync(dir)) { log(`${dir} does not exist. Pass --project <your repo>.`); return false; }
+  const settingsPath = path.join(dir, '.claude', 'settings.json');
+  const done = [];
+  const step = (label, fn) => { try { fn(); done.push(label); } catch (e) { log(`${label} failed: ${e.message}`); } };
+  step('SessionStart', () => setupContextHook(settingsPath));
+  step('Stop', () => setupAutosaveHook(settingsPath));
+  step('SessionEnd', () => setupHook(settingsPath));
+  step('.mcp.json', () => setupCode(dir, true));
+  step('CLAUDE.md', () => installInstructions(path.join(dir, 'CLAUDE.md')));
+  console.log('');
+  log(`Project-scoped install for ${dir}:`);
+  log(`  hooks     ${settingsPath}  (${done.filter(d => /Session|Stop/.test(d)).join(', ')})`);
+  log(`  reading   ${path.join(dir, 'CLAUDE.md')}`);
+  log(`  server    ${path.join(dir, '.mcp.json')}`);
+  log('Nothing machine-wide was changed: every other folder stays exactly as it was, so this');
+  log('repo is the only one with DaiDocs on, which also gives you a clean with/without baseline.');
+  log('Commit .claude/settings.json, CLAUDE.md and .mcp.json to share it with the repo. To undo,');
+  log('remove those three files (a .daidocs-bak copy of any pre-existing one sits beside it).');
+  return done.length > 0;
+}
+
 (async () => {
   console.log(`\nDaiDocs setup ${VERSION}: plain-text AI memory you own.\n`);
   // Before anything that could mutate (including the project-only and install-removal branches
   // below): --dry-run only prints what a full install would touch, then stops.
   if (has('dry-run') || has('dryrun')) { printDryRun(); return; }
+  // A repo-scoped install: hooks, CLAUDE.md and MCP in the repo, nothing machine-wide (N1).
+  if (has('project-scope')) { setupProjectScope(opt('project', null)); return; }
   // Every surface flag belongs here: a flag missing from this list makes setup fall into
   // interactive mode and block on the first question, so the flag alone would do nothing.
   const anyFlag = ['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'icon',
