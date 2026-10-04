@@ -388,6 +388,31 @@ project's memory too** when a part needs it; it asks once.
 
 ---
 
+## Your secrets stay out of it
+
+Memory is built from your sessions, so the obvious worry is that a key or a
+`.env` pasted into a chat ends up saved in plain text. It does not. Three things
+stand between your sessions and the store:
+
+- **A redaction pass on every capture.** Before anything is written to disk or
+  sent to a model, [`lib/redact.js`](lib/redact.js) strips credentials: API
+  keys, tokens, `.env` contents and the like. The test suite asserts that
+  secrets never reach the store, on every capture path.
+- **A `.daiignore` per project.** Drop a `.daiignore` at a project root and any
+  session whose folder matches a line in it is never captured at all: not the
+  raw, not the index, nothing. It reads like `.gitignore` (`secrets/`,
+  `logs/*`), and it is the clean way to keep a whole sensitive area out of
+  memory, beyond what redaction catches.
+- **A scrub command for what is already stored.** `node daidocs.js scrub`
+  re-runs redaction over an existing store, so a store made before a rule
+  existed can be cleaned in place.
+
+Nothing is uploaded anywhere. The store is plain files on your machine, and a
+model only ever sees a session if you set an API key or run on a subscription
+you chose. Full detail is in [`SECURITY.md`](SECURITY.md).
+
+---
+
 ## Does it work
 
 **83.00%** (415/500) on **LongMemEval-S**: 500 questions over chat histories

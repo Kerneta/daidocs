@@ -293,6 +293,16 @@ if (wanted('hook')) {
   const r3 = await runNode('session_archiver.mjs', [], env, JSON.stringify({ ...base, reason: 'exit' }));
   ok('an unchanged transcript is skipped', /already-saved|unchanged/.test(r3.err), r3.err.trim());
 
+  // SL4: resuming a session re-renders the same transcript, so re-archiving it must not duplicate
+  // an already-indexed memory. The hash-unchanged guard skips it, so the .dai count does not grow.
+  // (The start hook's matching guard, not re-injecting the prior context on resume, is checked in
+  // the #17 section below.)
+  const daiBeforeResume = fs.readdirSync(s).filter(f => f.endsWith('.dai')).length;
+  const rResume = await runNode('session_archiver.mjs', [], env, JSON.stringify({ ...base, reason: 'exit', source: 'resume' }));
+  const daiAfterResume = fs.readdirSync(s).filter(f => f.endsWith('.dai')).length;
+  ok('resuming and re-archiving an unchanged transcript adds no duplicate memory',
+    daiAfterResume === daiBeforeResume, `${daiBeforeResume} -> ${daiAfterResume}: ${rResume.err.trim()}`);
+
   const raws = fs.existsSync(path.join(s, '_raw')) ? fs.readdirSync(path.join(s, '_raw')) : [];
   ok('the full text is preserved in _raw', raws.some(f => f.endsWith('.txt')));
   const manifest = path.join(s, '_index', 'manifest.jsonl');
@@ -2660,6 +2670,20 @@ if (wanted('version')) {
   ok('a non-interactive install is never offered the Express/Custom choice, so it cannot hang',
     !/How would you like to set up/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*How would you like[^\n]*/) || [''])[0]);
+  // V4: the one-time install ping can never block a scripted run. Non-interactive returns without
+  // reading stdin, and --yes makes setup pass isTTY:false so even a TTY scripted install skips it.
+  {
+    const { maybeInstallPing } = require('./lib/install_ping.js');
+    let prompted = false;
+    const r = await maybeInstallPing({ version: 'test', isTTY: false,
+      flagFile: path.join(TMP, 'ping-v4', 'install.json'),
+      promptFn: async () => { prompted = true; return false; }, sendFn: async () => true, noPingEnv: false });
+    ok('the install ping never prompts on a non-interactive run (cannot hang)',
+      !!r && r.skipped === 'non-interactive' && !prompted, JSON.stringify(r));
+    const setupSrcV4 = fs.readFileSync(path.join(here, 'setup.js'), 'utf8');
+    ok('setup skips the ping under --yes by passing isTTY:false',
+      /isTTY: has\('yes'\) \? false : undefined/.test(setupSrcV4));
+  }
   ok('it registers the hooks it used to ask about',
     /SessionStart hook registered/.test(silentRun.out) && /Stop hook registered/.test(silentRun.out));
   ok('and installs the reading protocol', /Reading protocol installed/.test(silentRun.out));
@@ -2674,6 +2698,80 @@ if (wanted('version')) {
   ok('and the run says where to change any of it', /node setup\.js --status/.test(silentRun.out));
   ok('and tells the user to restart their assistant once', /[Rr]estart your assistant/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*estart your assistant[^\n]*/) || [''])[0]);
+
+  // A8/A9/H1: --dry-run prints every file a full install would touch and changes nothing. A fresh
+  // home proves the "touches nothing" claim (silentRun above already wrote into its own home).
+  const dHome = path.join(TMP, 'dryRun-home');
+  const dWork = path.join(dHome, 'work');
+  fs.mkdirSync(dWork, { recursive: true });
+  const dEnv = { ...process.env, HOME: dHome, USERPROFILE: dHome,
+    APPDATA: path.join(dHome, 'AppData', 'Roaming'), LOCALAPPDATA: path.join(dHome, 'AppData', 'Local'),
+    DAIDOCS_NO_PERSIST: '1', DAIDOCS_STORE: path.join(dHome, 'DaiDocs'), DAIDOCS_OBSERVER: '' };
+  const runDry = (args, cwd) => new Promise(res => {
+    const p3 = spawn(process.execPath, [path.join(here, 'setup.js'), ...args], { cwd, env: dEnv });
+    let out = ''; p3.stdout.on('data', d => out += d); p3.stderr.on('data', d => out += d);
+    p3.stdin.end(''); p3.on('close', code => res({ out, code }));
+  });
+  const dryRes = await runDry(['--dry-run'], dWork);
+  ok('--dry-run exits clean', dryRes.code === 0, String(dryRes.code));
+  ok('--dry-run announces itself and says it writes nothing',
+    /DRY RUN/.test(dryRes.out) && /Nothing below is written/.test(dryRes.out));
+  ok('--dry-run lists the user-scope Claude files',
+    /\.claude[\\/]settings\.json/.test(dryRes.out) && /\.claude\.json/.test(dryRes.out) && /CLAUDE\.md/.test(dryRes.out));
+  ok("--dry-run lists this project's .mcp.json", dryRes.out.includes(path.join(dWork, '.mcp.json')));
+  ok('--dry-run really touches nothing',
+    !fs.existsSync(path.join(dWork, '.mcp.json')) && !fs.existsSync(path.join(dHome, '.claude', 'settings.json'))
+    && !fs.existsSync(path.join(dHome, '.daidocs')),
+    fs.existsSync(path.join(dWork, '.mcp.json')) ? 'wrote .mcp.json' : 'clean');
+  // V5: inside the DaiDocs install folder itself, no per-project files are offered or written.
+  const drySelf = await runDry(['--dry-run'], here);
+  ok('--dry-run inside the install folder writes no project files there',
+    /install folder itself/.test(drySelf.out) && !/AGENTS\.md/.test(drySelf.out), drySelf.out.slice(-160));
+  ok('installAllInstructions skips per-project files in the install folder (V5)',
+    /!t\.global && inSelf/.test(fs.readFileSync(path.join(here, 'setup.js'), 'utf8')));
+
+  // N1: --project-scope installs hooks, CLAUDE.md and MCP into one repo and nothing machine-wide,
+  // so a team can adopt on one repo and every other folder keeps a clean off-state.
+  const psRepo = path.join(dHome, 'scoped-repo');
+  fs.mkdirSync(psRepo, { recursive: true });
+  const ps = await runDry(['--project-scope', '--project', psRepo], dWork);
+  ok('--project-scope exits clean', ps.code === 0, String(ps.code));
+  ok('--project-scope writes the three hooks into the repo .claude/settings.json', (() => {
+    try { const h = JSON.parse(fs.readFileSync(path.join(psRepo, '.claude', 'settings.json'), 'utf8')).hooks || {};
+      return ['SessionStart', 'SessionEnd', 'Stop'].every(k => Array.isArray(h[k]) && h[k].length); } catch { return false; }
+  })(), ps.out.slice(-160));
+  ok('--project-scope writes the repo .mcp.json',
+    fs.existsSync(path.join(psRepo, '.mcp.json')) && /daidocs-mcp/.test(fs.readFileSync(path.join(psRepo, '.mcp.json'), 'utf8')));
+  ok('--project-scope writes the repo CLAUDE.md reading protocol',
+    fs.existsSync(path.join(psRepo, 'CLAUDE.md')) && /DAIDOCS READING PROTOCOL/.test(fs.readFileSync(path.join(psRepo, 'CLAUDE.md'), 'utf8')));
+  ok('--project-scope leaves the repo files committable (no .gitignore added)',
+    !fs.existsSync(path.join(psRepo, '.gitignore')));
+  ok('--project-scope changes nothing machine-wide',
+    !fs.existsSync(path.join(dHome, '.claude', 'settings.json')) && !fs.existsSync(path.join(dHome, '.claude.json')));
+
+  // H2: a per-project .daiignore excludes a folder's sessions from capture entirely, on top of the
+  // credential redaction that already runs on every capture.
+  {
+    const Mi = require('./lib/session_marks');
+    ok('matchIgnore matches a folder name as prefix, suffix or any segment',
+      Mi.matchIgnore('secrets', 'secrets') && Mi.matchIgnore('secrets/x', 'secrets') && Mi.matchIgnore('a/secrets/b', 'secrets'));
+    ok('matchIgnore handles a path prefix and globs',
+      Mi.matchIgnore('vendor/pkg', 'vendor/') && Mi.matchIgnore('logs/today.txt', 'logs/*') && Mi.matchIgnore('deep/x/y', 'deep/**'));
+    ok('matchIgnore does not match an unrelated or partial name',
+      !Mi.matchIgnore('src/app', 'secrets') && !Mi.matchIgnore('secretsauce', 'secrets'));
+    const ig = path.join(TMP, 'daiignore-proj');
+    fs.mkdirSync(path.join(ig, 'secrets', 'inner'), { recursive: true });
+    fs.mkdirSync(path.join(ig, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(ig, '.git'), { recursive: true }); // make ig the project root
+    fs.writeFileSync(path.join(ig, '.daiignore'), '# keep secrets out of memory\nsecrets/\n');
+    ok('captureIgnored excludes a session under an ignored folder', Mi.captureIgnored(path.join(ig, 'secrets', 'inner')));
+    ok('captureIgnored allows a session elsewhere in the same project', !Mi.captureIgnored(path.join(ig, 'src')));
+    ok('captureIgnored is false when there is no .daiignore', !Mi.captureIgnored(dWork));
+    ok('the autosave hook consults .daiignore before writing',
+      /captureIgnored\(j\.cwd\)/.test(fs.readFileSync(path.join(here, 'session_autosave.mjs'), 'utf8')));
+    ok('the SessionEnd archiver consults .daiignore before capturing',
+      /captureIgnored\(j\.cwd\)/.test(fs.readFileSync(path.join(here, 'session_archiver.mjs'), 'utf8')));
+  }
   ok('and names the one command that puts everything back', /setup\.js --restore/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*--restore[^\n]*/) || [''])[0]);
   ok('and logs what changed on this machine', /Changed on this machine/.test(silentRun.out),
@@ -2752,8 +2850,11 @@ if (wanted('version')) {
   await runGi(['--code', '--instructions'], giHere, path.join(giHere, 'setup.js'));
   ok('setup run from the install folder does not write a .gitignore there',
     !fs.existsSync(path.join(giHere, '.gitignore')));
-  ok('even when that folder is a git repo and the protocol files were written',
-    fs.existsSync(path.join(giHere, 'AGENTS.md')));
+  // V5: and no per-project instruction files land in the install folder either, even though it is
+  // a git repo. The machine-wide CLAUDE.md is still written (to ~/.claude), just not repo files.
+  ok('and writes no per-project instruction files into the install folder (V5)',
+    !fs.existsSync(path.join(giHere, 'AGENTS.md')) && !fs.existsSync(path.join(giHere, 'GEMINI.md'))
+    && !fs.existsSync(path.join(giHere, '.cursorrules')));
 
   // git clone .../daidocs from a home directory makes ~/daidocs; the default store is ~/DaiDocs,
   // and on Windows/macOS those are one folder. If the store is already there git refuses (which

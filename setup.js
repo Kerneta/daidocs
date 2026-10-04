@@ -275,7 +275,7 @@ IconResource=${ico},0
   } catch (e) { log(`Folder icon not set: ${e.message}`); }
 }
 
-function setupCode(projectDir) {
+function setupCode(projectDir, share) {
   const dir = projectDir || process.cwd();
   if (path.resolve(dir) === path.resolve(HERE)) {
     log('Refusing to write .mcp.json into the install folder. Pass --project <your work folder>.');
@@ -288,7 +288,9 @@ function setupCode(projectDir) {
   cfg.mcpServers['daidocs-mcp'] = { command: NODE, args: [SERVER] };
   fs.writeFileSync(fp, JSON.stringify(cfg, null, 2));
   log(`Claude Code: .mcp.json written in ${dir}. Approve "daidocs-mcp" on next session`);
-  ignoreSetupFilesInGit(dir);
+  // A project-scoped install (share) is meant to be committed with the repo, so its files are NOT
+  // gitignored. The default per-user install keeps them out of git.
+  if (!share) ignoreSetupFilesInGit(dir);
   return true;
 }
 
@@ -407,8 +409,10 @@ function setupOtherClients() {
 // Register one Claude Code hook, replacing a stale entry from an older or moved install.
 // Match on THIS install's PATH, not just the script name: a name match would report a moved
 // install's hook as "already present" and never repoint it. Unrelated hooks are untouched.
-function registerHook(event, scriptPath, scriptName, description) {
-  const fp = path.join(os.homedir(), '.claude', 'settings.json');
+function registerHook(event, scriptPath, scriptName, description, settingsPath) {
+  // Default: the user-scope settings (every folder). A project-scoped install passes the repo's
+  // own .claude/settings.json instead, so the hooks live with the repo and nothing is machine-wide.
+  const fp = settingsPath || path.join(os.homedir(), '.claude', 'settings.json');
   fs.mkdirSync(path.dirname(fp), { recursive: true });
   backup(fp);
   const cfg = readJson(fp);
@@ -436,22 +440,22 @@ function registerHook(event, scriptPath, scriptName, description) {
   return true;
 }
 
-function setupHook() {
-  return registerHook('SessionEnd', ARCHIVER, 'session_archiver', 'every Claude Code session saves itself');
+function setupHook(settingsPath) {
+  return registerHook('SessionEnd', ARCHIVER, 'session_archiver', 'every Claude Code session saves itself', settingsPath);
 }
 
 // The other half of the loop. Without this, memory is written but never read
 // back at the start of a session, so the assistant begins every conversation
 // unaware that a store exists.
-function setupContextHook() {
-  return registerHook('SessionStart', CONTEXT, 'session_context', 'your memory index loads at the start of every session');
+function setupContextHook(settingsPath) {
+  return registerHook('SessionStart', CONTEXT, 'session_context', 'your memory index loads at the start of every session', settingsPath);
 }
 
 // Converting while the session is still live, using the assistant you are
 // already talking to. The SessionEnd archiver cannot do that: it is a detached
 // process, so its only route is a paid API call.
-function setupAutosaveHook() {
-  return registerHook('Stop', AUTOSAVE, 'session_autosave', 'sessions save themselves as you work, with no API key');
+function setupAutosaveHook(settingsPath) {
+  return registerHook('Stop', AUTOSAVE, 'session_autosave', 'sessions save themselves as you work, with no API key', settingsPath);
 }
 
 // The reading protocol: how to READ a store well once reachable. Registering the MCP server
@@ -482,18 +486,20 @@ function instructionTargets(projectDir) {
 }
 
 function installAllInstructions(projectDir, undo) {
-  if (projectDir && path.resolve(projectDir) === path.resolve(HERE)) {
-    log('Refusing to write assistant instructions into the install folder. Pass --project <your work folder>.');
-    return false;
-  }
+  const dir = projectDir || process.cwd();
+  // V5: when the "project" is the DaiDocs install folder itself (a clone run with no --project),
+  // skip the per-project files so the checkout never gets AGENTS.md/GEMINI.md/.cursorrules. The
+  // global Claude file lives in ~/.claude, so it is still written: it configures the machine, not
+  // the repo.
+  const inSelf = path.resolve(dir) === path.resolve(HERE);
   let n = 0;
   for (const t of instructionTargets(projectDir)) {
-    // Only create a project-level file if the user opted into this folder at all.
-    // The global Claude one is always written; the rest land beside their project.
+    if (!t.global && inSelf) continue;
     if (installInstructions(t.fp, undo)) n++;
   }
+  if (inSelf) log('In the DaiDocs install folder: wrote only the global reading protocol, no project files here.');
   log(`Reading protocol ${undo ? 'removed from' : 'installed for'} ${n} target(s): Claude Code, Codex/AGENTS.md, Gemini CLI, Cursor.`);
-  if (!undo && n > 0) ignoreSetupFilesInGit(projectDir || process.cwd());
+  if (!undo && n > 0 && !inSelf) ignoreSetupFilesInGit(dir);
   return n > 0;
 }
 
@@ -784,8 +790,86 @@ function ensureDependencies() {
   console.log('');
 }
 
+// --dry-run: print every file and setting a full install would create or modify, and change
+// nothing. Built from the same path logic the install uses, so it stays honest. Side-effect free
+// by construction: it enumerates, it never writes (A9/H1).
+function printDryRun() {
+  const home = os.homedir();
+  const project = opt('project', null) || process.cwd();
+  const inSelf = path.resolve(project) === path.resolve(HERE);
+  const L = [];
+  L.push('DRY RUN. These are the files and settings a full "node setup.js" would create or modify.');
+  L.push('Nothing below is written. Every file is backed up first and restorable with: node setup.js --restore');
+  L.push('');
+  L.push('Claude Desktop:');
+  L.push(`  ${desktopConfigPath()}   (daidocs-mcp server)`);
+  L.push('Claude Code, user scope (every folder on this machine):');
+  L.push(`  ${path.join(home, '.claude', 'settings.json')}   (SessionStart, Stop and autosave hooks)`);
+  L.push(`  ${path.join(home, '.claude.json')}   (daidocs-mcp server registration)`);
+  L.push(`  ${path.join(home, '.claude', 'CLAUDE.md')}   (reading protocol, machine-wide)`);
+  L.push('This folder:');
+  if (inSelf) {
+    L.push('  (this is the DaiDocs install folder itself, so no project files are written here)');
+  } else {
+    L.push(`  ${path.join(project, '.mcp.json')}   (daidocs-mcp for this project)`);
+    for (const t of instructionTargets(project)) if (!t.global) L.push(`  ${t.fp}   (${t.who})`);
+    L.push(`  ${path.join(project, '.gitignore')}   (only if this is a git repo: adds .mcp.json, AGENTS.md, GEMINI.md, .cursorrules)`);
+  }
+  L.push('Other MCP clients (only the ones installed on this machine):');
+  for (const c of otherMcpClients()) L.push(`  ${c.fp}   (${c.name}${fs.existsSync(c.dir) ? '' : ', not installed here so it would be skipped'})`);
+  L.push('File type / associations:');
+  L.push(process.platform === 'win32'
+    ? '  Windows registry HKCU\\Software\\Classes\\.dai   (the .dai file icon)'
+    : `  ${path.join(home, '.local', 'share', 'mime')} and the icon folders   (the .dai file type)`);
+  L.push('User environment:');
+  L.push(`  DAIDOCS_OBSERVER, and the provider key variable if you set one, via ${process.platform === 'win32' ? 'setx and HKCU\\Environment' : 'your shell profile'}`);
+  L.push('Memory store and install records:');
+  L.push(`  ${process.env.DAIDOCS_STORE || path.join(home, 'DaiDocs')}   (your memory; --restore never deletes it)`);
+  L.push(`  ${path.join(home, '.daidocs')}   (install state, ledger and permissions)`);
+  L.push('');
+  L.push('A specific flag narrows this (for example --code, --hook, --project <dir>); a bare run does all of it.');
+  L.push('Run it for real: node setup.js   (or node setup.js --ask to approve each step).');
+  console.log(L.join('\n'));
+}
+
+// N1: install scoped to ONE repo instead of the whole machine. The hooks go in the repo's own
+// .claude/settings.json, the reading protocol in the repo's CLAUDE.md, and the MCP server in the
+// repo's .mcp.json. Nothing user-global is touched, so every other folder keeps a clean off-state,
+// which is what lets a team adopt on one repo and makes a with/without baseline arm possible.
+function setupProjectScope(projectDir) {
+  const dir = path.resolve(projectDir || process.cwd());
+  if (dir === path.resolve(HERE)) {
+    log('Refusing to project-scope the install folder itself. Pass --project <your repo>.');
+    return false;
+  }
+  if (!fs.existsSync(dir)) { log(`${dir} does not exist. Pass --project <your repo>.`); return false; }
+  const settingsPath = path.join(dir, '.claude', 'settings.json');
+  const done = [];
+  const step = (label, fn) => { try { fn(); done.push(label); } catch (e) { log(`${label} failed: ${e.message}`); } };
+  step('SessionStart', () => setupContextHook(settingsPath));
+  step('Stop', () => setupAutosaveHook(settingsPath));
+  step('SessionEnd', () => setupHook(settingsPath));
+  step('.mcp.json', () => setupCode(dir, true));
+  step('CLAUDE.md', () => installInstructions(path.join(dir, 'CLAUDE.md')));
+  console.log('');
+  log(`Project-scoped install for ${dir}:`);
+  log(`  hooks     ${settingsPath}  (${done.filter(d => /Session|Stop/.test(d)).join(', ')})`);
+  log(`  reading   ${path.join(dir, 'CLAUDE.md')}`);
+  log(`  server    ${path.join(dir, '.mcp.json')}`);
+  log('Nothing machine-wide was changed: every other folder stays exactly as it was, so this');
+  log('repo is the only one with DaiDocs on, which also gives you a clean with/without baseline.');
+  log('Commit .claude/settings.json, CLAUDE.md and .mcp.json to share it with the repo. To undo,');
+  log('remove those three files (a .daidocs-bak copy of any pre-existing one sits beside it).');
+  return done.length > 0;
+}
+
 (async () => {
   console.log(`\nDaiDocs setup ${VERSION}: plain-text AI memory you own.\n`);
+  // Before anything that could mutate (including the project-only and install-removal branches
+  // below): --dry-run only prints what a full install would touch, then stops.
+  if (has('dry-run') || has('dryrun')) { printDryRun(); return; }
+  // A repo-scoped install: hooks, CLAUDE.md and MCP in the repo, nothing machine-wide (N1).
+  if (has('project-scope')) { setupProjectScope(opt('project', null)); return; }
   // Every surface flag belongs here: a flag missing from this list makes setup fall into
   // interactive mode and block on the first question, so the flag alone would do nothing.
   const anyFlag = ['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'icon',
@@ -1045,6 +1129,8 @@ function ensureDependencies() {
   // One-time, opt-in install ping. Off by default; never blocks or breaks setup.
   try {
     const { maybeInstallPing } = require('./lib/install_ping.js');
-    await maybeInstallPing({ version: VERSION });
+    // --yes is a scripted install: treat the one-time ping as non-interactive so it is left
+    // unasked for the next interactive run, meaning a TTY run with --yes can never hang here (V4).
+    await maybeInstallPing({ version: VERSION, isTTY: has('yes') ? false : undefined });
   } catch (e) { /* telemetry must never break the install */ }
 })();

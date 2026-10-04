@@ -41,7 +41,7 @@ function useStore(cwd) {
 
 for (const d of ['_index', '_raw', '_pending', '_unconverted']) fs.mkdirSync(path.join(STORE_DIR, d), { recursive: true });
 const { resolveObserver, subscriptionMode } = require('./lib/host');
-const { writeUnconverted, clearUnconverted, rawFor } = require('./lib/session_marks');
+const { writeUnconverted, clearUnconverted, rawFor, captureIgnored } = require('./lib/session_marks');
 const { needsKey } = require('./lib/observers');
 // Host-aware observer (DAIDOCS_OBSERVER overrides). Chosen once at install so every entry
 // point writes a store with the same observer.
@@ -50,7 +50,7 @@ const OBSERVER_SPEC = OBSERVER.spec;
 const MIN_TOKENS = 300;
 
 // On a subscription this hook doesn't call a PAID model: it saves the transcript and stops,
-// since the next session converts for free. needsKey scopes the refusal to spending money —
+// since the next session converts for free. needsKey scopes the refusal to spending money:
 // a keyless observer still runs here (which keeps the offline test path meaningful).
 const SUBSCRIPTION = subscriptionMode() && needsKey(OBSERVER_SPEC);
 
@@ -123,7 +123,7 @@ async function archive(sessionId, transcriptPath, project) {
   if (countTokens(text) < MIN_TOKENS) return 'too-small';
 
   // Idempotency is on CONTENT, not the session id alone: SessionEnd fires on /clear too and
-  // the session continues, so compare rendered vs last-indexed — identical = done, a strict
+  // the session continues, so compare rendered vs last-indexed: identical = done, a strict
   // extension = index only the new turns, anything else = a fresh continuation.
   const rawPath = path.join(STORE_DIR, '_raw', id + '.txt');
   const metaPath = path.join(STORE_DIR, '_raw', id + '.meta.json');
@@ -264,15 +264,21 @@ if (process.argv.includes('--catch-up')) {
   const transcriptPath = j.transcript_path || process.argv[2];
   const sessionId = j.session_id || (transcriptPath ? path.basename(transcriptPath, '.jsonl') : null);
   if (!transcriptPath || !sessionId) { console.error('session_archiver: no transcript_path'); process.exit(0); }
-  // tag the memory with its project so recall can scope to one project
-  const project = projectName(j.cwd);
-  // A locked or frozen project accepts nothing, and says so rather than failing
-  // silently halfway through an append.
-  const resolved = useStore(j.cwd);
-  const w = S.canWrite(resolved);
-  if (!w.ok) { console.error(`daidocs session_archiver: skipped, ${w.reason}`); process.exitCode = 0; }
-  const result = await archive(sessionId, transcriptPath, project);
-  console.error(`daidocs session_archiver: ${result} (${sessionId})`);
+  // A .daiignore at the project root can exclude this folder's sessions from capture (H2).
+  if (captureIgnored(j.cwd)) {
+    console.error('daidocs session_archiver: skipped (.daiignore)');
+    process.exitCode = 0;
+  } else {
+    // tag the memory with its project so recall can scope to one project
+    const project = projectName(j.cwd);
+    // A locked or frozen project accepts nothing, and says so rather than failing
+    // silently halfway through an append.
+    const resolved = useStore(j.cwd);
+    const w = S.canWrite(resolved);
+    if (!w.ok) { console.error(`daidocs session_archiver: skipped, ${w.reason}`); process.exitCode = 0; }
+    const result = await archive(sessionId, transcriptPath, project);
+    console.error(`daidocs session_archiver: ${result} (${sessionId})`);
+  }
   // Set the code, not process.exit(): exiting while a failed request's socket is still
   // closing trips a libuv assertion on Windows.
   // never block session end
