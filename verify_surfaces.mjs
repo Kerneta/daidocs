@@ -442,6 +442,22 @@ if (wanted('autosave')) {
     ok('and the unconverted tail is cleared', !fs.existsSync(path.join(s, '_unconverted', sid + '.txt')));
     const nothingNew = await c.callTool({ name: 'save_memory', arguments: { title: 'retry decision again', session: sid, understanding: u2 } });
     ok('saving the same session again with nothing waiting is refused, not silent', nothingNew.isError === true, (nothingNew.content[0].text || '').slice(0, 70));
+
+    // F8a: a malformed understanding (facts as a string, entities not an object, no summary) must
+    // not throw or poison the index. It is repaired, the memory still indexes, and the raw is kept.
+    const daiBeforeBad = fs.readdirSync(s).filter(f => f.endsWith('.dai')).length;
+    const bad = await c.callTool({ name: 'save_memory', arguments: {
+      title: 'malformed shape note', date: '2026-09-03',
+      content: `F8A_NEEDLE the deploy window is Tuesday 09:00 UTC.\n${LONG}`,
+      understanding: { facts: 'not-a-list', entities: 'nope', events: [{ what: 42 }], summary: null, topics: 'x' } } });
+    ok('save_memory accepts a malformed understanding instead of failing (F8a)', !bad.isError, (bad.content[0].text || '').slice(0, 100));
+    const daiAfterBad = fs.readdirSync(s).filter(f => f.endsWith('.dai'));
+    ok('the malformed save still produced an indexed .dai (F8a)', daiAfterBad.length === daiBeforeBad + 1, `${daiBeforeBad} -> ${daiAfterBad.length}`);
+    ok('and its verbatim content is preserved and reaches the index (F8a)',
+      daiAfterBad.map(f => fs.readFileSync(path.join(s, f), 'utf8')).join('\n').includes('F8A_NEEDLE'));
+    const idxFacts = path.join(s, '_index', 'facts.jsonl');
+    ok('the facts index stays valid JSON lines after a malformed save (F8a)',
+      !fs.existsSync(idxFacts) || fs.readFileSync(idxFacts, 'utf8').split('\n').filter(Boolean).every(l => { try { JSON.parse(l); return true; } catch { return false; } }));
   }
 
   // #F8b: type is an enum now, so a client sending a bogus type is told the valid set
@@ -584,6 +600,27 @@ if (wanted('autosave')) {
     ok("another project's capture in the same store is not counted here",
       !M.unconvertedFor(bs, proj).some(u => u.id === 'cc_b3-other')
       && !M.pendingFor(bs, proj, null).some(p => p.id === 'cc_b3-other'));
+  }
+
+  // SK1: four processes can write one store's append-only indexes at once, and a multi-kilobyte
+  // append is not atomic, so without serialization two writers interleave a half-line into a
+  // .jsonl and break every later JSON.parse. appendIndex locks per file; this fires many large
+  // concurrent appends from separate processes and asserts every resulting line still parses.
+  {
+    const dir = path.join(TMP, 'sk1-concurrency');
+    fs.mkdirSync(dir, { recursive: true });
+    const idx = path.join(dir, 'facts.jsonl');
+    const lockLib = path.join(here, 'lib', 'lock.js');
+    const W = 6, N = 30;
+    const prog = "const {appendIndex}=require(process.argv[1]);const f=process.argv[2],w=process.argv[3],n=+process.argv[4];const pad='x'.repeat(6000);for(let i=0;i<n;i++)appendIndex(f,JSON.stringify({w,i,pad}));";
+    await Promise.all(Array.from({ length: W }, (_, w) => new Promise(res => {
+      const p = spawn(process.execPath, ['-e', prog, lockLib, idx, String(w), String(N)], { cwd: here });
+      p.on('close', () => res());
+    })));
+    const lines = fs.existsSync(idx) ? fs.readFileSync(idx, 'utf8').split('\n').filter(Boolean) : [];
+    const allValid = lines.every(l => { try { JSON.parse(l); return true; } catch { return false; } });
+    ok('concurrent writers never interleave a half-line into an index (SK1)',
+      allValid && lines.length === W * N, `${lines.length}/${W * N} lines, allValid=${allValid}`);
   }
 
   // The folder question, enforced by the Stop hook. In an askable folder the
@@ -2699,6 +2736,34 @@ if (wanted('version')) {
   ok('and tells the user to restart their assistant once', /[Rr]estart your assistant/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*estart your assistant[^\n]*/) || [''])[0]);
 
+  // S2: a full install exports the model and claims autosave (it installed it); a scoped run does
+  // neither; and --restore takes back the DAIDOCS_OBSERVER a full install wrote. silentRun above is
+  // the full-install baseline (its env has DAIDOCS_NO_PERSIST, so persistVars logs "Would save").
+  ok('a full install exports DAIDOCS_OBSERVER', /Would save:[^\n]*DAIDOCS_OBSERVER/.test(silentRun.out),
+    (silentRun.out.match(/Would save:[^\n]*/) || [''])[0]);
+  ok('a full install says autosave is on, because it installed it', /save themselves as you work/.test(silentRun.out));
+  const s2Home = path.join(TMP, 's2-home');
+  const s2Work = path.join(s2Home, 'work');
+  fs.mkdirSync(s2Work, { recursive: true });
+  const s2Env = { ...process.env, HOME: s2Home, USERPROFILE: s2Home,
+    APPDATA: path.join(s2Home, 'AppData', 'Roaming'), LOCALAPPDATA: path.join(s2Home, 'AppData', 'Local'),
+    DAIDOCS_NO_PERSIST: '1', DAIDOCS_STORE: path.join(s2Home, 'DaiDocs'), DAIDOCS_OBSERVER: '' };
+  const runS2 = args => new Promise(res => {
+    const p4 = spawn(process.execPath, [path.join(here, 'setup.js'), ...args], { cwd: s2Work, env: s2Env });
+    let out = ''; p4.stdout.on('data', d => out += d); p4.stderr.on('data', d => out += d);
+    p4.stdin.end(''); p4.on('close', code => res({ out, code }));
+  });
+  const scopedRun = await runS2(['--icon']);
+  ok('a scoped run does not export DAIDOCS_OBSERVER machine-wide (S2)',
+    !/Would save:[^\n]*DAIDOCS_OBSERVER/.test(scopedRun.out) && /left out of your machine environment/.test(scopedRun.out),
+    scopedRun.out.slice(-200));
+  ok('a scoped run does not falsely claim autosave is on (S2)', !/save themselves as you work/.test(scopedRun.out));
+  await runS2([]); // a full install, so there is a recorded env var to take back
+  const restoredRun = await runS2(['--restore']);
+  ok('--restore takes back the DAIDOCS_OBSERVER it wrote (S2)',
+    /environment:[^\n]*DAIDOCS_OBSERVER/i.test(restoredRun.out),
+    (restoredRun.out.match(/[^\n]*DAIDOCS_OBSERVER[^\n]*/) || [''])[0]);
+
   // A8/A9/H1: --dry-run prints every file a full install would touch and changes nothing. A fresh
   // home proves the "touches nothing" claim (silentRun above already wrote into its own home).
   const dHome = path.join(TMP, 'dryRun-home');
@@ -3219,23 +3284,59 @@ if (wanted('version')) {
   const bareMock = await runResolve({ DAIDOCS_OBSERVER: 'mock' });
   ok('a bare keyless name (mock, no colon) is honoured too', bareMock.spec === 'mock', String(bareMock.spec));
 
-  // A PAID env value that contradicts the recorded choice is treated as stale.
+  // A PAID env value that contradicts the recorded choice, with NO key for it, is treated as
+  // stale: that is the only case that could cost money by accident. The key is cleared here so
+  // the check is deterministic on a machine that happens to have one set.
   const chosen = H2.resolveObserver().spec;
-  const stale = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini' });
+  const stale = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', OPENAI_API_KEY: '' });
   const record = (() => { try { return require('./lib/versioning').currentInstall(); } catch { return null; } })();
   if (record && record.observer && record.observer !== 'openai:gpt-4.1-mini') {
-    ok('a stale paid DAIDOCS_OBSERVER loses to the recorded choice', stale.spec === record.observer, String(stale.spec));
+    ok('a stale paid DAIDOCS_OBSERVER with no key loses to the recorded choice', stale.spec === record.observer, String(stale.spec));
     ok('and the override is reported, not hidden', stale.overrode === 'openai:gpt-4.1-mini', String(stale.overrode));
   } else {
-    ok('a stale paid DAIDOCS_OBSERVER loses to the recorded choice', true, 'no recorded choice on this machine, skipped');
+    ok('a stale paid DAIDOCS_OBSERVER with no key loses to the recorded choice', true, 'no recorded choice on this machine, skipped');
     ok('and the override is reported, not hidden', true, 'no recorded choice on this machine, skipped');
   }
+  // S3: the same paid env value WINS once its API key is present, with no DAIDOCS_USE_API needed.
+  // A model the user has a key for is a deliberate, affordable choice, not the stale accident.
+  const keyed = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', OPENAI_API_KEY: 'sk-test-present' });
+  ok('a paid DAIDOCS_OBSERVER wins when its key is present (S3)',
+    keyed.spec === 'openai:gpt-4.1-mini' && !keyed.overrode, JSON.stringify(keyed));
   // With DAIDOCS_USE_API=1 the user has opted into paying, so a paid env value is a
   // decision, not an accident, and must not be swapped for the recorded choice (#13).
-  const deliberate = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', DAIDOCS_USE_API: '1' });
+  const deliberate = await runResolve({ DAIDOCS_OBSERVER: 'openai:gpt-4.1-mini', DAIDOCS_USE_API: '1', OPENAI_API_KEY: '' });
   ok('DAIDOCS_USE_API=1 makes a paid DAIDOCS_OBSERVER win', deliberate.spec === 'openai:gpt-4.1-mini' && !deliberate.overrode, JSON.stringify(deliberate));
   ok('save_memory names a set-aside DAIDOCS_OBSERVER in its error', /r\.overrode \?[^\n]*DAIDOCS_USE_API=1/.test(fs.readFileSync(path.join(here, 'mcp_server.mjs'), 'utf8')));
   ok('resolution agrees with itself across processes', typeof chosen === 'string' && chosen.includes(':'), chosen);
+
+  // S7: DAIDOCS_HOST forces host detection for CI and clean test environments, over env markers
+  // and installed tools; an invalid value is ignored rather than obeyed; "none" forces no host.
+  const detectWith = env => new Promise(res => {
+    const p = spawn(process.execPath, ['-e', "process.stdout.write(String(require('./lib/host').detectHost() || 'none'))"],
+      { cwd: here, env: { ...process.env, ...env } });
+    let out = ''; p.stdout.on('data', d => out += d); p.on('close', () => res(out.trim()));
+  });
+  ok('DAIDOCS_HOST forces the host over env markers (S7)', (await detectWith({ DAIDOCS_HOST: 'openai', CLAUDECODE: '1' })) === 'openai');
+  ok('DAIDOCS_HOST=none forces no host (S7)', (await detectWith({ DAIDOCS_HOST: 'none', CLAUDECODE: '1' })) === 'none');
+  ok('an invalid DAIDOCS_HOST is ignored, not obeyed', (await detectWith({ DAIDOCS_HOST: 'bogus', CLAUDECODE: '1' })) === 'anthropic');
+
+  // S4: embeddings route through DAIDOCS_EMBED_BASE_URL or OPENAI_BASE_URL (for a proxy or an
+  // OpenAI-compatible gateway) instead of a hardcoded endpoint, and the lexical fallback the
+  // reader takes when embeddings are unavailable is logged loudly rather than silently.
+  {
+    const E = require('./lib/embeddings');
+    const saveB = process.env.OPENAI_BASE_URL, saveD = process.env.DAIDOCS_EMBED_BASE_URL;
+    delete process.env.OPENAI_BASE_URL; delete process.env.DAIDOCS_EMBED_BASE_URL;
+    ok('embeddings default to the public OpenAI endpoint', E.embedUrl() === 'https://api.openai.com/v1/embeddings', E.embedUrl());
+    process.env.OPENAI_BASE_URL = 'https://proxy.example/v1';
+    ok('embeddings honor OPENAI_BASE_URL (S4)', E.embedUrl() === 'https://proxy.example/v1/embeddings', E.embedUrl());
+    process.env.DAIDOCS_EMBED_BASE_URL = 'https://gw.example/v1/';
+    ok('a dedicated DAIDOCS_EMBED_BASE_URL wins over OPENAI_BASE_URL (S4)', E.embedUrl() === 'https://gw.example/v1/embeddings', E.embedUrl());
+    if (saveB === undefined) delete process.env.OPENAI_BASE_URL; else process.env.OPENAI_BASE_URL = saveB;
+    if (saveD === undefined) delete process.env.DAIDOCS_EMBED_BASE_URL; else process.env.DAIDOCS_EMBED_BASE_URL = saveD;
+    ok('the lexical fallback is logged loudly when embeddings are unavailable (S4)',
+      /manifest shortlist disabled/.test(fs.readFileSync(path.join(here, 'lib', 'methods', 'daidocs-reader', 'method.js'), 'utf8')));
+  }
 
   // Conversion outside a session cannot use the subscription, so it must offer
   // the free route rather than quietly billing.

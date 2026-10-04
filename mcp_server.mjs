@@ -28,6 +28,7 @@ const { needsKey } = require('./lib/observers');
 const S = require('./lib/stores');
 const { markSaved, unconvertedFor, cleanId, UNCONVERTED } = require('./lib/session_marks');
 const { capRecallContext } = require('./lib/recall_cap');
+const { appendIndex } = require('./lib/lock');
 const Reg = require('./lib/registry');
 
 // Resolved per call, not once at startup: one server serves every project, and
@@ -110,7 +111,7 @@ const manifestEntries = store => (store.files['_index/manifest.jsonl'] || '').tr
   .map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
 
 // Sessions captured but not yet indexed. _raw is lossless storage, not memory: nothing that
-// answers a question reads it, so an unconverted session is safe but unfindable — hence
+// answers a question reads it, so an unconverted session is safe but unfindable, hence
 // every read reports the backlog rather than answering as if it weren't there.
 function pendingCount(storeDir) {
   try { return fs.readdirSync(path.join(storeDir, '_pending')).filter(f => f.endsWith('.json')).length; }
@@ -164,6 +165,42 @@ function chunkText(text, target = 3000) {
 // recall accuracy (format-grid study); unwrap lines inside paragraphs
 const unwrap = t => String(t).replace(/\r\n/g, '\n').split(/\n\n+/)
   .map(p => (/^\s*([-*#>]|\d+\.)/.test(p) ? p : p.replace(/\n(?![-*#>]|\d+\.)/g, ' '))).join('\n\n');
+
+// F8a: validate a caller-supplied understanding at write time and coerce it to the shape the
+// engine and the _index files expect, so a malformed extraction (facts as a string, entities not
+// an object, a missing summary) cannot throw mid-ingest, leaving an un-indexed raw, or append
+// garbage rows to the append-only indexes. Unknown fields are kept; the typed ones are repaired.
+// Lossless fallback: if nothing usable survives, a minimal summary is taken from the text, so the
+// memory is still searchable rather than empty. The raw verbatim is written separately regardless.
+function sanitizeUnderstanding(u, text) {
+  const arr = v => (Array.isArray(v) ? v : []);
+  const str = v => (typeof v === 'string' ? v : (v == null ? '' : String(v)));
+  const o = (u && typeof u === 'object' && !Array.isArray(u)) ? u : {};
+  const ent = (o.entities && typeof o.entities === 'object' && !Array.isArray(o.entities)) ? o.entities : {};
+  const facts = arr(o.facts).map(f => {
+    if (typeof f === 'string') return { fact: f, date: null, kind: 'event' };
+    if (f && typeof f === 'object') return { fact: str(f.fact), date: typeof f.date === 'string' ? f.date : null, kind: str(f.kind) || 'event' };
+    return null;
+  }).filter(f => f && f.fact);
+  const events = arr(o.events)
+    .map(e => (e && typeof e === 'object') ? { date: typeof e.date === 'string' ? e.date : null, cat: str(e.cat), what: str(e.what) } : null)
+    .filter(Boolean);
+  const out = {
+    ...o,
+    entities: {
+      people: arr(ent.people), orgs: arr(ent.orgs), dates: arr(ent.dates),
+      amounts: arr(ent.amounts), places: arr(ent.places),
+    },
+    actions: arr(o.actions), facts, events,
+    preferences: arr(o.preferences), decisions: arr(o.decisions),
+    topics: arr(o.topics), tags: arr(o.tags), open_questions: arr(o.open_questions),
+    summary: str(o.summary), sentiment: str(o.sentiment) || 'neutral',
+  };
+  if (!out.summary && !out.facts.length && !out.topics.length) {
+    out.summary = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 300);
+  }
+  return out;
+}
 
 const server = new McpServer({ name: 'daidocs-mcp', version: VERSION });
 
@@ -304,12 +341,15 @@ server.tool(
       title = t.text;
       understanding = u.value;
     }
+    // F8a: repair a malformed caller-supplied understanding before it reaches the engine, so a bad
+    // shape cannot throw mid-ingest or write garbage rows to the indexes. The raw is kept either way.
+    if (understanding) understanding = sanitizeUnderstanding(understanding, content);
     // The MCP client announces itself at the handshake, which is a better host
     // signal than the environment: it names the app actually calling us.
     const clientName = (server.server.getClientVersion && server.server.getClientVersion() || {}).name;
 
     // Two ways to get an Understanding. The engine only asks a "provider" for a JSON string,
-    // so a caller that already read the conversation can supply its own extraction — free,
+    // so a caller that already read the conversation can supply its own extraction, free,
     // keyless, and the only route when the API has no credit. Otherwise the observer runs.
     let spec, observer;
     if (understanding) {
@@ -317,7 +357,7 @@ server.tool(
       observer = { id: 'inline', model: 'caller-supplied', live: false, available: () => true, complete: async () => JSON.stringify(understanding) };
     } else if (subscriptionMode(clientName) && needsKey(resolveObserver(clientName).spec)) {
       // On a subscription, don't spend API credit for a second model to re-read what the
-      // caller already read — ask the caller to write the extraction instead.
+      // caller already read, so ask the caller to write the extraction instead.
       return { content: [{ type: 'text', text: 'save_memory: call this again with "understanding" filled in. You have read this conversation, so write the extraction yourself: it is free on the subscription, and no API key is used. The schema is in the description of this tool.' }], isError: true };
     } else {
       const r = resolveObserver(clientName);
@@ -362,7 +402,7 @@ server.tool(
       }, observer);
       for (const f of res.files) {
         const p = path.join(STORE_DIR, f.path);
-        if (f.path.startsWith('_index/')) fs.appendFileSync(p, attribute(f.path, f.content, id));
+        if (f.path.startsWith('_index/')) appendIndex(p, attribute(f.path, f.content, id));
         else fs.writeFileSync(p, f.content);
       }
       // The .dai raw: pointer names _raw/<engine id>, known only after ingest. Point it at the
@@ -415,7 +455,7 @@ server.tool(
 
 // One deliberate summary sent UP to the parent store. A confidential part is never a read
 // candidate for anyone (including its parent), so when reading down is refused by design the
-// part decides what leaves, in a person's words. Not a digest — a readable parent gets a
+// part decides what leaves, in a person's words. Not a digest: a readable parent gets a
 // live one for free.
 server.tool(
   'brief_parent',
@@ -452,7 +492,7 @@ server.tool(
     const res = await daidocs.ingest({ id, sourceId: id, title, type: 'note', app: 'mcp', capturedAt: when, raw: body }, observer);
     for (const f of res.files) {
       const p = path.join(up.storeDir, f.path);
-      if (f.path.startsWith('_index/')) fs.appendFileSync(p, attribute(f.path, f.content, id));
+      if (f.path.startsWith('_index/')) appendIndex(p, attribute(f.path, f.content, id));
       else fs.writeFileSync(p, f.content);
     }
     const daiOut = res.files.find(f => f.path.endsWith('.dai'));
@@ -461,7 +501,7 @@ server.tool(
   }
 );
 
-// Give this folder its own memory, from the conversation — the per-project store system is
+// Give this folder its own memory, from the conversation: the per-project store system is
 // otherwise reachable only by a terminal command nobody runs.
 server.tool(
   'declare_project',
