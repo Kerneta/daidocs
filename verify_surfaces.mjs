@@ -33,6 +33,15 @@ const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'daidocs-verify-'));
 // dozens of temp folders in-process, so setting it later leaks temp paths into the real
 // ~/.daidocs/stores.json.
 process.env.DAIDOCS_REGISTRY = path.join(TMP, 'registry', 'stores.json');
+
+// Neutralized before any test runs, so every spawn that inherits {...process.env} gets a clean
+// slate. Claude Code sets these two for the live session; without clearing them resolveProjectDir()
+// in a spawned MCP server or hook resolves to the REAL project folder (CLAUDE_PROJECT_DIR, or the
+// cwd recorded for CLAUDE_CODE_SESSION_ID in ~/.daidocs/session-stores.json) instead of the test's
+// temp cwd, and a declare_project test then rewrites the real .daidocs/config.json. The dedicated
+// resolveProjectDir tests set their own values explicitly, so clearing them here does not affect them.
+delete process.env.CLAUDE_PROJECT_DIR;
+delete process.env.CLAUDE_CODE_SESSION_ID;
 const MOCK = 'mock:mock';
 let pass = 0, fail = 0;
 
@@ -2849,6 +2858,22 @@ if (wanted('version')) {
     !fs.existsSync(path.join(psRepo, '.gitignore')));
   ok('--project-scope changes nothing machine-wide',
     !fs.existsSync(path.join(dHome, '.claude', 'settings.json')) && !fs.existsSync(path.join(dHome, '.claude.json')));
+  // N1 portability: by default the committed config references the published package through npx, so
+  // it resolves on a teammate's machine rather than hardcoding this install's absolute paths.
+  const psSettings = fs.readFileSync(path.join(psRepo, '.claude', 'settings.json'), 'utf8');
+  const psMcp = fs.readFileSync(path.join(psRepo, '.mcp.json'), 'utf8');
+  ok('--project-scope hooks are portable (npx, not an absolute local path)',
+    /npx -y -p daidocs daidocs-context/.test(psSettings) && /daidocs-autosave/.test(psSettings)
+    && /daidocs-archive/.test(psSettings) && !/mcp-home[\\/].*session_context\.mjs|daidocs-live/.test(psSettings), psSettings.slice(0, 200));
+  ok('--project-scope MCP server is portable (npx -p daidocs daidocs-server)',
+    /"command":\s*"npx"/.test(psMcp) && /daidocs-server/.test(psMcp));
+  // --local pins absolute paths for a single machine (not shareable, but faster).
+  const psLocalRepo = path.join(dHome, 'scoped-repo-local');
+  fs.mkdirSync(psLocalRepo, { recursive: true });
+  await runDry(['--project-scope', '--local', '--project', psLocalRepo], dWork);
+  const psLocalMcp = fs.readFileSync(path.join(psLocalRepo, '.mcp.json'), 'utf8');
+  ok('--project-scope --local pins absolute paths (node + mcp_server.mjs), not npx',
+    /mcp_server\.mjs/.test(psLocalMcp) && !/"npx"/.test(psLocalMcp), psLocalMcp.slice(0, 160));
 
   // H2: a per-project .daiignore excludes a folder's sessions from capture entirely, on top of the
   // credential redaction that already runs on every capture.
