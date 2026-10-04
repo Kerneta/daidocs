@@ -281,7 +281,9 @@ if (wanted('hook')) {
     ['user', 'Record the sweep result.'],
     ['assistant', `On 2026-09-01 the sweep recorded 74.00 for v1.9.6.\n${LONG}`],
   ]);
-  const env = { DAIDOCS_STORE: s, DAIDOCS_OBSERVER: MOCK };
+  // DAIDOCS_NO_UPDATE_CHECK keeps the SessionStart hook's update probe off the network, so this
+  // surface stays offline and deterministic; the compare logic is tested as a pure function below.
+  const env = { DAIDOCS_STORE: s, DAIDOCS_OBSERVER: MOCK, DAIDOCS_NO_UPDATE_CHECK: '1' };
   const base = { session_id: 'verify-session-0001', transcript_path: tp, cwd: 'C:/work/atlas' };
 
   const r1 = await runNode('session_archiver.mjs', [], env, JSON.stringify({ ...base, reason: 'clear' }));
@@ -326,6 +328,8 @@ if (wanted('hook')) {
   const ctx = (hso && hso.additionalContext) || '';
   ok('injected context lists the stored memory', /sweep|atlas/.test(ctx), ctx.slice(0, 120));
   ok('injected context costs no model call', !/api key|fetch failed/i.test(start.err), start.err.trim().slice(0, 120));
+  // Version visibility: the context it emits names the loaded build.
+  ok('SessionStart stamps the loaded DaiDocs version', ctx.includes('DaiDocs ' + require('./lib/version').VERSION + ' loaded.'), ctx.slice(0, 60));
 
   const off = await runNode('session_context.mjs', [], { ...env, DAIDOCS_DISABLE: '1' }, JSON.stringify({ cwd: base.cwd }));
   ok('DAIDOCS_DISABLE suppresses injection', off.code === 0 && off.out.trim() === '', off.out.slice(0, 80));
@@ -1064,6 +1068,56 @@ if (wanted('version')) {
   // compatibility contract with every .dai file already written.
   ok('the file-format marker is separate from the release version', VER.FORMAT !== VER.VERSION, `format ${VER.FORMAT}, release ${VER.VERSION}`);
 
+  // Version on semver (so npm publish accepts it), with the provenance tag kept separate so
+  // every cited benchmark number stays valid.
+  ok('the release version is valid semver', /^\d+\.\d+\.\d+$/.test(VER.VERSION), VER.VERSION);
+  ok('the provenance tag is preserved as its own constant', VER.PROVENANCE === 'V4.4n32', String(VER.PROVENANCE));
+  ok('checkConsistency passes with a semver package.json', VER.checkConsistency(here).length === 0);
+  ok('package.json version equals VERSION, not the provenance tag',
+    JSON.parse(fs.readFileSync(path.join(here, 'package.json'), 'utf8')).version === VER.VERSION
+    && VER.VERSION !== VER.PROVENANCE);
+
+  section('version reliability: update nudge and startup self-checks');
+  const U = require('./lib/update_check');
+  // The update nudge is a pure compare over injected versions: no network in the test.
+  ok('a newer published version produces an update nudge',
+    /DaiDocs update available/.test(U.updateAvailableLine(VER.VERSION, '99.0.0'))
+    && /daidocs update/.test(U.updateAvailableLine(VER.VERSION, '99.0.0')));
+  ok('no nudge when already up to date', U.updateAvailableLine(VER.VERSION, VER.VERSION) === '');
+  ok('no nudge when the installed copy is newer than published', U.updateAvailableLine('99.0.0', VER.VERSION) === '');
+  ok('no nudge when a version is missing', U.updateAvailableLine(VER.VERSION, null) === '' && U.updateAvailableLine(null, '1.0.0') === '');
+  // The running-vs-installed mismatch warning (catches "updated but did not restart").
+  ok('a version mismatch warns to fully restart the host', /restart the host app/i.test(U.versionMismatchLine('4.4.36', '4.4.35')));
+  ok('no mismatch warning when the versions agree', U.versionMismatchLine('4.4.36', '4.4.36') === '');
+  ok('no mismatch warning when the installed version is unknown', U.versionMismatchLine('4.4.36', null) === '');
+  // The split-store self-check (the regression fixed in PR #51).
+  ok('a shared fallback with a project config warns about the split store',
+    /PR #51/.test(U.splitStoreLine({ fellBackToShared: true, projectConfigPath: 'C:/p/.daidocs/config.json', resolvedStoreDir: 'C:/u/DaiDocs' })));
+  ok('no split-store warning when the project store resolved',
+    U.splitStoreLine({ fellBackToShared: false, projectConfigPath: 'C:/p/.daidocs/config.json', resolvedStoreDir: 'x' }) === '');
+  ok('no split-store warning when there is no project config',
+    U.splitStoreLine({ fellBackToShared: true, projectConfigPath: null, resolvedStoreDir: 'x' }) === '');
+
+  section('doctor reports the version and the resolved store');
+  const docStore = store('doctor');
+  const doc = await runNode('daidocs.js', ['doctor'], { DAIDOCS_STORE: docStore, DAIDOCS_NO_UPDATE_CHECK: '1' });
+  ok('doctor exits clean', doc.code === 0, `exit ${doc.code} ${doc.err.slice(0, 80)}`);
+  ok('doctor prints the loaded version', doc.out.includes('DaiDocs ' + VER.VERSION), doc.out.split('\n')[0]);
+  ok('doctor prints the resolved store path', /store path:/.test(doc.out) && doc.out.includes(docStore), doc.out.slice(0, 200));
+  ok('doctor prints a save/recall consistency line', /save\/recall:\s+(OK|WARNING)/.test(doc.out), doc.out.slice(0, 240));
+
+  section('portable setup pins the exact version');
+  const pinHome = store('pin-home'); fs.mkdirSync(pinHome, { recursive: true });
+  const pinProj = store('pin-proj'); fs.mkdirSync(pinProj, { recursive: true });
+  const pin = await runNode('setup.js', ['--project-scope', '--project', pinProj],
+    { HOME: pinHome, USERPROFILE: pinHome, DAIDOCS_NO_PERSIST: '1' });
+  ok('project-scope setup completes', pin.code === 0, `exit ${pin.code} ${pin.err.slice(0, 100)}`);
+  const mcpJson = fs.existsSync(path.join(pinProj, '.mcp.json')) ? fs.readFileSync(path.join(pinProj, '.mcp.json'), 'utf8') : '';
+  ok('the .mcp.json npx command pins daidocs@<version>', mcpJson.includes('daidocs@' + VER.VERSION), mcpJson.slice(0, 160));
+  const pinSettings = path.join(pinProj, '.claude', 'settings.json');
+  const pinHooks = fs.existsSync(pinSettings) ? fs.readFileSync(pinSettings, 'utf8') : '';
+  ok('the hook npx commands pin daidocs@<version>', pinHooks.includes('daidocs@' + VER.VERSION), pinHooks.slice(0, 160));
+
   section('install versioning');
   ok('reads its own version from the single definition', V.packageVersion(here) === VER.VERSION, V.packageVersion(here));
   ok('orders versions numerically', V.compareVersions('1.2.0', '1.10.0') === -1 && V.compareVersions('2.0.0', '1.9.9') === 1);
@@ -1081,7 +1135,7 @@ if (wanted('version')) {
   ok('classifies a repeat run', V.classify('V4.4n1', 'V4.4n1') === 'reconfigure');
 
   // The ledger and state files live in the home directory, so this runs in a child process with
-  // HOME pointed at the temp dir — nothing here can touch a real install.
+  // HOME pointed at the temp dir, so nothing here can touch a real install.
   const fakeHome = store('home');
   fs.mkdirSync(fakeHome, { recursive: true });
   const homeEnv = { HOME: fakeHome, USERPROFILE: fakeHome };
@@ -1390,7 +1444,7 @@ if (wanted('version')) {
 
   section('credentials can be taken back out of a store');
   // Redaction runs on everything written from now on, but it was added after material was
-  // already stored, so an existing store can still hold credentials — hence scrub.
+  // already stored, so an existing store can still hold credentials, hence scrub.
   const scrubStore = store('scrub-me');
   fs.mkdirSync(path.join(scrubStore, '_raw'), { recursive: true });
   const fakeKey = 'sk-ant-' + 'A1b2C3d4E5f6G7h8'.repeat(3);
@@ -1833,7 +1887,7 @@ if (wanted('version')) {
   }
   ok('no script turns import.meta.url into a path by hand', docByHand.length === 0, docByHand.join(', '));
   // Shell command lines in the docs must not join with &&: PowerShell 5.1, the Windows default,
-  // parses it as an error. An npm script may still use && — npm runs those through cmd or sh,
+  // parses it as an error. An npm script may still use &&: npm runs those through cmd or sh,
   // never PowerShell.
   const docAmp = [];
   for (const line of docMan) {
@@ -1965,7 +2019,7 @@ if (wanted('version')) {
 
   section('the backlog is grouped by where it came from');
   // "29 unindexed" names a problem but not how to start; grouped by origin it becomes a list of
-  // decisions — convert this project, skip that one.
+  // decisions: convert this project, skip that one.
   const pdStore = store('pending-groups');
   for (const d of ['_index', '_raw', '_pending']) fs.mkdirSync(path.join(pdStore, d), { recursive: true });
   const mkPend = (id, project, cwd, text) => {
@@ -2300,7 +2354,7 @@ if (wanted('version')) {
 
   section('the map opens itself, when there is someone to open it for');
   // The build opens the page itself (one file, no server), but must not open a window on a
-  // machine nobody is sitting at — and this suite builds pages, so pin the decision down.
+  // machine nobody is sitting at, and this suite builds pages, so pin the decision down.
   const OPEN = require('./lib/open_page');
   ok('Windows gets start with its empty title argument',
     JSON.stringify(OPEN.openCommand('win32', 'C:/a b/x.html')) === JSON.stringify({ cmd: 'cmd', args: ['/c', 'start', '', 'C:/a b/x.html'] }),
@@ -2663,7 +2717,7 @@ if (wanted('version')) {
 
   section('one folder per part, from the conversation');
   // A project with several parts is several projects: the main folder reads its parts, and a
-  // part reaches the main project only when asked, with the answer recorded once — all from
+  // part reaches the main project only when asked, with the answer recorded once, all from
   // the conversation.
   const partsHome = store('parts-home');
   const mainRoot = path.join(partsHome, 'atlas');
@@ -2701,7 +2755,7 @@ if (wanted('version')) {
 
   section('the action lines survive a long index');
   // Truncation trims from the end, where the backlog offer and declare nudge sat, so on a store
-  // with a long index they were silently cut off — invisible exactly where they were needed.
+  // with a long index they were silently cut off, invisible exactly where they were needed.
   const bigStore = store('long-index');
   fs.mkdirSync(path.join(bigStore, '_index'), { recursive: true });
   fs.mkdirSync(path.join(bigStore, '_pending'), { recursive: true });
@@ -2862,8 +2916,8 @@ if (wanted('version')) {
   // it resolves on a teammate's machine rather than hardcoding this install's absolute paths.
   const psSettings = fs.readFileSync(path.join(psRepo, '.claude', 'settings.json'), 'utf8');
   const psMcp = fs.readFileSync(path.join(psRepo, '.mcp.json'), 'utf8');
-  ok('--project-scope hooks are portable (npx, not an absolute local path)',
-    /npx -y -p daidocs daidocs-context/.test(psSettings) && /daidocs-autosave/.test(psSettings)
+  ok('--project-scope hooks are portable and version-pinned (npx daidocs@<version>, not an absolute local path)',
+    /npx -y -p daidocs@\d+\.\d+\.\d+ daidocs-context/.test(psSettings) && /daidocs-autosave/.test(psSettings)
     && /daidocs-archive/.test(psSettings) && !/mcp-home[\\/].*session_context\.mjs|daidocs-live/.test(psSettings), psSettings.slice(0, 200));
   ok('--project-scope MCP server is portable (npx -p daidocs daidocs-server)',
     /"command":\s*"npx"/.test(psMcp) && /daidocs-server/.test(psMcp));
@@ -3014,7 +3068,7 @@ if (wanted('version')) {
 
   // The install must not depend on a shell running npm: on Windows, PowerShell's default
   // execution policy refuses npm.ps1, stopping every npm command. So setup.js installs its own
-  // deps by running npm's JS entry point with this node — not npm.cmd, which node has refused
+  // deps by running npm's JS entry point with this node, not npm.cmd, which node has refused
   // to spawn since the 2024 argument-injection fix (EINVAL).
   const installSrc = rdDoc('setup.js');
   ok('setup installs its own dependencies', /function ensureDependencies\(\)/.test(installSrc));
@@ -3119,7 +3173,7 @@ if (wanted('version')) {
 
   section('a project made of parts');
   // One folder per part, each with its own store; the root reads its parts and no part pays the
-  // read cost of the whole project. Nothing is copied upward — the root reads children live.
+  // read cost of the whole project. Nothing is copied upward: the root reads children live.
   const St = require('./lib/stores');
   const root = store('myapp');
   const mk = (dir, cfg) => {
@@ -3252,7 +3306,7 @@ if (wanted('version')) {
 
   section('the backlog offer actually reaches the user');
   // SessionStart additionalContext goes to the ASSISTANT, never the screen, so a note phrased
-  // "the user can say ..." is one the user never reads — leaving the backlog invisible to the
+  // "the user can say ..." is one the user never reads, leaving the backlog invisible to the
   // only person who can authorise draining it.
   const ctxSrc = fs.readFileSync(path.join(here, 'session_context.mjs'), 'utf8');
   ok('the note instructs the assistant to speak', /ACTION FOR YOU/.test(ctxSrc));
@@ -3475,7 +3529,7 @@ if (wanted('version')) {
 
   section('a subscription is never billed behind your back');
   // No background path may reach for a key on a subscription host: the SessionEnd hook is a
-  // separate process, and it used to call the Anthropic API with whatever key it found — failing
+  // separate process, and it used to call the Anthropic API with whatever key it found, failing
   // every archive on an account with no API credit.
   const H = require('./lib/host');
   ok('a Claude host is in subscription mode', H.subscriptionMode('claude-code') === true);
@@ -3525,8 +3579,8 @@ if (wanted('version')) {
     !/per million tokens/.test(claudeMenu[0].price) && !/per million tokens/.test(claudeMenu[1].price),
     `${claudeMenu[0].price} | ${claudeMenu[1].price}`);
   ok('the first one is marked as the recommendation', /recommended/.test(claudeMenu[0].price), claudeMenu[0].price);
-  // A model list under a memory question reads as "choose the model you talk to" — a far bigger
-  // decision than this — so the menu clarifies it is only the converter.
+  // A model list under a memory question reads as "choose the model you talk to", a far bigger
+  // decision than this, so the menu clarifies it is only the converter.
   const claudeRendered = OBS.renderMenu('anthropic');
   ok('the menu says this is only the converter', /only the model that converts/.test(claudeRendered));
   ok('and that it is not the model you talk to', /not the model\s+you talk to/.test(claudeRendered));

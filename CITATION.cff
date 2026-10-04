@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use DaiDocs or report its scores, please cite as below and state the method version, the answering model, the judge snapshot and the denominator of the run."
 title: "DaiDocs: Plain-Text AI-Native Memory"
-version: V4.4n32
+version: 4.4.36
 authors:
   - family-names: Rigi
     given-names: Amin

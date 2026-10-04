@@ -11,6 +11,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -18,6 +19,7 @@ import os from 'os';
 
 const require = createRequire(import.meta.url);
 const { VERSION, ENGINE_PATH } = require('./lib/version');
+const { versionMismatchLine, splitStoreLine } = require('./lib/update_check');
 const daidocs = require(ENGINE_PATH);
 const { getProviders } = require('./lib/providers');
 const { countTokens } = require('./lib/tokens');
@@ -578,6 +580,41 @@ server.tool(
   }
 );
 
+// The daidocs package actually installed on disk, if a SEPARATE one is reachable (not this
+// running copy). Lets us catch "npm updated the package but this long-lived server still runs
+// the old code". When nothing separate resolves, we stay quiet rather than raise a false alarm.
+function installedPackageVersion() {
+  try {
+    const pkgPath = require.resolve('daidocs/package.json');
+    const here = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
+    if (path.resolve(path.dirname(pkgPath)) === here) return null; // same install, nothing to compare
+    const v = JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version;
+    return v || null;
+  } catch { return null; }
+}
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error(`daidocs-mcp ${VERSION} ready. Stores resolve per project; no project config means the shared store.`);
+
+// Startup self-checks. Both are best-effort: a diagnostic line on stderr, never a throw and
+// never a block. Each guards a "the server is not writing where you think" failure.
+// #4: the split-store regression fixed in PR #51. If this server resolved the shared store
+// while the resolved project directory actually sits under a project that declares its own
+// store, save and recall can diverge from where the session hooks wrote. Surface it.
+try {
+  const projDir = resolveProjectDir();
+  const resolved = S.resolveStore(projDir);
+  const found = S.findProject(projDir);
+  const split = splitStoreLine({
+    fellBackToShared: !resolved.config,
+    projectConfigPath: found ? found.configPath : null,
+    resolvedStoreDir: resolved.storeDir,
+  });
+  if (split) console.error(split);
+} catch { /* a self-check must never stop the server */ }
+// #5: running version vs the installed package on disk. Catches "updated but did not restart".
+try {
+  const mism = versionMismatchLine(VERSION, installedPackageVersion());
+  if (mism) console.error(mism);
+} catch { /* never block */ }
