@@ -1045,6 +1045,8 @@ function ensureDependencies() {
   // One-time, opt-in install ping. Off by default; never blocks or breaks setup.
   try {
     const { maybeInstallPing } = require('./lib/install_ping.js');
-    await maybeInstallPing({ version: VERSION });
+    // --yes is a scripted install: treat the one-time ping as non-interactive so it is left
+    // unasked for the next interactive run, meaning a TTY run with --yes can never hang here (V4).
+    await maybeInstallPing({ version: VERSION, isTTY: has('yes') ? false : undefined });
   } catch (e) { /* telemetry must never break the install */ }
 })();

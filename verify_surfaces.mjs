@@ -2660,6 +2660,20 @@ if (wanted('version')) {
   ok('a non-interactive install is never offered the Express/Custom choice, so it cannot hang',
     !/How would you like to set up/.test(silentRun.out),
     (silentRun.out.match(/[^\n]*How would you like[^\n]*/) || [''])[0]);
+  // V4: the one-time install ping can never block a scripted run. Non-interactive returns without
+  // reading stdin, and --yes makes setup pass isTTY:false so even a TTY scripted install skips it.
+  {
+    const { maybeInstallPing } = require('./lib/install_ping.js');
+    let prompted = false;
+    const r = await maybeInstallPing({ version: 'test', isTTY: false,
+      flagFile: path.join(TMP, 'ping-v4', 'install.json'),
+      promptFn: async () => { prompted = true; return false; }, sendFn: async () => true, noPingEnv: false });
+    ok('the install ping never prompts on a non-interactive run (cannot hang)',
+      !!r && r.skipped === 'non-interactive' && !prompted, JSON.stringify(r));
+    const setupSrcV4 = fs.readFileSync(path.join(here, 'setup.js'), 'utf8');
+    ok('setup skips the ping under --yes by passing isTTY:false',
+      /isTTY: has\('yes'\) \? false : undefined/.test(setupSrcV4));
+  }
   ok('it registers the hooks it used to ask about',
     /SessionStart hook registered/.test(silentRun.out) && /Stop hook registered/.test(silentRun.out));
   ok('and installs the reading protocol', /Reading protocol installed/.test(silentRun.out));
