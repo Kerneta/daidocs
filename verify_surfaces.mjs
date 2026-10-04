@@ -623,6 +623,42 @@ if (wanted('autosave')) {
       allValid && lines.length === W * N, `${lines.length}/${W * N} lines, allValid=${allValid}`);
   }
 
+  // MCP store resolution: the server must resolve the SAME folder the hooks use even when the
+  // desktop app launches it with cwd=$HOME (the split-store bug). resolveProjectDir prefers
+  // CLAUDE_PROJECT_DIR, then the cwd the SessionStart hook recorded for CLAUDE_CODE_SESSION_ID,
+  // then process.cwd(); the hooks always have the real cwd, so recall and save follow them.
+  {
+    const smLib = path.join(here, 'lib', 'session_marks.js');
+    const storesLib = path.join(here, 'lib', 'stores.js');
+    const hHome = path.join(TMP, 'mcp-home'); fs.mkdirSync(hHome, { recursive: true });
+    const projA = path.join(TMP, 'mcp-projA'); fs.mkdirSync(projA, { recursive: true });
+    const projB = path.join(TMP, 'mcp-projB'); fs.mkdirSync(projB, { recursive: true });
+    const projC = path.join(TMP, 'mcp-projC'); fs.mkdirSync(projC, { recursive: true });
+    // realpath-normalize: on macOS process.cwd() returns /private/var while the temp path is
+    // /var (a symlink), so a plain string compare would spuriously differ.
+    const nrm = p => { let r = String(p); try { r = fs.realpathSync(r); } catch { /* may not exist yet */ } return r.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase(); };
+    const base = { ...process.env, HOME: hHome, USERPROFILE: hHome, CLAUDE_PROJECT_DIR: '', CLAUDE_CODE_SESSION_ID: '' };
+    const runPD = (env, cwd) => new Promise(res => {
+      const p = spawn(process.execPath, ['-e', 'process.stdout.write(require(process.argv[1]).resolveProjectDir())', smLib], { cwd, env: { ...base, ...env } });
+      let o = ''; p.stdout.on('data', d => o += d); p.on('close', () => res(o.trim()));
+    });
+    ok('resolveProjectDir prefers CLAUDE_PROJECT_DIR over cwd', nrm(await runPD({ CLAUDE_PROJECT_DIR: projA }, hHome)) === nrm(projA));
+    await new Promise(res => { const p = spawn(process.execPath, ['-e', "require(process.argv[1]).recordSessionCwd('testsid-0001', process.argv[2])", smLib, projB], { cwd: hHome, env: base }); p.on('close', () => res()); });
+    ok('resolveProjectDir uses the hook-recorded cwd for CLAUDE_CODE_SESSION_ID',
+      nrm(await runPD({ CLAUDE_CODE_SESSION_ID: 'testsid-0001' }, hHome)) === nrm(projB));
+    ok('resolveProjectDir falls back to process.cwd() when nothing else is set', nrm(await runPD({}, projC)) === nrm(projC));
+    // End to end: with cwd=$HOME (the desktop bug) and CLAUDE_PROJECT_DIR set, the store resolves
+    // to the PROJECT store, not the shared one, so recall and save find the hooks' captures.
+    fs.mkdirSync(path.join(projA, '.daidocs'), { recursive: true });
+    fs.writeFileSync(path.join(projA, '.daidocs', 'config.json'), JSON.stringify({ type: 'normal', store: '.daidocs/store', reads: ['self'] }));
+    const storeOut = await new Promise(res => {
+      const p = spawn(process.execPath, ['-e', 'const SM=require(process.argv[1]),S=require(process.argv[2]);process.stdout.write(S.resolveStore(SM.resolveProjectDir()).storeDir)', smLib, storesLib], { cwd: hHome, env: { ...base, CLAUDE_PROJECT_DIR: projA } });
+      let o = ''; p.stdout.on('data', d => o += d); p.on('close', () => res(o.trim()));
+    });
+    ok('with cwd=$HOME the MCP store still resolves to the project store, not the shared one',
+      nrm(storeOut) === nrm(path.join(projA, '.daidocs', 'store')), storeOut);
+  }
+
   // The folder question, enforced by the Stop hook. In an askable folder the
   // first stop blocks with the question, once; the next stop (same transcript,
   // flag set) is quiet; a recorded 'general' answer keeps it quiet for a fresh

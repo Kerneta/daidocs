@@ -14,7 +14,7 @@ import { createRequire } from 'module';
 const { projectName } = createRequire(import.meta.url)('./lib/convert');
 const S = createRequire(import.meta.url)('./lib/stores');
 const { subscriptionMode } = createRequire(import.meta.url)('./lib/host');
-const { unconvertedFor, pendingFor, autoDeclare, folderNotice } = createRequire(import.meta.url)('./lib/session_marks');
+const { unconvertedFor, pendingFor, autoDeclare, folderNotice, recordSessionCwd } = createRequire(import.meta.url)('./lib/session_marks');
 let STORE_DIR = S.SHARED_STORE();
 
 const MAX_ENTRIES = parseInt(process.env.DAIDOCS_CONTEXT_ENTRIES || '30', 10);
@@ -198,6 +198,9 @@ async function main() {
   // Before anything is read: an undeclared folder becomes a project now, so
   // this session already writes into it rather than into the shared store.
   DECLARED = autoDeclare(j.cwd, S.resolveStore(j.cwd));
+  // Record this session's folder so the MCP server (which the desktop app launches with cwd=$HOME)
+  // can resolve the SAME store the hooks use, correlating by CLAUDE_CODE_SESSION_ID.
+  try { recordSessionCwd(j.session_id, j.cwd); } catch (_) { /* convenience only */ }
   const resolved = S.resolveStore(j.cwd);
   STORE_DIR = resolved.storeDir;
   SHARED = !resolved.config;
