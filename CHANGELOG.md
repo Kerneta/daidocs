@@ -7,6 +7,21 @@ Scores below are LongMemEval-S, 500 questions, GPT-4o answering, scored by the b
 authors' own `evaluate_qa.py` with judge snapshot `gpt-4o-2024-08-06`. Numbers measured on
 other scales are marked as such and are not comparable.
 
+## [Unreleased]
+
+### Added
+
+- **`/recall` and `/remember` slash commands for Claude Code (FR6).** Two prompt
+  templates over the `daidocs-mcp` tools: `/recall <question>` searches your `.dai`
+  memory with `recall_memory` and answers following the reading protocol, and
+  `/remember <fact>` saves a note with `save_memory`, writing the extraction itself so
+  it needs no API key. Source copies live in `claude/commands/`; `node setup.js`
+  installs them into `~/.claude/commands/` (available in every project), a
+  project-scoped install copies them into the repo's own `.claude/commands/`, and
+  `node setup.js --commands` installs just them. They are tracked like every other
+  surface, so `--status` reports them and `--restore` removes them (restoring any
+  file you already had at the same path).
+
 ## [4.4.36] - 2026-10-05
 
 **Update reliability, and the version on semver.** The release version is now a valid

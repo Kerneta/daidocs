@@ -55,6 +55,7 @@
     "mcp_selftest.mjs",
     "lib/",
     "prompts/",
+    "claude/",
     "docs/",
     "spec/",
     "QUICKSTART.md",
