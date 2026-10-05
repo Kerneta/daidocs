@@ -98,6 +98,7 @@ const SERVER = path.join(HERE, 'mcp_server.mjs');
 const ARCHIVER = path.join(HERE, 'session_archiver.mjs');
 const CONTEXT = path.join(HERE, 'session_context.mjs');
 const AUTOSAVE = path.join(HERE, 'session_autosave.mjs');
+const COMMANDS_SRC = path.join(HERE, 'claude', 'commands');
 
 // N1: a project-scoped install can reference the PUBLISHED package through npx instead of this
 // machine's absolute paths, so a committed .claude config resolves on every teammate's machine.
@@ -476,6 +477,30 @@ function setupAutosaveHook(settingsPath, portable) {
     'sessions save themselves as you work, with no API key', settingsPath, portable ? npxHookCommand('daidocs-autosave') : null);
 }
 
+// FR6: the /recall and /remember slash commands. They are thin prompt templates over the
+// daidocs-mcp tools (recall_memory, save_memory), so they rely on the MCP server being
+// registered, which a normal setup does. Source copies live in claude/commands/; this copies
+// each one into <claudeDir>/commands/. The default ~/.claude makes them available in every
+// project; a project-scoped install passes the repo's own .claude so they travel with the repo.
+// backup() lets --restore remove them again and put back any file the user already had there.
+function setupCommands(claudeDir) {
+  const base = claudeDir || path.join(os.homedir(), '.claude');
+  const dest = path.join(base, 'commands');
+  if (!fs.existsSync(COMMANDS_SRC)) { log('claude/commands not found, slash commands skipped'); return false; }
+  const files = fs.readdirSync(COMMANDS_SRC).filter(f => f.endsWith('.md') && f !== 'README.md');
+  if (!files.length) { log('No slash commands to install'); return false; }
+  fs.mkdirSync(dest, { recursive: true });
+  const names = [];
+  for (const f of files) {
+    const fp = path.join(dest, f);
+    backup(fp);
+    fs.copyFileSync(path.join(COMMANDS_SRC, f), fp);
+    names.push('/' + f.replace(/\.md$/, ''));
+  }
+  log(`Slash commands installed (${dest}): ${names.join(', ')}`);
+  return true;
+}
+
 // The reading protocol: how to READ a store well once reachable. Registering the MCP server
 // says the store EXISTS but not how to read it, and whole-file reads cost ~15x the tokens of
 // the three zooms, and an unrouted question type was the biggest source of wrong answers.
@@ -777,6 +802,7 @@ function printStatus() {
     ['Save again when a session ends', hookOn('SessionEnd'), 'node setup.js --hook'],
     ['Reading protocol in CLAUDE.md', fs.existsSync(path.join(home, '.claude', 'CLAUDE.md'))
       && /DaiDocs|\.dai/.test(safeRead(path.join(home, '.claude', 'CLAUDE.md'))), 'node setup.js --instructions'],
+    ['Slash commands /recall /remember', fs.existsSync(path.join(home, '.claude', 'commands', 'recall.md')), 'node setup.js --commands'],
     ['.dai file icon', fileTypeRegistered(), 'node setup.js --icon'],
   ];
   console.log('  What is on:\n');
@@ -852,6 +878,7 @@ function printDryRun() {
   L.push(`  ${path.join(home, '.claude', 'settings.json')}   (SessionStart, Stop and autosave hooks)`);
   L.push(`  ${path.join(home, '.claude.json')}   (daidocs-mcp server registration)`);
   L.push(`  ${path.join(home, '.claude', 'CLAUDE.md')}   (reading protocol, machine-wide)`);
+  L.push(`  ${path.join(home, '.claude', 'commands')}   (the /recall and /remember slash commands)`);
   L.push('This folder:');
   if (inSelf) {
     L.push('  (this is the DaiDocs install folder itself, so no project files are written here)');
@@ -899,11 +926,13 @@ function setupProjectScope(projectDir) {
   step('SessionEnd', () => setupHook(settingsPath, portable));
   step('.mcp.json', () => setupCode(dir, true, portable));
   step('CLAUDE.md', () => installInstructions(path.join(dir, 'CLAUDE.md')));
+  step('commands', () => setupCommands(path.join(dir, '.claude')));
   console.log('');
   log(`Project-scoped install for ${dir} (${portable ? 'portable, via npx' : 'local paths'}):`);
   log(`  hooks     ${settingsPath}  (${done.filter(d => /Session|Stop/.test(d)).join(', ')})`);
   log(`  reading   ${path.join(dir, 'CLAUDE.md')}`);
   log(`  server    ${path.join(dir, '.mcp.json')}`);
+  log(`  commands  ${path.join(dir, '.claude', 'commands')}  (/recall, /remember)`);
   log('Nothing machine-wide was changed: every other folder stays exactly as it was, so this');
   log('repo is the only one with DaiDocs on, which also gives you a clean with/without baseline.');
   if (portable) {
@@ -925,7 +954,7 @@ function setupProjectScope(projectDir) {
   if (has('project-scope')) { setupProjectScope(opt('project', null)); return; }
   // Every surface flag belongs here: a flag missing from this list makes setup fall into
   // interactive mode and block on the first question, so the flag alone would do nothing.
-  const anyFlag = ['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'icon',
+  const anyFlag = ['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'commands', 'icon',
     'observer', 'key', 'all', 'project', 'project-type', 'store'].some(has);
   // A bare run configures everything (EVERY); --ask restores the per-question flow.
   // The Express/Custom choice below can flip ASK on, so both are recomputed then.
@@ -935,7 +964,7 @@ function setupProjectScope(projectDir) {
   // "remove previous install" branch and tear down the user's hooks/configs. So a
   // project-only run does exactly that one thing and stops.
   const projectOnly = (has('project') || has('project-type') || has('store'))
-    && !['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'icon', 'observer', 'key', 'all'].some(has);
+    && !['desktop', 'code', 'hook', 'context', 'autosave', 'clients', 'instructions', 'commands', 'icon', 'observer', 'key', 'all'].some(has);
   if (projectOnly) {
     const ok = setupProject(opt('project', null), opt('project-type', null), opt('store', null));
     if (ok) {
@@ -1064,6 +1093,8 @@ function setupProjectScope(projectDir) {
   if (EVERY || has('clients') || (ASK && (await ask('Configure other MCP clients (Cursor, Windsurf)? [Y/n] ')).toLowerCase() !== 'n')) did('clients', setupOtherClients);
   // default yes: without it an assistant can reach the store but reads it the expensive way
   if (EVERY || has('instructions') || (ASK && (await ask('Teach your assistants how to read your store efficiently? [Y/n] ')).toLowerCase() !== 'n')) did('instructions', () => installAllInstructions(opt('project', null), false));
+  // FR6: the /recall and /remember Claude Code slash commands, user-scope so they work everywhere.
+  if (EVERY || has('commands') || (ASK && (await ask('Add the /recall and /remember slash commands to Claude Code? [Y/n] ')).toLowerCase() !== 'n')) did('commands', () => setupCommands());
   // Interactive setup offers per-project store declaration; otherwise the whole feature is
   // reachable only by reading the source, so every install writes to the one shared store.
   let ptype = opt('project-type', null);
