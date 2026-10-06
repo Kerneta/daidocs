@@ -183,22 +183,49 @@ def kind_of(node_type, default):
     return KIND_MAP.get(node_type, default)
 
 
+def _callee_name(src, n):
+    """The called symbol's name for one call node, or None."""
+    fn = n.child_by_field_name("function") or n.child_by_field_name("name") \
+         or n.child_by_field_name("method") or n.child_by_field_name("constructor") \
+         or (n.named_children[0] if n.named_children else None)
+    if fn is None:
+        return None
+    nm = last_ident(txt(src, fn))
+    if nm == "new":
+        r = n.child_by_field_name("receiver")
+        if r is not None:
+            nm = last_ident(txt(src, r))
+    return nm or None
+
+
 def collect_calls(src, body, spec):
     names, seen = [], set()
+    calls = spec.get("call", set())
     for n in _walk(body):
+        if n.type in calls:
+            nm = _callee_name(src, n)
+            if nm and nm not in seen:
+                seen.add(nm)
+                names.append(nm)
+    return names
+
+
+def collect_module_calls(src, root, spec):
+    """Calls made at module top level, i.e. not inside any function or method node.
+    Captures the top-level 'main' block (including an IIFE like `(async () => {...})()`)
+    that collect_calls, which only ever looks inside a symbol's own node, cannot see."""
+    fn_types = spec.get("func", set()) | spec.get("method", set())
+    ranges = [(n.start_byte, n.end_byte) for n in _walk(root) if n.type in fn_types]
+    names, seen = [], set()
+    for n in _walk(root):
         if n.type in spec.get("call", set()):
-            fn = n.child_by_field_name("function") or n.child_by_field_name("name") \
-                 or n.child_by_field_name("method") or n.child_by_field_name("constructor") \
-                 or (n.named_children[0] if n.named_children else None)
-            if fn is not None:
-                nm = last_ident(txt(src, fn))
-                if nm == "new":
-                    r = n.child_by_field_name("receiver")
-                    if r is not None:
-                        nm = last_ident(txt(src, r))
-                if nm and nm not in seen:
-                    seen.add(nm)
-                    names.append(nm)
+            s = n.start_byte
+            if any(a <= s < b for a, b in ranges):
+                continue  # inside a function/method: it belongs to that symbol
+            nm = _callee_name(src, n)
+            if nm and nm not in seen:
+                seen.add(nm)
+                names.append(nm)
     return names
 
 
@@ -508,6 +535,15 @@ def extract_file(path, module, lang):
                             "calls": collect_calls(src, node, spec),
                             "trefs": collect_type_refs(src, node),
                             "arg_refs": collect_arg_idents(src, node), "methods": []})
+
+    # module-level ("__main__") calls: the top-level block that owns no function symbol
+    mod_calls = collect_module_calls(src, root, spec)
+    if mod_calls:
+        symbols.append({"kind": "module", "name": "__main__",
+                        "line": 1, "end": src.count(b"\n") + 1, "sig": "",
+                        "extends": [], "implements": [], "embeds": [], "mixes_in": [],
+                        "members": [], "doc": "", "calls": mod_calls, "trefs": [],
+                        "arg_refs": set(), "methods": []})
 
     mods, syms, facts = collect_imports(src, root, lang)
     return {"module": module, "path": os.path.basename(path), "lang": lang, "sha1": sha1,

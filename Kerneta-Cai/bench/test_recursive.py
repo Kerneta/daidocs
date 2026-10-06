@@ -47,6 +47,11 @@ try:
                           store, "defines", "service_call"], capture_output=True, text=True).stdout
     check("service_call is defined in core/service", "core/service" in out, out)
 
+    # module-level (top-level) calls are captured under a __main__ owner
+    out = subprocess.run([sys.executable, os.path.join(ROOT, "engine", "cai_query.py"),
+                          store, "callees", "__main__"], capture_output=True, text=True).stdout
+    check("top-level call main() captured under __main__", "app.__main__ calls app.main" in out, out)
+
     # 3. incremental update keys by nested module path
     print("\n=== recursive incremental update ===")
     cai_update.update(CORPUS, store, quiet=True)   # seed the SHA index

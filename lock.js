@@ -90,7 +90,10 @@ function status(dir) {
 // releases (docs/PROVENANCE.md; `npm run verify` checks the engine hash); everything else
 // may change between locks.
 const MANIFEST_SKIP_DIRS = new Set(['node_modules', '.git', '__pycache__', '.selftest-store']);
-const MANIFEST_SKIP_FILES = new Set(['MANIFEST.sha256', 'LOCKED.md', 'daidocs-dashboard.html']);
+// '.git' is a FILE in a git worktree (a gitdir pointer), not a directory, so the
+// skip-dirs set misses it there; skip it as a file too, or the manifest lists a .git
+// entry that breaks `npm run verify` in a normal clone (where .git is a directory).
+const MANIFEST_SKIP_FILES = new Set(['MANIFEST.sha256', 'LOCKED.md', 'daidocs-dashboard.html', '.git']);
 function writeManifest(dir) {
   const crypto = require('crypto');
   const files = [];
