@@ -56,3 +56,18 @@ daidocs-dashboard.html
 # next to them. It is machine-specific and must never ship.
 __pycache__/
 *.pyc
+
+# ---------------------------------------------------------------------------
+# Kerneta-Cai (the code tier).
+# ---------------------------------------------------------------------------
+# Its committed test fixtures live under corpus/, including a .dai-format history
+# store whose _index/ the rules above would otherwise ignore. Re-include them: they
+# are hand-authored fixtures, not anyone's real memory.
+!Kerneta-Cai/corpus/history/
+!Kerneta-Cai/corpus/history/_index/
+!Kerneta-Cai/corpus/history/**
+
+# `kerneta init` / `kerneta setup` write a built store and a per-project skill+hook
+# at the repo root; both are machine-specific and rebuildable, never committed.
+.cai-store/
+.claude/

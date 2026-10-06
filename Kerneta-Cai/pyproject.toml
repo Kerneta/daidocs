@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kerneta-cai"
+version = "5.1.1"
+description = "One plain-text memory layer over code (.cai), documents (.dai-lite) and session history (.dai), with a router that knows which to use."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Amin Rigi" }]
+keywords = ["code-memory", "cai", "dai", "daidocs", "tree-sitter", "agent-memory", "rag"]
+
+# The code tier needs the tree-sitter grammars. The document and history tiers are
+# pure stdlib. Installing kerneta therefore makes .cai + .dai-lite + .dai-history all
+# work from the interpreter pip used, which is the interpreter `setup` then wires into
+# the Claude Code hook: no hand-passed python path.
+dependencies = [
+  "tree-sitter>=0.24",
+  "tree-sitter-python",
+  "tree-sitter-javascript",
+  "tree-sitter-typescript",
+  "tree-sitter-go",
+  "tree-sitter-rust",
+  "tree-sitter-java",
+  "tree-sitter-c",
+  "tree-sitter-cpp",
+  "tree-sitter-ruby",
+  "tree-sitter-c-sharp",
+  "tree-sitter-sql",
+  "tree-sitter-hcl",
+]
+
+[project.scripts]
+kerneta = "kerneta_cli:main"
+
+[tool.setuptools]
+py-modules = ["kerneta_cli"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kerneta_engine*"]
+
+[tool.setuptools.package-dir]
+kerneta_engine = "engine"

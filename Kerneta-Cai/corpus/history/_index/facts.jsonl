@@ -1,0 +1,8 @@
+{"date":"2026-01-10","dated":true,"fact":"Chose Postgres over MySQL as the orders database for its transactional guarantees","kind":"event","entities":["Postgres","MySQL","orders"],"src":"hist_001"}
+{"date":"2026-01-10","dated":true,"fact":"Orders database is Postgres","kind":"attribute","entities":["Postgres","orders"],"src":"hist_001"}
+{"date":"2026-02-15","dated":true,"fact":"Added a Redis cache to the pricing service, the first cache in the system","kind":"event","entities":["Redis","pricing"],"src":"hist_002"}
+{"date":"2026-03-20","dated":true,"fact":"Migrated authentication from server sessions to JWT tokens","kind":"event","entities":["JWT","auth","sessions"],"src":"hist_003"}
+{"date":"2026-04-05","dated":true,"fact":"Added a Redis cache to the catalog service, the second Redis cache","kind":"event","entities":["Redis","catalog"],"src":"hist_004"}
+{"date":"2026-05-12","dated":true,"fact":"Rolled JWT authentication back to server sessions after a token-refresh bug","kind":"event","entities":["JWT","auth","sessions"],"src":"hist_005"}
+{"date":"2026-06-01","dated":true,"fact":"Chose Stripe as the payment provider over Adyen and Braintree","kind":"event","entities":["Stripe","Adyen","Braintree","payments"],"src":"hist_006"}
+{"date":"2026-06-01","dated":true,"fact":"Payment provider is Stripe","kind":"attribute","entities":["Stripe","payments"],"src":"hist_006"}

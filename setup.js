@@ -17,6 +17,7 @@ const readline = require('readline');
 const V = require('./lib/versioning');
 const OBS = require('./lib/observers');
 const S = require('./lib/stores');
+const CODE = require('./lib/code_tier');
 
 const HERE = __dirname;
 const VERSION = V.packageVersion(HERE);
@@ -1187,6 +1188,10 @@ function setupProjectScope(projectDir) {
   }
 
   V.writeState({ version: VERSION, installPath: HERE, installedAt: new Date().toISOString(), surfaces, observer });
+
+  // Option B: offer the Kerneta-Cai code tier (.cai) in the same flow. Never blocks
+  // or breaks setup; prints a one-liner in silent mode, offers to install in --ask.
+  try { await CODE.offerCodeTier({ here: HERE, cwd: process.cwd(), ask, log, ASK }); } catch (_) {}
 
   // Existing history. Most people installing this already have months of
   // sessions on disk; asking now is the difference between a store that is

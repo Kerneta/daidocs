@@ -1,0 +1,7 @@
+{"date":"2026-01-10","cat":"decision","what":"Chose Postgres as the orders database","src":"hist_001"}
+{"date":"2026-02-15","cat":"change","what":"Added a Redis cache to the pricing service","src":"hist_002"}
+{"date":"2026-02-20","cat":"other","what":"Discussed Redis vs Memcached for future caches","src":"hist_002"}
+{"date":"2026-03-20","cat":"change","what":"Migrated auth to JWT","src":"hist_003"}
+{"date":"2026-04-05","cat":"change","what":"Added a Redis cache to the catalog service","src":"hist_004"}
+{"date":"2026-05-12","cat":"change","what":"Rolled auth back from JWT to sessions","src":"hist_005"}
+{"date":"2026-06-01","cat":"decision","what":"Chose Stripe as the payment provider","src":"hist_006"}
