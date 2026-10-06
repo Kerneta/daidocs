@@ -1222,11 +1222,11 @@ if (wanted('version')) {
 
   // And a rollback: a state that claims a NEWER version than this copy.
   const st2 = JSON.parse(fs.readFileSync(path.join(fakeHome, '.daidocs-setup-state.json'), 'utf8'));
-  fs.writeFileSync(path.join(fakeHome, '.daidocs-setup-state.json'), JSON.stringify({ ...st2, version: 'V4.5', installPath: 'C:/somewhere/new-daidocs' }));
+  fs.writeFileSync(path.join(fakeHome, '.daidocs-setup-state.json'), JSON.stringify({ ...st2, version: 'V99.0', installPath: 'C:/somewhere/new-daidocs' }));
   const i3 = await runNode('setup.js', flags, installEnv);
   ok('a rollback is named as one', /rollback to an older version/.test(i3.out), i3.out.split('\n').find(l => /Removing it/.test(l)) || '');
   const rows3 = fs.readFileSync(path.join(fakeHome, '.daidocs-installs.jsonl'), 'utf8').trim().split('\n').map(JSON.parse);
-  ok('the ledger records the rollback', rows3.some(r => r.action === 'rollback' && r.from === 'V4.5'), rows3.map(r => r.action).join(','));
+  ok('the ledger records the rollback', rows3.some(r => r.action === 'rollback' && r.from === 'V99.0'), rows3.map(r => r.action).join(','));
 
   const hist2 = await runNode('setup.js', ['--versions'], installEnv);
   ok('the history lists every event in order', (hist2.out.match(/install|upgrade|rollback|uninstall/g) || []).length >= 5, `${rows3.length} rows`);
