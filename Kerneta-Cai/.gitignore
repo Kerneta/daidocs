@@ -1,0 +1,18 @@
+# generated stores and caches (never committed)
+store-*/
+*.dai-store/
+.cai-store*/
+**/graphify-out/
+__pycache__/
+*.pyc
+.venv/
+.ingest-cache/
+
+# packaging / editable-install artifacts
+*.egg-info/
+build/
+dist/
+.cai-shas.json
+
+# per-machine Claude Code config written by `kerneta setup` (absolute paths)
+.claude/
