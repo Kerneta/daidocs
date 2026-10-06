@@ -6,12 +6,14 @@
 <div align="center">
   <img src="assets/brand/dai-file.svg" alt="" width="88" height="88">
 
-  <h1>.dai</h1>
+  <h1>.dai + .cai</h1>
 
-  <p><b>An open plain-text format for AI memory (launched Sep 2026).</b><br>
-  Your assistant's memory becomes files on your disk that you can open, grep and keep.</p>
+  <p><b>Open plain-text memory for AI, covering both your history and your code.</b><br>
+  Your assistant's memory becomes files on your disk that you can open, grep and keep: <code>.dai</code> for documents and session history, <code>.cai</code> for a graph of your code.</p>
 
-  <p><b>Second on the LongMemEval-S leaderboard</b> among memory systems anyone can re-run, <b>22.40 points above the same model with no memory</b>, reading <b>10x fewer tokens</b> per question.<br>
+  <p><b>One of the most complete memory systems there is.</b> Most tools remember one half: either your conversations or your code. This remembers both, in the same plain-text, local-first format, and a router knows which half a question belongs to.</p>
+
+  <p><b>Second on the LongMemEval-S leaderboard</b> among memory systems anyone can re-run, <b>22.40 points above the same model with no memory</b>, reading <b>10x fewer tokens</b> per question. The <code>.cai</code> code graph answers callers, callees and rename-impact from a small fraction of the tokens of reading the files.<br>
   Every number here ships with its per-question judge verdicts and a sha256 manifest.</p>
 
   <p>
@@ -19,6 +21,7 @@
     <a href="docs/GUIDE.md"><b>The guide</b></a> ·
     <a href="docs/RESULTS.md"><b>Benchmark</b></a> ·
     <a href="spec/DAIDOCS-STANDARD.md"><b>The format</b></a> ·
+    <a href="Kerneta-Cai/README.md"><b>The code tier</b></a> ·
     <a href="docs/REPLICATION.md"><b>Reproduce it</b></a>
   </p>
 
@@ -46,6 +49,35 @@
 
 ---
 
+## Two halves, one format: `.dai` for history, `.cai` for code
+
+Most memory tools remember one thing. A code-graph tool knows your call graph but not the
+conversation where you decided how it should work. A chat-memory tool knows the decision but
+cannot tell you who calls the function you are about to change. This is both, in one
+plain-text, local-first layer, with a router that sends each question to the half that can
+answer it.
+
+| | `.dai` | `.cai` |
+|---|---|---|
+| remembers | documents and session history: past conversations, decisions, facts, preferences | your code: a deterministic graph of callers, callees, imports, definitions and transitive dependencies |
+| built by | an observer model, once per conversation (free on a Claude subscription, written by the assistant already in the session) | tree-sitter, deterministically, with no model and no API cost |
+| languages | any text, any human language | 10 programming languages: Python, JavaScript, TypeScript, Go, Rust, Java, C, C++, Ruby, C# |
+| engine | Node (reference), plus a pure-Python reader | Python, `pip install kerneta-cai` |
+| install | `npx daidocs setup` | `pip install kerneta-cai`, then `kerneta setup` |
+
+Both are plain text on your disk, both answer to `grep` and `git`, and both exist for the same
+reason: so a model reads a small, question-specific slice instead of the whole history or the
+whole repository. They also cross-link. A document that names a code symbol is linked to it
+both ways, so a single query can return the code *and* the prose that explains it. The `ask`
+router then decides which tier answers: code graph, documents, or past sessions. The code tier
+has its own guide in [`Kerneta-Cai/`](Kerneta-Cai/README.md).
+
+You do not have to take both. `.dai` on its own is a complete document-and-history memory;
+`.cai` on its own is a complete code graph. Install one, or install both and let the router
+join them.
+
+---
+
 ## Language independent, model independent
 
 A `.dai` file is three plain-text zones: a YAML header, a fenced JSON block, and the text. No binary, no database, no SDK required to read it.
@@ -59,9 +91,10 @@ Build a reader in another language and open a PR: that is the contribution that 
 ---
 
 **What is in this repository:** the Kerneta Engine V4.4n that reads and writes `.dai` files,
-the MCP server that connects it to your assistants, and the complete evidence for every number
-quoted below: the benchmark run, the judge's verdict on each of the 500 questions, and the
-five-model comparison. Each evidence file is hashed in [`MANIFEST.sha256`](MANIFEST.sha256)
+the MCP server that connects it to your assistants, the `.cai` code tier in
+[`Kerneta-Cai/`](Kerneta-Cai/README.md) that builds and reads the code graph, and the complete
+evidence for every number quoted below: the benchmark run, the judge's verdict on each of the
+500 questions, and the five-model comparison. Each evidence file is hashed in [`MANIFEST.sha256`](MANIFEST.sha256)
 so you can check that what is described is what was measured; how to do that is in
 [`docs/PROVENANCE.md`](docs/PROVENANCE.md).
 
@@ -127,6 +160,20 @@ It lives in [`browser-extension/`](browser-extension/), and it is not installed 
 
 ## Install
 
+Two halves, two package managers. Install the one you want, or both for the full system.
+
+```bash
+npx daidocs setup        # .dai: documents + session history  (Node 18+)
+pip install kerneta-cai  # .cai: the code graph                (Python 3.10+)
+```
+
+Want both? Install both, one with npm and one with pip. `npx daidocs setup --ask` also offers
+the `.cai` code tier as part of its flow. The two halves share nothing at install time and
+never collide: `.dai` is Node, `.cai` is Python, each is independently useful, and the `ask`
+router joins them when both are present.
+
+### `.dai`: documents and session history (npm)
+
 Node 18 or newer.
 
 ```bash
@@ -152,10 +199,39 @@ called `daidocs`, and the default memory store is `DaiDocs`: on Windows and macO
 are the same folder, so a clone made from your home directory would land on top of your
 own memory. Setup refuses to run from inside the store if it ever happens.
 
-### Python (pip)
+### `.cai`: the code graph (pip)
 
-Prefer Python? Read your `.dai` stores from code, and drive the engine from a
-`daidocs` command:
+Python 3.10 or newer. One install brings the engine, the tree-sitter grammars for all 10
+languages, and a `kerneta` command that drives every operation:
+
+```bash
+pip install kerneta-cai
+kerneta doctor
+kerneta setup <project_dir> --corpus <code_dir>
+```
+
+`kerneta doctor` verifies the interpreter, the engine and the grammars. `kerneta setup` then
+makes `.cai` automatic for a project: it builds the code graph once, installs a skill so Claude
+Code queries the store instead of reading source files (far fewer tokens), and adds a
+PostToolUse hook that refreshes the store after every edit, so the graph is always current with
+no manual rebuild. To make it load in every project at once, `kerneta setup --global --auto`.
+
+The graph is deterministic, built by tree-sitter rather than a model, so it needs no API key
+and costs nothing to keep fresh. When a `.dai` session store sits beside the project, `kerneta
+setup` links it automatically and the `ask` router answers code, document and history questions
+from one command. The code tier's own README has the full command set (`build`, `update`,
+`watch`, `query`, `ask`, `history`, `doctor`): [`Kerneta-Cai/README.md`](Kerneta-Cai/README.md).
+
+Until the PyPI publish lands, install it straight from this repository:
+
+```bash
+pip install "git+https://github.com/Kerneta/daidocs#subdirectory=Kerneta-Cai"
+```
+
+### Python reader for `.dai` (pip)
+
+This is the `.dai` side, a separate package from the `.cai` code tier above. Prefer Python?
+Read your `.dai` stores from code, and drive the engine from a `daidocs` command:
 
 ```bash
 pip install daidocs
@@ -620,6 +696,7 @@ issue you can open**, and we will say so publicly rather than quietly editing th
 | [`daidocs.js`](daidocs.js) | the CLI: convert, pending, stores, backup, scrub, ingest, ask |
 | [`setup.js`](setup.js) | one-command install and configuration |
 | [`lib/methods/daidocs-v44n/`](lib/methods/daidocs-v44n/) | the engine, in the configuration this repo ships |
+| [`Kerneta-Cai/`](Kerneta-Cai/README.md) | the `.cai` code tier: the tree-sitter code graph, the code/doc cross-links and the code/docs/history router (Python, `pip install kerneta-cai`) |
 | [`mcp_server.mjs`](mcp_server.mjs) | the MCP server |
 | [`session_archiver.mjs`](session_archiver.mjs) | the Claude Code SessionEnd hook |
 | [`session_context.mjs`](session_context.mjs) | the SessionStart hook: memory loads at the start of a session |
