@@ -189,6 +189,82 @@ def setup(project_dir, corpus, store=None, python=None):
     return "\n".join(out)
 
 
+GLOBAL_SKILL = """---
+name: kerneta-cai
+description: In any project that has a .cai code store, query it for code questions (callers, callees, definitions, impact, why) instead of reading whole source files, to answer with far fewer tokens.
+---
+
+# Kerneta .cai (global)
+
+Many of this user's projects carry a plain-text `.cai` code-memory store at
+`<project>/.cai-store`, kept fresh automatically after every edit. When a project has
+one, prefer querying it over reading source files: a query slice is a tiny fraction of
+the tokens.
+
+## Use it when a `.cai-store` exists in the project
+- `kerneta ask ./.cai-store "<question>"`   (router over code, and history if linked)
+- `kerneta query ./.cai-store callers <sym>`   (also callees / imports / defines / tdeps)
+- `kerneta query ./.cai-store why <sym>` / `kerneta history ./.cai-store "<question>"`
+
+If the project has no store yet and it is worth indexing, build one once with
+`kerneta init .` (then the global auto-refresh hook keeps it current). If `kerneta` is
+not on PATH, call the engine scripts with the project's Python directly.
+
+Prefer a query slice over loading a raw file whenever the store can answer.
+"""
+
+
+def init(project, corpus=None, store=None, python=None):
+    """Opt a single project in: build its store once and drop a marker the global
+    auto-refresh hook reads. Writes no per-project skill or hook (those are global)."""
+    engine = os.path.dirname(os.path.abspath(__file__))
+    project = os.path.abspath(project)
+    corpus = os.path.abspath(corpus) if corpus else project
+    store = os.path.abspath(store) if store else os.path.join(project, ".cai-store")
+    python = os.path.abspath(python) if python else sys.executable
+    out = []
+    sys.path.insert(0, engine)
+    import cai_update
+    cai_update.update(corpus, store, quiet=True)
+    os.makedirs(store, exist_ok=True)
+    with open(os.path.join(store, ".kerneta.json"), "w", encoding="utf-8") as f:
+        json.dump({"corpus": corpus, "store": store, "python": python}, f, indent=2)
+    out.append("built + marked store: {}".format(store))
+    hist = _find_history(project)
+    if hist:
+        with open(os.path.join(store, "history.json"), "w", encoding="utf-8") as f:
+            json.dump({"dai_store": hist}, f, indent=2)
+        out.append("linked history store: {}".format(hist))
+    out.append("project opted in; the global hook will keep this store fresh after edits.")
+    return "\n".join(out)
+
+
+def setup_global(python=None, auto=False):
+    """Install the skill + auto-refresh hook at the USER level (~/.claude) so .cai
+    loads in every project automatically. With auto=True the hook also builds a store
+    on the first code edit in a git repo (zero-touch, no `init` needed); otherwise a
+    repo is opted in once with `kerneta init`."""
+    engine = os.path.dirname(os.path.abspath(__file__))
+    python = os.path.abspath(python) if python else sys.executable
+    home_claude = os.path.join(os.path.expanduser("~"), ".claude")
+    out = []
+    skill_dir = os.path.join(home_claude, "skills", "kerneta-cai")
+    os.makedirs(skill_dir, exist_ok=True)
+    with open(os.path.join(skill_dir, "SKILL.md"), "w", encoding="utf-8") as f:
+        f.write(GLOBAL_SKILL)
+    out.append("installed global skill: {}".format(os.path.join(skill_dir, "SKILL.md")))
+    cmd = '"{}" "{}/cai_hook_resolve.py"{}'.format(
+        python.replace("\\", "/"), engine.replace("\\", "/"), " --auto" if auto else "")
+    settings = os.path.join(home_claude, "settings.json")
+    added = _merge_settings(settings, cmd)
+    out.append(("added global PostToolUse hook to {}" if added
+                else "global PostToolUse hook already present in {}").format(settings))
+    out.append("\n.cai now loads in every project." + (
+        " With --auto, a store builds itself on the first code edit in a git repo (no init needed)."
+        if auto else " Index a project once with `kerneta init .`; the hook keeps it fresh after edits."))
+    return "\n".join(out)
+
+
 def _opt(args, name, default=None):
     return args[args.index(name) + 1] if name in args else default
 
@@ -199,12 +275,20 @@ if __name__ == "__main__":
         print(install_skill(sys.argv[2]))
     elif cmd == "hook":
         print(install_hook(sys.argv[2]))
+    elif cmd == "init":
+        a = sys.argv[2:]
+        print(init(a[0] if a and not a[0].startswith("--") else ".",
+                   _opt(a, "--corpus"), _opt(a, "--store"), _opt(a, "--python")))
     elif cmd == "setup":
         a = sys.argv[2:]
-        corpus = _opt(a, "--corpus")
-        if not corpus:
-            print("usage: setup <project_dir> --corpus <dir> [--store <dir>] [--python <path>]")
-            sys.exit(2)
-        print(setup(a[0], corpus, _opt(a, "--store"), _opt(a, "--python")))
+        if "--global" in a:
+            print(setup_global(_opt(a, "--python"), auto=("--auto" in a)))
+        else:
+            corpus = _opt(a, "--corpus")
+            if not corpus:
+                print("usage: setup <project_dir> --corpus <dir> [--store <dir>] [--python <path>]")
+                print("   or: setup --global [--python <path>]")
+                sys.exit(2)
+            print(setup(a[0], corpus, _opt(a, "--store"), _opt(a, "--python")))
     else:
         print("unknown command:", cmd)

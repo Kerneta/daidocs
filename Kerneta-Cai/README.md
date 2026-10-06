@@ -141,6 +141,27 @@ slice reflecting the latest code, with no manual rebuild. This supersedes the ol
 git `hook` command (which only refreshed at commit time); the git hook remains available
 for non-Claude-Code workflows.
 
+### Every project, automatically (global)
+
+To make `.cai` load in *every* project without adding it each time, install once at the
+user level. Two flavours:
+
+```
+kerneta setup --global --auto   # zero-touch: a store builds itself on the first code
+                                # edit in a git repo, no per-repo step at all
+
+kerneta setup --global          # opt-in: then run `kerneta init .` once per repo
+```
+
+`--global` writes `~/.claude/skills/kerneta-cai/SKILL.md` (so the skill loads in every
+session) and a `PostToolUse` hook that, after any edit, finds the current project's store
+from its `.cai-store/.kerneta.json` marker and refreshes only that one. With `--auto`, if
+a git repo has no store yet, the first code edit builds one (guardrails: git repos only,
+not home/drive roots, skipped above 4000 files so huge trees are indexed by hand). Without
+`--auto`, you opt a repo in once with `kerneta init .`. Either way, repos with no store are
+a fast no-op, the always-on cost is just the skill's one-line description, the hook spends
+no model tokens, and querying a store is cheaper than reading files.
+
 ## Build and test
 
 ```

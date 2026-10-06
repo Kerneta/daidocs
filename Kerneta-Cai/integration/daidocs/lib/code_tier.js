@@ -55,8 +55,10 @@ async function offerCodeTier({ here, cwd, ask, log, ASK }) {
   }
 
   // In silent mode we never install Python packages on the user's behalf; we tell
-  // them the one command. In --ask mode we offer to do it now.
-  if (!ASK) {
+  // them the one command. In --ask mode we offer to do it now, but only at a real
+  // terminal: with piped / non-TTY stdin (tests, CI) we print the one-liner so we
+  // never consume an answer the surrounding prompt sequence was counting on.
+  if (!ASK || !process.stdin.isTTY) {
     log('Code memory (.cai) available. To add it for this project:');
     log('  ' + py.argv.join(' ') + ' -m pip install "' + pkgDir + '" && kerneta setup . --corpus .');
     return;

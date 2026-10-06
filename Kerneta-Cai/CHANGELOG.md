@@ -67,6 +67,20 @@ Makes `.cai` automatic in Claude Code, so it is used and kept fresh with no manu
   `GO-LIVE.md` runbook (unlock, fold in, test, run the verify suite, commit, push, deploy).
   The two-install model is intentional: npm (Node) for docs+history, pip for the Python
   code tier; one repo and one router, two package managers.
+- **Global, every-project use** (`kerneta setup --global` + `kerneta init`): installs the
+  skill and a project-aware auto-refresh hook into `~/.claude` so `.cai` loads in every
+  Claude Code session automatically, no per-project skill to remember. `kerneta init .`
+  opts a repo in (builds its store once and drops a `.cai-store/.kerneta.json` marker);
+  `engine/cai_hook_resolve.py` is the PostToolUse resolver that, after any edit, finds the
+  edited file's project store from the marker and refreshes only that one (a fast no-op in
+  repos that never opted in, and it never blocks or fails an edit). Always-on cost is just
+  the skill's one-line description; queries save tokens vs reading files.
+  `bench/test_global.py` passes 13/13 (init, marker, resolver refresh + no-op, zero-touch
+  auto-build in a git repo + the no-repo guardrail, and that the global settings merge
+  preserves existing hooks).
+- **Zero-touch** (`kerneta setup --global --auto`): the hook builds a store on the first
+  code edit in a git repo, so no `kerneta init` is needed at all. Guardrails: git repos
+  only, never a home/drive root, skipped above 4000 files (index those by hand).
 
 ## V5.1.0 (2026-10-05)
 

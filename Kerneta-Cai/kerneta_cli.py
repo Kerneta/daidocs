@@ -39,6 +39,7 @@ SCRIPTS = {
     "combined": ("combined_query.py", []),
     "history": ("dai_history.py", []),
     "setup":   ("cai_install.py", ["setup"]),
+    "init":    ("cai_install.py", ["init"]),
     "skill":   ("cai_install.py", ["skill"]),
     "hook":    ("cai_install.py", ["hook"]),
 }
