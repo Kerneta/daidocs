@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use DaiDocs or report its scores, please cite as below and state the method version, the answering model, the judge snapshot and the denominator of the run."
 title: "DaiDocs: Plain-Text AI-Native Memory"
-version: 4.4.36
+version: 5.1.1
 authors:
   - family-names: Rigi
     given-names: Amin
@@ -11,7 +11,7 @@ authors:
     email: ali@daidocs.com
   - name: "The DaiDocs contributors"
 year: 2026
-date-released: 2026-09-12
+date-released: 2026-10-06
 license: Apache-2.0
 repository-code: "https://github.com/Kerneta/daidocs"
 url: "https://daidocs.com"

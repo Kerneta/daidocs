@@ -7,10 +7,22 @@ Scores below are LongMemEval-S, 500 questions, GPT-4o answering, scored by the b
 authors' own `evaluate_qa.py` with judge snapshot `gpt-4o-2024-08-06`. Numbers measured on
 other scales are marked as such and are not comparable.
 
-## [Unreleased]
+## [5.1.1] - 2026-10-06
+
+**Code memory joins documents and history, and the version unifies on 5.1.1.** DaiDocs
+now carries a code tier alongside its document and session memory, so one system answers
+across code, docs and history. The release version moves to `5.1.1` (from `4.4.36`) to
+mark the unified line; `PROVENANCE` (`V4.4n32`), `FORMAT` (`4.4`) and the engine id are
+unchanged, so every cited benchmark number stays valid.
 
 ### Added
 
+- **Kerneta-Cai code tier (`Kerneta-Cai/`).** A plain-text `.cai` code graph (10 languages,
+  tree-sitter) with document cross-links and a session-history reader, sharing one `ask`
+  router with the `.dai` memory. Python package `kerneta-cai` (`pip install kerneta-cai`);
+  it stays off the npm `files` whitelist, so `npm install daidocs` is unchanged. `node
+  setup.js --ask` offers to install it in the same flow. `kerneta setup --global --auto`
+  makes an agent query it automatically in every project.
 - **`/recall` and `/remember` slash commands for Claude Code (FR6).** Two prompt
   templates over the `daidocs-mcp` tools: `/recall <question>` searches your `.dai`
   memory with `recall_memory` and answers following the reading protocol, and

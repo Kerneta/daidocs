@@ -1,6 +1,6 @@
 {
   "name": "daidocs",
-  "version": "4.4.36",
+  "version": "5.1.1",
   "description": ".dai, an open plain-text format for AI memory. Reference engine plus MCP server for Claude Desktop, Claude Code and any MCP client.",
   "license": "Apache-2.0",
   "type": "commonjs",
