@@ -93,7 +93,7 @@ all rebuilt from source offline (no API, XERJ not included):
 At 35x scale (the CPython standard library, 7,469 symbols) the per-query cost stays flat:
 `.Cai` averages 69 tokens to Graphify's 178.
 
-[See the full results and reproduce them &rarr;](code-benchmarks/)
+[See the full results](code-benchmarks/RESULTS.md) · [reproduce them &rarr;](code-benchmarks/)
 
 ---
 
