@@ -9,3 +9,5 @@ tree-sitter-c
 tree-sitter-cpp
 tree-sitter-ruby
 tree-sitter-c-sharp
+sentence-transformers>=2.2
+numpy

@@ -1,0 +1,74 @@
+[
+ {
+  "n": 1,
+  "q": "the authentication class that reads credentials from the user's ~/.netrc file",
+  "gold_sym": "NetRCAuth",
+  "gold_file": "_auth.py"
+ },
+ {
+  "n": 2,
+  "q": "the auth scheme that responds to a server challenge by hashing the password with a nonce",
+  "gold_sym": "DigestAuth",
+  "gold_file": "_auth.py"
+ },
+ {
+  "n": 3,
+  "q": "a top-level helper that fires a single request and hands back a streaming context manager",
+  "gold_sym": "stream",
+  "gold_file": "_api.py"
+ },
+ {
+  "n": 4,
+  "q": "the method on a response that throws if the status code indicates a client or server error",
+  "gold_sym": "raise_for_status",
+  "gold_file": "_models.py"
+ },
+ {
+  "n": 5,
+  "q": "the exception raised when a response has a 4xx or 5xx status",
+  "gold_sym": "HTTPStatusError",
+  "gold_file": "_exceptions.py"
+ },
+ {
+  "n": 6,
+  "q": "the configuration object that caps how many connections are pooled and kept alive",
+  "gold_sym": "Limits",
+  "gold_file": "_config.py"
+ },
+ {
+  "n": 7,
+  "q": "the object that holds a parsed URL with scheme host path and query",
+  "gold_sym": "URL",
+  "gold_file": "_models.py"
+ },
+ {
+  "n": 8,
+  "q": "the abstract base for asynchronously streaming the bytes of a response body",
+  "gold_sym": "AsyncByteStream",
+  "gold_file": "_types.py"
+ },
+ {
+  "n": 9,
+  "q": "the class that stores and resends cookies across requests in a session",
+  "gold_sym": "Cookies",
+  "gold_file": "_client.py"
+ },
+ {
+  "n": 10,
+  "q": "the configuration for connect read and write timeouts",
+  "gold_sym": "Timeout",
+  "gold_file": "_client.py"
+ },
+ {
+  "n": 11,
+  "q": "turn a mapping of query parameters into an immutable multidict",
+  "gold_sym": "QueryParams",
+  "gold_file": "_urls.py"
+ },
+ {
+  "n": 12,
+  "q": "the primary synchronous entry object you instantiate to send requests and reuse connections",
+  "gold_sym": "Client",
+  "gold_file": "_client.py"
+ }
+]
