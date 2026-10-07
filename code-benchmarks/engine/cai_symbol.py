@@ -12,6 +12,7 @@ import mem_search_plus as mp
 import mem_search as ms
 
 _SYM = re.compile(r"^- (\S+)\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:\[L(\d+)-L(\d+)\])?")
+_SUB = re.compile(r"^\s+- (\S+)\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:\[L(\d+)-L(\d+)\])?")
 
 
 def parse_cai_symbols(cai_path):
@@ -23,8 +24,10 @@ def parse_cai_symbols(cai_path):
         start = next(i for i, l in enumerate(lines) if l.strip() == "## symbols")
     except StopIteration:
         return []
-    out = []
+    out = []          # top-level symbols (class/def/fn) with their full blocks
+    subs = []         # nested method/property symbols, as their own retrievable docs
     cur = None
+    subcur = None
     for l in lines[start + 1:]:
         if l.startswith("## "):
             break
@@ -32,19 +35,38 @@ def parse_cai_symbols(cai_path):
         if m:
             if cur:
                 out.append(cur)
+            if subcur:
+                subs.append(subcur); subcur = None
             cur = {"kind": m.group(1), "name": m.group(2),
                    "l0": int(m.group(3)) if m.group(3) else None,
                    "l1": int(m.group(4)) if m.group(4) else None,
                    "block": [l]}
-        elif cur is not None and (l.startswith(" ") or l.startswith("\t") or not l.strip()):
+            continue
+        sm = _SUB.match(l)
+        if sm:
+            # a nested method/property: keep it inside the class block AND as its own doc
+            if subcur:
+                subs.append(subcur)
+            subcur = {"kind": sm.group(1), "name": sm.group(2),
+                      "l0": int(sm.group(3)) if sm.group(3) else None,
+                      "l1": int(sm.group(4)) if sm.group(4) else None,
+                      "block": [l]}
+            if cur is not None:
+                cur["block"].append(l)
+            continue
+        if cur is not None:
             cur["block"].append(l)
-        elif cur is not None:
-            cur["block"].append(l)
+        if subcur is not None:
+            subcur["block"].append(l)
     if cur:
         out.append(cur)
-    for s in out:
+    if subcur:
+        subs.append(subcur)
+    seen = {(s["name"]) for s in out}
+    all_syms = out + [s for s in subs if s["name"] not in seen or True]
+    for s in all_syms:
         s["block"] = "\n".join(s["block"]).rstrip()
-    return out
+    return all_syms
 
 
 def _span_signals(src_lines, l0, l1):

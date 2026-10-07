@@ -62,8 +62,8 @@ semantic: a behaviour described in natural language, answer is the implementing 
 
 | Query type | n | .cai recall | .cai top-1 | Graphify recall | .cai tok | Graphify tok | .cai vs Graphify |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| semantic | 40 | 100% | 55% | 100% | 1414 | 1841 | 1x less |
-| lookup | 25 | 76% | 44% | 100% | 855 | 3698 | 4x less |
+| semantic | 40 | 95% | 32% | 100% | 722 | 1841 | 3x less |
+| lookup | 25 | 92% | 56% | 100% | 425 | 3698 | 9x less |
 
 ## "Make this change" end-to-end (.cai vs Graphify vs raw)
 
@@ -81,5 +81,5 @@ Given a change, surface every function that must be edited (target + direct call
 
 | Tool | gold in pack | solved | avg tokens |
 | --- | --- | --- | --- |
-| .cai | 12 / 12 | 12 / 12 | 1698 |
+| .cai | 12 / 12 | 12 / 12 | 907 |
 | Graphify | 11 / 12 | 10 / 12 | 2746 |

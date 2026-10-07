@@ -29,7 +29,7 @@ if not os.path.exists(GF) and os.path.exists(GF + ".exe"):
 SRC = os.path.join(HERE, "corpora/httpx/src")
 STORE = os.path.join(HERE, "results", "stores", "httpx")
 GRAPH = os.path.join(HERE, "corpora/httpx/graphify/graphify-out/graph.json")
-K = 8
+K = 10  # re-calibrated for method-level symbol docs (keeps the ~700-token budget)
 
 
 def toks(t):
