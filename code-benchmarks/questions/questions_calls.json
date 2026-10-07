@@ -1,0 +1,41 @@
+[
+  {"id":"c01","q":"What directly calls pct?","op":"callers","args":["pct"],
+   "gf":["explain","pct()"],"raw":["shop"],
+   "gtype":"set","gold":["bulk_discount","loyalty_discount"],"distract":["item_price","cart_total"]},
+
+  {"id":"c02","q":"What does cart_total call?","op":"callees","args":["cart_total"],
+   "gf":["explain","cart_total()"],"raw":["shop"],
+   "gtype":"presence","gold":["item_price","loyalty_discount","format_money"],"distract":[]},
+
+  {"id":"c03","q":"What directly calls bulk_discount?","op":"callers","args":["bulk_discount"],
+   "gf":["explain","bulk_discount()"],"raw":["shop"],
+   "gtype":"set","gold":["item_price"],"distract":["cart_total","loyalty_discount"]},
+
+  {"id":"c04","q":"What directly calls format_money?","op":"callers","args":["format_money"],
+   "gf":["explain","format_money()"],"raw":["shop"],
+   "gtype":"presence","gold":["cart_total"],"distract":[]},
+
+  {"id":"c05","q":"What does item_price call?","op":"callees","args":["item_price"],
+   "gf":["explain","item_price()"],"raw":["shop"],
+   "gtype":"presence","gold":["bulk_discount"],"distract":[]},
+
+  {"id":"c06","q":"What does bulk_discount call?","op":"callees","args":["bulk_discount"],
+   "gf":["explain","bulk_discount()"],"raw":["shop"],
+   "gtype":"presence","gold":["pct"],"distract":[]},
+
+  {"id":"c07","q":"What directly calls loyalty_discount?","op":"callers","args":["loyalty_discount"],
+   "gf":["explain","loyalty_discount()"],"raw":["shop"],
+   "gtype":"presence","gold":["cart_total"],"distract":[]},
+
+  {"id":"c08","q":"Where is cart_total defined?","op":"defines","args":["cart_total"],
+   "gf":["explain","cart_total()"],"raw":["shop"],
+   "gtype":"presence","gold":["shop"],"distract":[]},
+
+  {"id":"c09","q":"What directly calls item_price?","op":"callers","args":["item_price"],
+   "gf":["explain","item_price()"],"raw":["shop"],
+   "gtype":"presence","gold":["cart_total"],"distract":[]},
+
+  {"id":"c10","q":"What does loyalty_discount call?","op":"callees","args":["loyalty_discount"],
+   "gf":["explain","loyalty_discount()"],"raw":["shop"],
+   "gtype":"presence","gold":["pct"],"distract":[]}
+]

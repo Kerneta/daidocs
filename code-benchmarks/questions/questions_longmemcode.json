@@ -1,0 +1,257 @@
+[
+ {
+  "id": "L01",
+  "q": "What does layer_0 transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "layer_0"
+  ],
+  "gf": [
+   "query",
+   "transitive import dependencies of layer_0{ext}"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "layer_1",
+   "layer_2",
+   "layer_3",
+   "layer_4",
+   "layer_5",
+   "layer_6",
+   "layer_7",
+   "layer_8",
+   "layer_9",
+   "layer_10",
+   "layer_11"
+  ],
+  "distract": []
+ },
+ {
+  "id": "L02",
+  "q": "Import path from layer_0 to layer_11?",
+  "op": "path",
+  "args": [
+   "layer_0",
+   "layer_11"
+  ],
+  "gf": [
+   "path",
+   "layer_0{ext}",
+   "layer_11{ext}"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "layer_0",
+   "layer_11"
+  ],
+  "distract": []
+ },
+ {
+  "id": "L05c",
+  "q": "What directly calls f_5?",
+  "op": "callers",
+  "args": [
+   "f_5"
+  ],
+  "gf": [
+   "explain",
+   "f_5()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "set",
+  "gold": [
+   "f_4"
+  ],
+  "distract": [
+   "f_0",
+   "f_1",
+   "f_2",
+   "f_3"
+  ]
+ },
+ {
+  "id": "L01c",
+  "q": "What directly calls f_1?",
+  "op": "callers",
+  "args": [
+   "f_1"
+  ],
+  "gf": [
+   "explain",
+   "f_1()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "set",
+  "gold": [
+   "f_0"
+  ],
+  "distract": []
+ },
+ {
+  "id": "L10c",
+  "q": "What directly calls f_10?",
+  "op": "callers",
+  "args": [
+   "f_10"
+  ],
+  "gf": [
+   "explain",
+   "f_10()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "set",
+  "gold": [
+   "f_9"
+  ],
+  "distract": [
+   "f_0",
+   "f_1",
+   "f_2",
+   "f_3",
+   "f_4",
+   "f_5",
+   "f_6",
+   "f_7",
+   "f_8"
+  ]
+ },
+ {
+  "id": "L07c",
+  "q": "What directly calls f_7?",
+  "op": "callers",
+  "args": [
+   "f_7"
+  ],
+  "gf": [
+   "explain",
+   "f_7()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "set",
+  "gold": [
+   "f_6"
+  ],
+  "distract": [
+   "f_0",
+   "f_1",
+   "f_2",
+   "f_3",
+   "f_4",
+   "f_5"
+  ]
+ },
+ {
+  "id": "L00e",
+  "q": "What does f_0 call?",
+  "op": "callees",
+  "args": [
+   "f_0"
+  ],
+  "gf": [
+   "explain",
+   "f_0()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "f_1"
+  ],
+  "distract": []
+ },
+ {
+  "id": "L07e",
+  "q": "What does f_7 call?",
+  "op": "callees",
+  "args": [
+   "f_7"
+  ],
+  "gf": [
+   "explain",
+   "f_7()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "f_8"
+  ],
+  "distract": []
+ },
+ {
+  "id": "L10e",
+  "q": "What does f_10 call?",
+  "op": "callees",
+  "args": [
+   "f_10"
+  ],
+  "gf": [
+   "explain",
+   "f_10()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "f_11"
+  ],
+  "distract": []
+ },
+ {
+  "id": "L20",
+  "q": "Where is f_7 defined?",
+  "op": "defines",
+  "args": [
+   "f_7"
+  ],
+  "gf": [
+   "explain",
+   "f_7()"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "layer_7"
+  ],
+  "distract": []
+ },
+ {
+  "id": "L21",
+  "q": "What does layer_3 import?",
+  "op": "imports",
+  "args": [
+   "layer_3"
+  ],
+  "gf": [
+   "explain",
+   "layer_3{ext}"
+  ],
+  "raw": [
+   "layer_3"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "layer_4"
+  ],
+  "distract": []
+ }
+]

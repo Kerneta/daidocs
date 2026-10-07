@@ -1,0 +1,360 @@
+[
+ {
+  "id": "R_imp___init__",
+  "q": "What sibling modules does __init__ import?",
+  "op": "imports",
+  "args": [
+   "__init__"
+  ],
+  "gf": [
+   "explain",
+   "__init__{ext}"
+  ],
+  "raw": [
+   "__init__"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "__version__",
+   "api",
+   "exceptions",
+   "models",
+   "packages",
+   "sessions",
+   "status_codes",
+   "utils"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_imp__internal_utils",
+  "q": "What sibling modules does _internal_utils import?",
+  "op": "imports",
+  "args": [
+   "_internal_utils"
+  ],
+  "gf": [
+   "explain",
+   "_internal_utils{ext}"
+  ],
+  "raw": [
+   "_internal_utils"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "compat"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_imp__types",
+  "q": "What sibling modules does _types import?",
+  "op": "imports",
+  "args": [
+   "_types"
+  ],
+  "gf": [
+   "explain",
+   "_types{ext}"
+  ],
+  "raw": [
+   "_types"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "auth",
+   "cookies",
+   "models",
+   "structures"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_imp_adapters",
+  "q": "What sibling modules does adapters import?",
+  "op": "imports",
+  "args": [
+   "adapters"
+  ],
+  "gf": [
+   "explain",
+   "adapters{ext}"
+  ],
+  "raw": [
+   "adapters"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "_types",
+   "auth",
+   "compat",
+   "cookies",
+   "exceptions",
+   "models",
+   "structures",
+   "utils"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_imp_api",
+  "q": "What sibling modules does api import?",
+  "op": "imports",
+  "args": [
+   "api"
+  ],
+  "gf": [
+   "explain",
+   "api{ext}"
+  ],
+  "raw": [
+   "api"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "_types",
+   "models",
+   "sessions"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_imp_auth",
+  "q": "What sibling modules does auth import?",
+  "op": "imports",
+  "args": [
+   "auth"
+  ],
+  "gf": [
+   "explain",
+   "auth{ext}"
+  ],
+  "raw": [
+   "auth"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "_internal_utils",
+   "compat",
+   "cookies",
+   "models",
+   "utils"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_AuthBase",
+  "q": "Which module defines AuthBase?",
+  "op": "defines",
+  "args": [
+   "AuthBase"
+  ],
+  "gf": [
+   "explain",
+   "AuthBase()"
+  ],
+  "raw": [
+   "auth"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "auth"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_BaseAdapter",
+  "q": "Which module defines BaseAdapter?",
+  "op": "defines",
+  "args": [
+   "BaseAdapter"
+  ],
+  "gf": [
+   "explain",
+   "BaseAdapter()"
+  ],
+  "raw": [
+   "adapters"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "adapters"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_CaseInsensitiveDict",
+  "q": "Which module defines CaseInsensitiveDict?",
+  "op": "defines",
+  "args": [
+   "CaseInsensitiveDict"
+  ],
+  "gf": [
+   "explain",
+   "CaseInsensitiveDict()"
+  ],
+  "raw": [
+   "structures"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "structures"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_ChunkedEncodingError",
+  "q": "Which module defines ChunkedEncodingError?",
+  "op": "defines",
+  "args": [
+   "ChunkedEncodingError"
+  ],
+  "gf": [
+   "explain",
+   "ChunkedEncodingError()"
+  ],
+  "raw": [
+   "exceptions"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "exceptions"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_ConnectTimeout",
+  "q": "Which module defines ConnectTimeout?",
+  "op": "defines",
+  "args": [
+   "ConnectTimeout"
+  ],
+  "gf": [
+   "explain",
+   "ConnectTimeout()"
+  ],
+  "raw": [
+   "exceptions"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "exceptions"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_ConnectionError",
+  "q": "Which module defines ConnectionError?",
+  "op": "defines",
+  "args": [
+   "ConnectionError"
+  ],
+  "gf": [
+   "explain",
+   "ConnectionError()"
+  ],
+  "raw": [
+   "exceptions"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "exceptions"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_ContentDecodingError",
+  "q": "Which module defines ContentDecodingError?",
+  "op": "defines",
+  "args": [
+   "ContentDecodingError"
+  ],
+  "gf": [
+   "explain",
+   "ContentDecodingError()"
+  ],
+  "raw": [
+   "exceptions"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "exceptions"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_def_CookieConflictError",
+  "q": "Which module defines CookieConflictError?",
+  "op": "defines",
+  "args": [
+   "CookieConflictError"
+  ],
+  "gf": [
+   "explain",
+   "CookieConflictError()"
+  ],
+  "raw": [
+   "cookies"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "cookies"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_mostimp",
+  "q": "Which module is imported by the most siblings? (models and compat tie)",
+  "op": "most_imported",
+  "args": [],
+  "gf": [
+   "query",
+   "which module is imported by the most other modules"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "any",
+  "gold": [
+   "models",
+   "compat"
+  ],
+  "distract": []
+ },
+ {
+  "id": "R_tdeps",
+  "q": "What does __init__ transitively import?",
+  "op": "tdeps",
+  "args": [
+   "__init__"
+  ],
+  "gf": [
+   "query",
+   "transitive import dependencies of __init__{ext}"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "__version__",
+   "_internal_utils",
+   "_types",
+   "adapters",
+   "api",
+   "auth",
+   "certs",
+   "compat",
+   "cookies",
+   "exceptions",
+   "hooks",
+   "models",
+   "packages",
+   "sessions",
+   "status_codes",
+   "structures",
+   "utils"
+  ],
+  "distract": []
+ }
+]

@@ -1,0 +1,41 @@
+[
+  {"id":"CB01","q":"What does cai_update import?","op":"imports","args":["cai_update"],
+   "gf":["explain","cai_update{ext}"],"raw":["cai_update"],
+   "gtype":"presence","gold":["cai_ts_extract"],"distract":[]},
+
+  {"id":"CB02","q":"What does cai_route import?","op":"imports","args":["cai_route"],
+   "gf":["explain","cai_route{ext}"],"raw":["cai_route"],
+   "gtype":"presence","gold":["cai_ts_extract","cai_data_extract"],"distract":[]},
+
+  {"id":"CB03","q":"What does cai_serve import?","op":"imports","args":["cai_serve"],
+   "gf":["explain","cai_serve{ext}"],"raw":["cai_serve"],
+   "gtype":"presence","gold":["cai_query"],"distract":[]},
+
+  {"id":"CB04","q":"Where is parse_nl defined?","op":"defines","args":["parse_nl"],
+   "gf":["explain","parse_nl()"],"raw":["cai_query"],
+   "gtype":"presence","gold":["cai_query"],"distract":[]},
+
+  {"id":"CB05","q":"Where is god_nodes defined?","op":"defines","args":["god_nodes"],
+   "gf":["explain","god_nodes()"],"raw":["cai_analyze"],
+   "gtype":"presence","gold":["cai_analyze"],"distract":[]},
+
+  {"id":"CB06","q":"Where is extract_sql defined?","op":"defines","args":["extract_sql"],
+   "gf":["explain","extract_sql()"],"raw":["cai_data_extract"],
+   "gtype":"presence","gold":["cai_data_extract"],"distract":[]},
+
+  {"id":"CB07","q":"Where is impact defined?","op":"defines","args":["impact"],
+   "gf":["explain","impact()"],"raw":["cai_pr"],
+   "gtype":"presence","gold":["cai_pr"],"distract":[]},
+
+  {"id":"CB08","q":"Where is collect_relations defined?","op":"defines","args":["collect_relations"],
+   "gf":["explain","collect_relations()"],"raw":["cai_ts_extract"],
+   "gtype":"presence","gold":["cai_ts_extract"],"distract":[]},
+
+  {"id":"CB09","q":"Which module is imported by the most others?","op":"most_imported","args":[],
+   "gf":["query","which module is imported by the most other modules"],"raw":["ALL"],
+   "gtype":"presence","gold":["cai_ts_extract"],"distract":[]},
+
+  {"id":"CB10","q":"Import path from cai_update to cai_ts_extract?","op":"path","args":["cai_update","cai_ts_extract"],
+   "gf":["path","cai_update{ext}","cai_ts_extract{ext}"],"raw":["cai_update","cai_ts_extract"],
+   "gtype":"presence","gold":["cai_update","cai_ts_extract"],"distract":[]}
+]

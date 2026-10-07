@@ -1,0 +1,218 @@
+{
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "nodes": [
+    {
+      "id": "shop_shop",
+      "label": "Shop.cs",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shop_shop_shop",
+      "label": "Shop",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L1",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shop_shop_shop_pct",
+      "label": ".pct()",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L2",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shop_shop_shop_format_money",
+      "label": ".format_money()",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L6",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shop_shop_shop_bulk_discount",
+      "label": ".bulk_discount()",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L10",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shop_shop_shop_loyalty_discount",
+      "label": ".loyalty_discount()",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L17",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shop_shop_shop_item_price",
+      "label": ".item_price()",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L21",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shop_shop_shop_cart_total",
+      "label": ".cart_total()",
+      "file_type": "code",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L25",
+      "_callable": true,
+      "_origin": "ast"
+    }
+  ],
+  "links": [
+    {
+      "source": "shop_shop",
+      "target": "shop_shop_shop",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop",
+      "target": "shop_shop_shop_pct",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop",
+      "target": "shop_shop_shop_format_money",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop",
+      "target": "shop_shop_shop_bulk_discount",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop",
+      "target": "shop_shop_shop_loyalty_discount",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop",
+      "target": "shop_shop_shop_item_price",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop",
+      "target": "shop_shop_shop_cart_total",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop_bulk_discount",
+      "target": "shop_shop_shop_pct",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop_loyalty_discount",
+      "target": "shop_shop_shop_pct",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop_item_price",
+      "target": "shop_shop_shop_bulk_discount",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop_cart_total",
+      "target": "shop_shop_shop_item_price",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop_cart_total",
+      "target": "shop_shop_shop_loyalty_discount",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shop_shop_shop_cart_total",
+      "target": "shop_shop_shop_format_money",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shop/Shop.cs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "directed": false
+}

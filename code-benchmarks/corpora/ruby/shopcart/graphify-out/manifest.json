@@ -1,0 +1,50 @@
+{
+  "app.rb": {
+    "mtime": 1789608001.0720966,
+    "seen": 1789608013.2955666,
+    "ast_hash": "c85943331bd76be8edc0d848f0a22849",
+    "semantic_hash": "c85943331bd76be8edc0d848f0a22849"
+  },
+  "cart.rb": {
+    "mtime": 1789607997.9579854,
+    "seen": 1789608013.2955666,
+    "ast_hash": "9556655765355d573035d8a6916be2f1",
+    "semantic_hash": "9556655765355d573035d8a6916be2f1"
+  },
+  "catalog.rb": {
+    "mtime": 1789607995.825586,
+    "seen": 1789608013.2955666,
+    "ast_hash": "38b63e5606382ee4a912471af88adfa7",
+    "semantic_hash": "38b63e5606382ee4a912471af88adfa7"
+  },
+  "checkout.rb": {
+    "mtime": 1789607999.376714,
+    "seen": 1789608013.2955666,
+    "ast_hash": "1559b4e145790489a314f5dc028edddd",
+    "semantic_hash": "1559b4e145790489a314f5dc028edddd"
+  },
+  "discounts.rb": {
+    "mtime": 1789607989.7298522,
+    "seen": 1789608013.2955666,
+    "ast_hash": "6204a1d2f578d3eab818b1a0d38ccb8d",
+    "semantic_hash": "6204a1d2f578d3eab818b1a0d38ccb8d"
+  },
+  "models.rb": {
+    "mtime": 1789607987.7878044,
+    "seen": 1789608013.2955666,
+    "ast_hash": "ed6d16aab62fcc96fcfb671959b06065",
+    "semantic_hash": "ed6d16aab62fcc96fcfb671959b06065"
+  },
+  "pricing.rb": {
+    "mtime": 1789607991.9029362,
+    "seen": 1789608013.2955666,
+    "ast_hash": "fe7d4eb3eac7a6c555c64e90e5e0adef",
+    "semantic_hash": "fe7d4eb3eac7a6c555c64e90e5e0adef"
+  },
+  "utils.rb": {
+    "mtime": 1789607985.9747436,
+    "seen": 1789608013.2955666,
+    "ast_hash": "d908bf5ab69bf604e2e4485993778b80",
+    "semantic_hash": "d908bf5ab69bf604e2e4485993778b80"
+  }
+}
