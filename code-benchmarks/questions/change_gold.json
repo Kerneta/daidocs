@@ -1,0 +1,62 @@
+[
+ {
+  "n": 1,
+  "q": "We want build_request to accept a new `timeout` argument and thread it through. List every function that must be edited to add and forward this parameter.",
+  "target": "build_request",
+  "gold_set": [
+   "build_request",
+   "stream",
+   "request"
+  ]
+ },
+ {
+  "n": 2,
+  "q": "Add a `retries` parameter to the client's send method; every internal code path that calls send must forward it. List all functions that must be edited.",
+  "target": "send",
+  "gold_set": [
+   "send",
+   "sync_auth_flow",
+   "async_auth_flow",
+   "stream",
+   "request",
+   "_send_handling_auth"
+  ]
+ },
+ {
+  "n": 3,
+  "q": "We're changing _merge_url to return a different type. Find every function that calls it and would need updating.",
+  "target": "_merge_url",
+  "gold_set": [
+   "_merge_url",
+   "build_request"
+  ]
+ },
+ {
+  "n": 4,
+  "q": "We're adding instrumentation around the single-request send in the redirect path. Which function(s) directly call _send_single_request and must be checked?",
+  "target": "_send_single_request",
+  "gold_set": [
+   "_send_single_request",
+   "_send_handling_redirects"
+  ]
+ },
+ {
+  "n": 5,
+  "q": "We're changing the signature of the redirect header builder _redirect_headers. List every function that calls it.",
+  "target": "_redirect_headers",
+  "gold_set": [
+   "_redirect_headers",
+   "_build_redirect_request"
+  ]
+ },
+ {
+  "n": 6,
+  "q": "We're reworking how _build_auth constructs the auth object. List all of its call sites that must be updated.",
+  "target": "_build_auth",
+  "gold_set": [
+   "_build_auth",
+   "_build_request_auth",
+   "auth"
+  ]
+ }
+]
