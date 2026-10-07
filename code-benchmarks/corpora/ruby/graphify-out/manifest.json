@@ -1,0 +1,50 @@
+{
+  "shopcart/app.rb": {
+    "mtime": 1789608001.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "c85943331bd76be8edc0d848f0a22849",
+    "semantic_hash": ""
+  },
+  "shopcart/cart.rb": {
+    "mtime": 1789607997.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "9556655765355d573035d8a6916be2f1",
+    "semantic_hash": ""
+  },
+  "shopcart/catalog.rb": {
+    "mtime": 1789607995.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "38b63e5606382ee4a912471af88adfa7",
+    "semantic_hash": ""
+  },
+  "shopcart/checkout.rb": {
+    "mtime": 1789607999.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "1559b4e145790489a314f5dc028edddd",
+    "semantic_hash": ""
+  },
+  "shopcart/discounts.rb": {
+    "mtime": 1789607989.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "6204a1d2f578d3eab818b1a0d38ccb8d",
+    "semantic_hash": ""
+  },
+  "shopcart/models.rb": {
+    "mtime": 1789607987.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "ed6d16aab62fcc96fcfb671959b06065",
+    "semantic_hash": ""
+  },
+  "shopcart/pricing.rb": {
+    "mtime": 1789607991.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "fe7d4eb3eac7a6c555c64e90e5e0adef",
+    "semantic_hash": ""
+  },
+  "shopcart/utils.rb": {
+    "mtime": 1789607985.0,
+    "seen": 1791327401.9408603,
+    "ast_hash": "d908bf5ab69bf604e2e4485993778b80",
+    "semantic_hash": ""
+  }
+}

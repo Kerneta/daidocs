@@ -1,0 +1,900 @@
+{
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "failed_sources": [],
+  "extracted_sources": [
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\app.js",
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\cart.js",
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\catalog.js",
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\checkout.js",
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\discounts.js",
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\models.js",
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\pricing.js",
+    "C:\\Users\\LENOVO\\Desktop\\Browser\\_archive-cai-pre-v5\\cai+python\\corpora\\js\\shopcart\\utils.js"
+  ],
+  "nodes": [
+    {
+      "id": "shopcart_app",
+      "label": "app.js",
+      "file_type": "code",
+      "source_file": "shopcart/app.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_app_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "shopcart/app.js",
+      "source_location": "L5",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_cart",
+      "label": "cart.js",
+      "file_type": "code",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_cart_cart",
+      "label": "Cart",
+      "file_type": "code",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L5",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_cart_cart_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L6",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_cart_cart_add",
+      "label": ".add()",
+      "file_type": "code",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L9",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_cart_cart_total",
+      "label": ".total()",
+      "file_type": "code",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L16",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_catalog",
+      "label": "catalog.js",
+      "file_type": "code",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_catalog_catalog",
+      "label": "CATALOG",
+      "file_type": "code",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L3",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_catalog_find_product",
+      "label": "find_product()",
+      "file_type": "code",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L9",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_catalog_all_products",
+      "label": "all_products()",
+      "file_type": "code",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L18",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_checkout",
+      "label": "checkout.js",
+      "file_type": "code",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_checkout_checkout",
+      "label": "checkout()",
+      "file_type": "code",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L4",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_discounts",
+      "label": "discounts.js",
+      "file_type": "code",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_discounts_bulk_discount",
+      "label": "bulk_discount()",
+      "file_type": "code",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L3",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_discounts_loyalty_discount",
+      "label": "loyalty_discount()",
+      "file_type": "code",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L10",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_models",
+      "label": "models.js",
+      "file_type": "code",
+      "source_file": "shopcart/models.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_models_product",
+      "label": "Product",
+      "file_type": "code",
+      "source_file": "shopcart/models.js",
+      "source_location": "L1",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_models_product_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "shopcart/models.js",
+      "source_location": "L2",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_models_cartitem",
+      "label": "CartItem",
+      "file_type": "code",
+      "source_file": "shopcart/models.js",
+      "source_location": "L9",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_models_cartitem_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "shopcart/models.js",
+      "source_location": "L10",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_models_cartitem_line_cents",
+      "label": ".line_cents()",
+      "file_type": "code",
+      "source_file": "shopcart/models.js",
+      "source_location": "L14",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_pricing",
+      "label": "pricing.js",
+      "file_type": "code",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_pricing_item_price",
+      "label": "item_price()",
+      "file_type": "code",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L4",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_pricing_cart_total",
+      "label": "cart_total()",
+      "file_type": "code",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L10",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_utils",
+      "label": "utils.js",
+      "file_type": "code",
+      "source_file": "shopcart/utils.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_utils_format_money",
+      "label": "format_money()",
+      "file_type": "code",
+      "source_file": "shopcart/utils.js",
+      "source_location": "L1",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shopcart_utils_pct",
+      "label": "pct()",
+      "file_type": "code",
+      "source_file": "shopcart/utils.js",
+      "source_location": "L5",
+      "_callable": true,
+      "_origin": "ast"
+    }
+  ],
+  "links": [
+    {
+      "source": "shopcart_app",
+      "target": "shopcart_catalog",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app",
+      "target": "shopcart_catalog_all_products",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app",
+      "target": "shopcart_cart",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app",
+      "target": "shopcart_cart_cart",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app",
+      "target": "shopcart_checkout",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app",
+      "target": "shopcart_checkout_checkout",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app",
+      "target": "shopcart_app_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart",
+      "target": "shopcart_models",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart",
+      "target": "shopcart_models_cartitem",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart",
+      "target": "shopcart_catalog",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart",
+      "target": "shopcart_catalog_find_product",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart",
+      "target": "shopcart_pricing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart",
+      "target": "shopcart_pricing_cart_total",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart",
+      "target": "shopcart_cart_cart",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart_cart",
+      "target": "shopcart_cart_cart_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart_cart",
+      "target": "shopcart_cart_cart_add",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart_cart",
+      "target": "shopcart_cart_cart_total",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/cart.js",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_catalog",
+      "target": "shopcart_models",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_catalog",
+      "target": "shopcart_models_product",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_catalog",
+      "target": "shopcart_catalog_catalog",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_catalog",
+      "target": "shopcart_catalog_find_product",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_catalog",
+      "target": "shopcart_catalog_all_products",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/catalog.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_checkout",
+      "target": "shopcart_pricing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_checkout",
+      "target": "shopcart_pricing_cart_total",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_checkout",
+      "target": "shopcart_utils",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_checkout",
+      "target": "shopcart_utils_format_money",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_checkout",
+      "target": "shopcart_checkout_checkout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_discounts",
+      "target": "shopcart_utils",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_discounts",
+      "target": "shopcart_utils_pct",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_discounts",
+      "target": "shopcart_discounts_bulk_discount",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_discounts",
+      "target": "shopcart_discounts_loyalty_discount",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_models",
+      "target": "shopcart_models_product",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/models.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_models_product",
+      "target": "shopcart_models_product_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/models.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_models",
+      "target": "shopcart_models_cartitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/models.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_models_cartitem",
+      "target": "shopcart_models_cartitem_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/models.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_models_cartitem",
+      "target": "shopcart_models_cartitem_line_cents",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/models.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing",
+      "target": "shopcart_discounts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing",
+      "target": "shopcart_discounts_bulk_discount",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing",
+      "target": "shopcart_discounts_loyalty_discount",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing",
+      "target": "shopcart_utils",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing",
+      "target": "shopcart_utils_format_money",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing",
+      "target": "shopcart_pricing_item_price",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing",
+      "target": "shopcart_pricing_cart_total",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing_cart_total",
+      "target": "shopcart_pricing_item_price",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_utils",
+      "target": "shopcart_utils_format_money",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/utils.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_utils",
+      "target": "shopcart_utils_pct",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/utils.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app_main",
+      "target": "shopcart_catalog_all_products",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app_main",
+      "target": "shopcart_checkout_checkout",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/app.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_checkout_checkout",
+      "target": "shopcart_utils_format_money",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/checkout.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_discounts_bulk_discount",
+      "target": "shopcart_utils_pct",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_discounts_loyalty_discount",
+      "target": "shopcart_utils_pct",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/discounts.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing_item_price",
+      "target": "shopcart_discounts_bulk_discount",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing_cart_total",
+      "target": "shopcart_discounts_loyalty_discount",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_pricing_cart_total",
+      "target": "shopcart_utils_format_money",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shopcart/pricing.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app_main",
+      "target": "shopcart_cart_cart",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shopcart/app.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart_cart_add",
+      "target": "shopcart_catalog_find_product",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shopcart/cart.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart_cart_add",
+      "target": "shopcart_models_cartitem",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shopcart/cart.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_cart_cart_total",
+      "target": "shopcart_pricing_cart_total",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shopcart/cart.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shopcart_app_main",
+      "target": "shopcart_cart_cart_add",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "shopcart/app.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "directed": false
+}

@@ -1,0 +1,247 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "shop_shop",
+      "label": "Shop",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "shop",
+      "source_file": "Shop.java",
+      "source_location": "L1"
+    },
+    {
+      "id": "shop_shop_cart_total",
+      "label": ".cart_total()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": ".cart_total()",
+      "source_file": "Shop.java",
+      "source_location": "L25"
+    },
+    {
+      "id": "shop_shop_format_money",
+      "label": ".format_money()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": ".format_money()",
+      "source_file": "Shop.java",
+      "source_location": "L6"
+    },
+    {
+      "id": "shop_shop_bulk_discount",
+      "label": ".bulk_discount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": ".bulk_discount()",
+      "source_file": "Shop.java",
+      "source_location": "L10"
+    },
+    {
+      "id": "shop_shop_item_price",
+      "label": ".item_price()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": ".item_price()",
+      "source_file": "Shop.java",
+      "source_location": "L21"
+    },
+    {
+      "id": "shop_shop_loyalty_discount",
+      "label": ".loyalty_discount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "norm_label": ".loyalty_discount()",
+      "source_file": "Shop.java",
+      "source_location": "L17"
+    },
+    {
+      "id": "shop_shop_pct",
+      "label": ".pct()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "norm_label": ".pct()",
+      "source_file": "Shop.java",
+      "source_location": "L2"
+    },
+    {
+      "id": "shop",
+      "label": "Shop.java",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "shop.java",
+      "source_file": "Shop.java",
+      "source_location": "L1"
+    }
+  ],
+  "links": [
+    {
+      "source": "shop_shop_bulk_discount",
+      "target": "shop_shop_pct",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "Shop.java",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop_cart_total",
+      "target": "shop_shop_item_price",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "Shop.java",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop_cart_total",
+      "target": "shop_shop_loyalty_discount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "Shop.java",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop_cart_total",
+      "target": "shop_shop_format_money",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "Shop.java",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop_item_price",
+      "target": "shop_shop_bulk_discount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "Shop.java",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop_loyalty_discount",
+      "target": "shop_shop_pct",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "Shop.java",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "shop",
+      "target": "shop_shop",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Shop.java",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop",
+      "target": "shop_shop_bulk_discount",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Shop.java",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop",
+      "target": "shop_shop_loyalty_discount",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Shop.java",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop",
+      "target": "shop_shop_pct",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Shop.java",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop",
+      "target": "shop_shop_item_price",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Shop.java",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop",
+      "target": "shop_shop_cart_total",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Shop.java",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_shop",
+      "target": "shop_shop_format_money",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Shop.java",
+      "source_location": "L6",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}
