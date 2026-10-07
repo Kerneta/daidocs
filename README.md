@@ -78,6 +78,25 @@ join them.
 
 ---
 
+## `.Cai` for code: measured against Graphify
+
+`.Cai` is a plain-text code graph. On real repositories it matches or beats Graphify on
+accuracy while putting a fraction of the tokens in front of the model. A few headline rows,
+all rebuilt from source offline (no API, XERJ not included):
+
+| Code retrieval (real repos) | `.Cai` | Graphify | raw files | `.Cai` vs Graphify | `.Cai` vs raw |
+| --- | --- | --- | --- | --- | --- |
+| psf/requests, 16 ast-graded questions | 16/16 at 55 tok | 13/16 at 689 | 16/16 at 9,023 | **13x less** | **164x less** |
+| httpx imports (who does X import) | 100% at 22 tok | 91% at 4,696 | 100% at 64,075 | **218x less** | **2,976x less** |
+| Make this change, 6 httpx edits | 1.00 recall, 6/6 sets at 38 tok | 0.64, 3/6 at 1,651 | 0.61, 1/6 at 64,075 | **43x less** | **1,686x less** |
+
+At 35x scale (the CPython standard library, 7,469 symbols) the per-query cost stays flat:
+`.Cai` averages 69 tokens to Graphify's 178.
+
+[See the full results and reproduce them &rarr;](code-benchmarks/)
+
+---
+
 ## Language independent, model independent
 
 A `.dai` file is three plain-text zones: a YAML header, a fenced JSON block, and the text. No binary, no database, no SDK required to read it.
