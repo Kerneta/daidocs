@@ -1,3 +1,4 @@
 results/stores/
+results/changeblind_raw.json
 __pycache__/
 *.pyc
