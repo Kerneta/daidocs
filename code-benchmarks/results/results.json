@@ -93,17 +93,82 @@
         "raw": 195.6
       }
     },
-    "_aggregate": {
-      "n": 44,
+    "go": {
+      "n": 10,
       "acc": {
-        "cai": 44,
-        "gfy": 33,
-        "raw": 40
+        "cai": 10,
+        "gfy": 10,
+        "raw": 8
       },
       "avg": {
-        "cai": 33.4,
-        "gfy": 137.8,
-        "raw": 263.6
+        "cai": 25.4,
+        "gfy": 75.0,
+        "raw": 148.0
+      }
+    },
+    "rust": {
+      "n": 10,
+      "acc": {
+        "cai": 10,
+        "gfy": 10,
+        "raw": 8
+      },
+      "avg": {
+        "cai": 25.4,
+        "gfy": 76.0,
+        "raw": 163.0
+      }
+    },
+    "java": {
+      "n": 10,
+      "acc": {
+        "cai": 10,
+        "gfy": 10,
+        "raw": 8
+      },
+      "avg": {
+        "cai": 25.6,
+        "gfy": 77.5,
+        "raw": 195.0
+      }
+    },
+    "csharp": {
+      "n": 10,
+      "acc": {
+        "cai": 10,
+        "gfy": 10,
+        "raw": 8
+      },
+      "avg": {
+        "cai": 25.5,
+        "gfy": 75.5,
+        "raw": 194.0
+      }
+    },
+    "cpp": {
+      "n": 10,
+      "acc": {
+        "cai": 10,
+        "gfy": 10,
+        "raw": 8
+      },
+      "avg": {
+        "cai": 25.5,
+        "gfy": 77.2,
+        "raw": 161.0
+      }
+    },
+    "_aggregate": {
+      "n": 94,
+      "acc": {
+        "cai": 94,
+        "gfy": 83,
+        "raw": 80
+      },
+      "avg": {
+        "cai": 29.2,
+        "gfy": 105.1,
+        "raw": 215.0
       }
     }
   },
@@ -162,5 +227,60 @@
       "gr": 0.0,
       "rr": 1.0
     }
+  },
+  "scale": {
+    "rows": [
+      {
+        "sym": "partial",
+        "cai_tok": 107,
+        "gfy_tok": 642
+      },
+      {
+        "sym": "wraps",
+        "cai_tok": 141,
+        "gfy_tok": 311
+      },
+      {
+        "sym": "ArgumentParser",
+        "cai_tok": 233,
+        "gfy_tok": 386
+      },
+      {
+        "sym": "reduce",
+        "cai_tok": 64,
+        "gfy_tok": 232
+      },
+      {
+        "sym": "total_ordering",
+        "cai_tok": 21,
+        "gfy_tok": 66
+      },
+      {
+        "sym": "lru_cache",
+        "cai_tok": 45,
+        "gfy_tok": 62
+      },
+      {
+        "sym": "namedtuple",
+        "cai_tok": 20,
+        "gfy_tok": 57
+      },
+      {
+        "sym": "OrderedDict",
+        "cai_tok": 20,
+        "gfy_tok": 10
+      },
+      {
+        "sym": "Counter",
+        "cai_tok": 19,
+        "gfy_tok": 9
+      },
+      {
+        "sym": "deque",
+        "cai_tok": 19,
+        "gfy_tok": 8
+      }
+    ],
+    "symbols": 10
   }
 }

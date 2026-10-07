@@ -1,63 +1,83 @@
 # Kerneta .cai code-retrieval benchmarks: replication kit
 
 Self-contained, offline reproduction of the Kerneta `.cai` vs Graphify vs raw-files
-code-retrieval numbers. No API key, no network, no model calls: structural tools parse
-offline and grading is programmatic. Anyone can rebuild every number from source.
+code-retrieval numbers published at https://daidocs.com/results-code.html. Structural tools
+parse offline and grading is programmatic, so anyone can rebuild every number from source.
+XERJ is not included.
 
 ## What it measures
 
-For a code question (which modules does X import, who calls Y, what are the subclasses of
-Z, the transitive dependencies, etc.) each system produces the context pack it would put in
-front of a model. We grade the pack against tool-independent gold and measure its token
-cost (chars/4, applied identically to every system).
+For a code question (which modules import X, who calls Y, the subclasses of Z, the
+transitive dependencies, a behaviour described in prose, an edit set for a change) each
+system produces the context pack it would put in front of a model. We grade the pack
+against tool-independent gold and measure its token cost (chars/4, applied identically to
+every system).
 
-- **.cai**: plain-text code store with targeted ops, built by `engine/cai_ts_extract.py`
-  (tree-sitter, the extractor the product uses) and queried by `engine/cai_query.py`.
+- **.cai**: plain-text code store built by `engine/cai_ts_extract.py` (tree-sitter, the
+  extractor the product uses), queried by `engine/cai_query.py` for structural ops and by
+  the hybrid lexical+MiniLM retrieval (`engine/cai_symbol.py`) for semantic ones.
 - **Graphify**: external code-knowledge-graph CLI, queried by graph traversal (graphs are
   pre-built on disk under each corpus's `graphify-out/`).
 - **raw files**: the naive baseline, the whole source files an agent would otherwise read.
 
 ## Requirements
 
-- Python 3.12+ with the tree-sitter grammars: `pip install -r requirements.txt`
-- Graphify installed at `~/.local/bin/graphify` (https://graphify.dev). The corpus graphs
-  are already built and committed, so Graphify columns reproduce from them.
+    pip install -r requirements.txt     # tree-sitter grammars, sentence-transformers (MiniLM), numpy
+
+Graphify installed at `~/.local/bin/graphify` (https://graphify.dev). The corpus graphs are
+committed, so Graphify columns reproduce from them. The end-to-end "solved" columns are
+answered by a blind model (the published runs used a Claude subscription actor).
 
 ## Run
 
-    python run_all.py
+| Section (matches the site) | Command | Needs |
+| --- | --- | --- |
+| Headline (9 languages, deep multi-hop, real-code, requests), httpx structural, stdlib scale | `python run_all.py` | graphify |
+| httpx semantic + lookup | `python run_semantic.py` | graphify, MiniLM |
+| "Make this change" (edit-set recall) | `python run_change.py` then a blind agent over `results/changeblind_*.json`, then `python grade_change.py` | graphify, blind agent |
+| Hard paraphrase | `python run_hard.py` then a blind agent over `results/hardblind_*.json`, then `python grade_hard.py` | graphify, MiniLM, blind agent |
 
-Writes `results/RESULTS.md` (the tables) and `results/results.json` (machine-readable). Each
+`run_all.py` writes `results/RESULTS.md` (the tables) and `results/results.json`. Each
 `.cai` store is rebuilt from source on every run, so the numbers are not cached.
 
 ## IMPORTANT: build stores with the tree-sitter extractor
 
-Always build a `.cai` store with `engine/cai_ts_extract.py`. The repo also contains a
-deprecated `cai_extract.py` (AST-only) that the product does not use; a store built with it
-is missing `extends` edges and has partial import capture, so subclasses queries return
-nothing and import rows under-score. Sanity check a store with
-`grep -c '"type": "extends"' <store>/edges.jsonl` (should be > 0 where classes inherit).
+Always build a `.cai` store with `engine/cai_ts_extract.py`. A store built with the legacy
+AST-only extractor is missing `extends` edges and under-captures imports, so subclasses
+queries return nothing and import rows under-score. Sanity check:
+`grep -c '"type": "extends"' <store>/edges.jsonl` should be > 0 where classes inherit.
 
-## Gold provenance and honesty notes
+## Results
 
-- **psf/requests (16Q)** is the strongest suite: gold is generated from the Python stdlib
-  `ast` module (`questions/questions_realrepo.json`), independent of both tools' parsers.
-  The "most imported module" question accepts either tied winner (models and compat tie at
-  indegree 10), graded with an `any`-of-gold rule.
-- **ContextBench-style (10Q)** and **the per-language set (11Q)** use hand-authored gold,
-  verified ast-consistent. The per-language synthetic set had two tautological questions
-  (gold equal to the query argument) and a verbosity-penalising grader; both are corrected
-  here, so the baselines are graded fairly.
-- **LongMemCode (11Q)** is a constructed deep import/call chain; gold comes from its
-  generator template.
-- **httpx structural** uses member-recall of the ast-derived answer set.
-- The call-graph languages (go/rust/java/csharp/cpp) need their single-file corpora and are
-  not bundled here; the four bundled languages (python/js/ts/ruby) run the full set.
+See `results/RESULTS.md` (regenerated by the runners). Highlights, all rebuilt from source:
+
+- psf/requests (ast-oracle gold): .cai 16/16 at 55 tok, 13x fewer than Graphify, 164x fewer
+  than raw.
+- httpx structural: .cai 100% recall on every type; imports 218x fewer tokens than Graphify,
+  subclasses 73x, with the raw baseline hundreds to thousands of times larger.
+- stdlib scale (7,469 symbols): per-query cost tracks the symbol's fan-in, not the store
+  size; .cai averages 69 tokens to Graphify's 178.
+- make-this-change: .cai recall 1.00, 6/6 complete edit sets, F1 0.98, at 38 tokens.
+- hard paraphrase: .cai gold-in-pack 12/12, solved 12/12, at 1698 tokens.
+
+## Honesty notes
+
+- Gold for psf/requests is generated from the Python stdlib `ast` module, independent of
+  both tools' parsers. The most-imported tie is graded any-of. The synthetic per-language
+  set had two tautological questions and a verbosity-penalising grader; both are corrected,
+  so the baselines are graded fairly.
+- `.cai`'s paraphrase recall degrades under many distractors (lookup recall ~76% here); this
+  is the documented weakness, and semantic/lookup token counts depend on the embedding
+  setup. All structural, scale, and edit-set numbers reproduce at or above the published
+  figures.
+- The call-graph languages (go/rust/java/csharp/cpp) use their single-file `shop` corpora
+  with `questions_calls.json`; the other four use the multi-file `shopcart` corpora.
 
 ## Layout
 
-    engine/        cai_ts_extract.py (build), cai_query.py (query)
+    engine/        cai_ts_extract.py, cai_query.py, cai_symbol.py, mem_search_plus.py
     corpora/       each corpus + its pre-built graphify-out/ graph
     questions/     questions + gold per suite
-    run_all.py     rebuilds stores, runs every suite, writes results/
-    results/       RESULTS.md + results.json (regenerated by run_all.py)
+    run_all.py / run_semantic.py / run_change.py / run_hard.py   the runners
+    grade_change.py / grade_hard.py                              the E2E graders
+    results/       RESULTS.md + results.json + per-suite result/pack files
