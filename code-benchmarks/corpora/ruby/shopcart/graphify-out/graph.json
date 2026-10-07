@@ -1,0 +1,712 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "cart_cart",
+      "label": "Cart",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "cart",
+      "source_file": "cart.rb",
+      "source_location": "L5"
+    },
+    {
+      "id": "models_cartitem",
+      "label": "CartItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "norm_label": "cartitem",
+      "source_file": "models.rb",
+      "source_location": "L9"
+    },
+    {
+      "id": "models_product",
+      "label": "Product",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "norm_label": "product",
+      "source_file": "models.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_main",
+      "label": "main()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "main()",
+      "source_file": "app.rb",
+      "source_location": "L5"
+    },
+    {
+      "id": "cart_cart_add",
+      "label": ".add()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "metadata": {
+        "ruby_method_kind": "instance"
+      },
+      "norm_label": ".add()",
+      "source_file": "cart.rb",
+      "source_location": "L10"
+    },
+    {
+      "id": "cart_cart_initialize",
+      "label": ".initialize()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "metadata": {
+        "ruby_method_kind": "instance"
+      },
+      "norm_label": ".initialize()",
+      "source_file": "cart.rb",
+      "source_location": "L6"
+    },
+    {
+      "id": "cart_cart_total",
+      "label": ".total()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "metadata": {
+        "ruby_method_kind": "instance"
+      },
+      "norm_label": ".total()",
+      "source_file": "cart.rb",
+      "source_location": "L16"
+    },
+    {
+      "id": "catalog_all_products",
+      "label": "all_products()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "all_products()",
+      "source_file": "catalog.rb",
+      "source_location": "L14"
+    },
+    {
+      "id": "catalog_find_product",
+      "label": "find_product()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "find_product()",
+      "source_file": "catalog.rb",
+      "source_location": "L9"
+    },
+    {
+      "id": "discounts_bulk_discount",
+      "label": "bulk_discount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "bulk_discount()",
+      "source_file": "discounts.rb",
+      "source_location": "L3"
+    },
+    {
+      "id": "discounts_loyalty_discount",
+      "label": "loyalty_discount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "loyalty_discount()",
+      "source_file": "discounts.rb",
+      "source_location": "L8"
+    },
+    {
+      "id": "pricing_cart_total",
+      "label": "cart_total()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "cart_total()",
+      "source_file": "pricing.rb",
+      "source_location": "L10"
+    },
+    {
+      "id": "pricing_item_price",
+      "label": "item_price()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "item_price()",
+      "source_file": "pricing.rb",
+      "source_location": "L4"
+    },
+    {
+      "id": "utils_pct",
+      "label": "pct()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "pct()",
+      "source_file": "utils.rb",
+      "source_location": "L5"
+    },
+    {
+      "id": "models_cartitem_initialize",
+      "label": ".initialize()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "metadata": {
+        "ruby_method_kind": "instance"
+      },
+      "norm_label": ".initialize()",
+      "source_file": "models.rb",
+      "source_location": "L10"
+    },
+    {
+      "id": "models_cartitem_line_cents",
+      "label": ".line_cents()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "metadata": {
+        "ruby_method_kind": "instance"
+      },
+      "norm_label": ".line_cents()",
+      "source_file": "models.rb",
+      "source_location": "L15"
+    },
+    {
+      "id": "models_product_initialize",
+      "label": ".initialize()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "metadata": {
+        "ruby_method_kind": "instance"
+      },
+      "norm_label": ".initialize()",
+      "source_file": "models.rb",
+      "source_location": "L2"
+    },
+    {
+      "id": "checkout_checkout",
+      "label": "checkout()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "file_type": "code",
+      "norm_label": "checkout()",
+      "source_file": "checkout.rb",
+      "source_location": "L4"
+    },
+    {
+      "id": "utils_format_money",
+      "label": "format_money()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "file_type": "code",
+      "norm_label": "format_money()",
+      "source_file": "utils.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "app",
+      "label": "app.rb",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1
+      },
+      "norm_label": "app.rb",
+      "source_file": "app.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "cart",
+      "label": "cart.rb",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1
+      },
+      "norm_label": "cart.rb",
+      "source_file": "cart.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "catalog",
+      "label": "catalog.rb",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1,
+        "ruby_external_method_owners": [
+          "CATALOG::*"
+        ]
+      },
+      "norm_label": "catalog.rb",
+      "source_file": "catalog.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "discounts",
+      "label": "discounts.rb",
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1
+      },
+      "norm_label": "discounts.rb",
+      "source_file": "discounts.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "pricing",
+      "label": "pricing.rb",
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1
+      },
+      "norm_label": "pricing.rb",
+      "source_file": "pricing.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "models",
+      "label": "models.rb",
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1
+      },
+      "norm_label": "models.rb",
+      "source_file": "models.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "checkout",
+      "label": "checkout.rb",
+      "_origin": "ast",
+      "community": 3,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1
+      },
+      "norm_label": "checkout.rb",
+      "source_file": "checkout.rb",
+      "source_location": "L1"
+    },
+    {
+      "id": "utils",
+      "label": "utils.rb",
+      "_origin": "ast",
+      "community": 3,
+      "file_type": "code",
+      "metadata": {
+        "ruby_resolution_schema": 1
+      },
+      "norm_label": "utils.rb",
+      "source_file": "utils.rb",
+      "source_location": "L1"
+    }
+  ],
+  "links": [
+    {
+      "source": "app_main",
+      "target": "cart_cart",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app.rb",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_main",
+      "target": "cart_cart_add",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app.rb",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "cart_cart_add",
+      "target": "models_cartitem",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "cart.rb",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "pricing_cart_total",
+      "target": "pricing_item_price",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "pricing.rb",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_main",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app.rb",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "cart",
+      "target": "cart_cart",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cart.rb",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "catalog",
+      "target": "catalog_all_products",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "catalog.rb",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "catalog",
+      "target": "catalog_find_product",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "catalog.rb",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "checkout",
+      "target": "checkout_checkout",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "checkout.rb",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "discounts",
+      "target": "discounts_bulk_discount",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "discounts.rb",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "discounts",
+      "target": "discounts_loyalty_discount",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "discounts.rb",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "models",
+      "target": "models_product",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "models.rb",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "models",
+      "target": "models_cartitem",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "models.rb",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "pricing",
+      "target": "pricing_cart_total",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "pricing.rb",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "pricing",
+      "target": "pricing_item_price",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "pricing.rb",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "utils",
+      "target": "utils_format_money",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "utils.rb",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "utils",
+      "target": "utils_pct",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "utils.rb",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "cart_cart",
+      "target": "cart_cart_add",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cart.rb",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "cart_cart",
+      "target": "cart_cart_total",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cart.rb",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "cart_cart",
+      "target": "cart_cart_initialize",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cart.rb",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "models_cartitem",
+      "target": "models_cartitem_initialize",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "models.rb",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "models_cartitem",
+      "target": "models_cartitem_line_cents",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "models.rb",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "models_product",
+      "target": "models_product_initialize",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "models.rb",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_main",
+      "target": "checkout_checkout",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "app.rb",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "cart_cart_add",
+      "target": "catalog_find_product",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "cart.rb",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "cart_cart_total",
+      "target": "pricing_cart_total",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "cart.rb",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "checkout_checkout",
+      "target": "utils_format_money",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "checkout.rb",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "discounts_bulk_discount",
+      "target": "utils_pct",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "discounts.rb",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "discounts_loyalty_discount",
+      "target": "utils_pct",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "discounts.rb",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "pricing_cart_total",
+      "target": "discounts_loyalty_discount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "pricing.rb",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "pricing_cart_total",
+      "target": "utils_format_money",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "pricing.rb",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "pricing_item_price",
+      "target": "discounts_bulk_discount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "pricing.rb",
+      "source_location": "L6",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

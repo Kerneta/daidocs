@@ -1,0 +1,1655 @@
+[
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does __init__.py import?",
+  "op": "imports",
+  "args": [
+   "__init__"
+  ],
+  "gold_set": [
+   "__version__",
+   "_api",
+   "_auth",
+   "_client",
+   "_config",
+   "_content",
+   "_exceptions",
+   "_main",
+   "_models",
+   "_status_codes",
+   "_types",
+   "_urls"
+  ],
+  "id": "g001"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _api.py import?",
+  "op": "imports",
+  "args": [
+   "_api"
+  ],
+  "gold_set": [
+   "_client",
+   "_config",
+   "_models",
+   "_types",
+   "_urls"
+  ],
+  "id": "g002"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _auth.py import?",
+  "op": "imports",
+  "args": [
+   "_auth"
+  ],
+  "gold_set": [
+   "_exceptions",
+   "_models",
+   "_utils"
+  ],
+  "id": "g003"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _client.py import?",
+  "op": "imports",
+  "args": [
+   "_client"
+  ],
+  "gold_set": [
+   "__version__",
+   "_auth",
+   "_config",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_status_codes",
+   "_types",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g004"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _config.py import?",
+  "op": "imports",
+  "args": [
+   "_config"
+  ],
+  "gold_set": [
+   "_models",
+   "_types",
+   "_urls"
+  ],
+  "id": "g005"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _content.py import?",
+  "op": "imports",
+  "args": [
+   "_content"
+  ],
+  "gold_set": [
+   "_exceptions",
+   "_multipart",
+   "_types",
+   "_utils"
+  ],
+  "id": "g006"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _decoders.py import?",
+  "op": "imports",
+  "args": [
+   "_decoders"
+  ],
+  "gold_set": [
+   "_exceptions"
+  ],
+  "id": "g007"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _exceptions.py import?",
+  "op": "imports",
+  "args": [
+   "_exceptions"
+  ],
+  "gold_set": [
+   "_models"
+  ],
+  "id": "g008"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _main.py import?",
+  "op": "imports",
+  "args": [
+   "_main"
+  ],
+  "gold_set": [
+   "_client",
+   "_exceptions",
+   "_models",
+   "_status_codes"
+  ],
+  "id": "g009"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _models.py import?",
+  "op": "imports",
+  "args": [
+   "_models"
+  ],
+  "gold_set": [
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g010"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _multipart.py import?",
+  "op": "imports",
+  "args": [
+   "_multipart"
+  ],
+  "gold_set": [
+   "_types",
+   "_utils"
+  ],
+  "id": "g011"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _types.py import?",
+  "op": "imports",
+  "args": [
+   "_types"
+  ],
+  "gold_set": [
+   "_auth",
+   "_config",
+   "_models",
+   "_urls"
+  ],
+  "id": "g012"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _urlparse.py import?",
+  "op": "imports",
+  "args": [
+   "_urlparse"
+  ],
+  "gold_set": [
+   "_exceptions"
+  ],
+  "id": "g013"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _urls.py import?",
+  "op": "imports",
+  "args": [
+   "_urls"
+  ],
+  "gold_set": [
+   "_types",
+   "_urlparse",
+   "_utils"
+  ],
+  "id": "g014"
+ },
+ {
+  "cat": "structural",
+  "sub": "imports",
+  "q": "Which internal modules does _utils.py import?",
+  "op": "imports",
+  "args": [
+   "_utils"
+  ],
+  "gold_set": [
+   "_types",
+   "_urls"
+  ],
+  "id": "g015"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does __init__.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "__init__"
+  ],
+  "gold_set": [
+   "__version__",
+   "_api",
+   "_auth",
+   "_client",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_main",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g016"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _api.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_api"
+  ],
+  "gold_set": [
+   "__version__",
+   "_auth",
+   "_client",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g017"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _auth.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_auth"
+  ],
+  "gold_set": [
+   "_auth",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g018"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _client.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_client"
+  ],
+  "gold_set": [
+   "__version__",
+   "_auth",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g019"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _config.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_config"
+  ],
+  "gold_set": [
+   "_auth",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g020"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _content.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_content"
+  ],
+  "gold_set": [
+   "_auth",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g021"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _decoders.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_decoders"
+  ],
+  "gold_set": [
+   "_auth",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g022"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _exceptions.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_exceptions"
+  ],
+  "gold_set": [
+   "_auth",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g023"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _main.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_main"
+  ],
+  "gold_set": [
+   "__version__",
+   "_auth",
+   "_client",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g024"
+ },
+ {
+  "cat": "structural",
+  "sub": "tdeps",
+  "q": "Which internal modules does _models.py transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "_models"
+  ],
+  "gold_set": [
+   "_auth",
+   "_config",
+   "_content",
+   "_decoders",
+   "_exceptions",
+   "_models",
+   "_multipart",
+   "_status_codes",
+   "_types",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g025"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call decode?",
+  "op": "callers",
+  "args": [
+   "decode"
+  ],
+  "gold_set": [
+   "_auth",
+   "_client",
+   "_decoders",
+   "_main",
+   "_models",
+   "_multipart",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g026"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call join?",
+  "op": "callers",
+  "args": [
+   "join"
+  ],
+  "gold_set": [
+   "_auth",
+   "_client",
+   "_decoders",
+   "_main",
+   "_models",
+   "_multipart",
+   "_urlparse",
+   "_urls"
+  ],
+  "id": "g027"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call get?",
+  "op": "callers",
+  "args": [
+   "get"
+  ],
+  "gold_set": [
+   "_auth",
+   "_client",
+   "_config",
+   "_main",
+   "_models",
+   "_urlparse",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g028"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call items?",
+  "op": "callers",
+  "args": [
+   "items"
+  ],
+  "gold_set": [
+   "_auth",
+   "_client",
+   "_content",
+   "_main",
+   "_models",
+   "_multipart",
+   "_urlparse",
+   "_urls"
+  ],
+  "id": "g029"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call read?",
+  "op": "callers",
+  "args": [
+   "read"
+  ],
+  "gold_set": [
+   "_auth",
+   "_client",
+   "_content",
+   "_main",
+   "_models",
+   "_multipart"
+  ],
+  "id": "g030"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call URL?",
+  "op": "callers",
+  "args": [
+   "URL"
+  ],
+  "gold_set": [
+   "_client",
+   "_config",
+   "_models",
+   "_urls",
+   "_utils"
+  ],
+  "id": "g031"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call aread?",
+  "op": "callers",
+  "args": [
+   "aread"
+  ],
+  "gold_set": [
+   "_auth",
+   "_client",
+   "_content"
+  ],
+  "id": "g032"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call get_list?",
+  "op": "callers",
+  "args": [
+   "get_list"
+  ],
+  "gold_set": [
+   "_auth",
+   "_models",
+   "_urls"
+  ],
+  "id": "g033"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call Cookies?",
+  "op": "callers",
+  "args": [
+   "Cookies"
+  ],
+  "gold_set": [
+   "_auth",
+   "_client",
+   "_models"
+  ],
+  "id": "g034"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call Headers?",
+  "op": "callers",
+  "args": [
+   "Headers"
+  ],
+  "gold_set": [
+   "_client",
+   "_config",
+   "_models"
+  ],
+  "id": "g035"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call copy_with?",
+  "op": "callers",
+  "args": [
+   "copy_with"
+  ],
+  "gold_set": [
+   "_client",
+   "_config",
+   "_urls"
+  ],
+  "id": "g036"
+ },
+ {
+  "cat": "structural",
+  "sub": "callers",
+  "q": "Which modules call update?",
+  "op": "callers",
+  "args": [
+   "update"
+  ],
+  "gold_set": [
+   "_client",
+   "_main",
+   "_urlparse"
+  ],
+  "id": "g037"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does __init__ call?",
+  "op": "callees",
+  "args": [
+   "__init__"
+  ],
+  "gold_set": [
+   "Cookies",
+   "Headers",
+   "QueryParams",
+   "Timeout",
+   "URL",
+   "URLPattern",
+   "_build_auth",
+   "_build_auth_header",
+   "_enforce_trailing_slash",
+   "_get_proxy_map",
+   "_guess_content_type",
+   "_init_proxy_transport",
+   "_init_transport",
+   "_iter_fields",
+   "_normalize_header_key",
+   "_normalize_header_value",
+   "_prepare",
+   "copy_with",
+   "decode",
+   "encode_request",
+   "encode_response",
+   "get",
+   "get_multipart_boundary_from_content_type",
+   "items",
+   "primitive_value_to_str",
+   "read",
+   "set",
+   "set_cookie_header",
+   "to_bytes",
+   "update",
+   "urlparse"
+  ],
+  "id": "g038"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does urlparse call?",
+  "op": "callees",
+  "args": [
+   "urlparse"
+  ],
+  "gold_set": [
+   "InvalidURL",
+   "ParseResult",
+   "encode_host",
+   "get",
+   "items",
+   "normalize_path",
+   "normalize_port",
+   "quote",
+   "validate_path"
+  ],
+  "id": "g039"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does _send_handling_auth call?",
+  "op": "callees",
+  "args": [
+   "_send_handling_auth"
+  ],
+  "gold_set": [
+   "_send_handling_redirects",
+   "aclose",
+   "aread",
+   "async_auth_flow",
+   "close",
+   "read",
+   "send",
+   "sync_auth_flow"
+  ],
+  "id": "g040"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does _build_auth_header call?",
+  "op": "callees",
+  "args": [
+   "_build_auth_header"
+  ],
+  "gold_set": [
+   "_get_client_nonce",
+   "_get_header_value",
+   "_resolve_qop",
+   "decode",
+   "digest",
+   "join",
+   "to_bytes"
+  ],
+  "id": "g041"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does build_request call?",
+  "op": "callees",
+  "args": [
+   "build_request"
+  ],
+  "gold_set": [
+   "Request",
+   "Timeout",
+   "_merge_cookies",
+   "_merge_headers",
+   "_merge_queryparams",
+   "_merge_url",
+   "as_dict"
+  ],
+  "id": "g042"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does send call?",
+  "op": "callees",
+  "args": [
+   "send"
+  ],
+  "gold_set": [
+   "_build_request_auth",
+   "_send_handling_auth",
+   "_set_timeout",
+   "aclose",
+   "aread",
+   "close",
+   "read"
+  ],
+  "id": "g043"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does _send_handling_redirects call?",
+  "op": "callees",
+  "args": [
+   "_send_handling_redirects"
+  ],
+  "gold_set": [
+   "TooManyRedirects",
+   "_build_redirect_request",
+   "_send_single_request",
+   "aclose",
+   "aread",
+   "close",
+   "read"
+  ],
+  "id": "g044"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does iter_raw call?",
+  "op": "callees",
+  "args": [
+   "iter_raw"
+  ],
+  "gold_set": [
+   "ByteChunker",
+   "StreamClosed",
+   "StreamConsumed",
+   "close",
+   "decode",
+   "flush",
+   "request_context"
+  ],
+  "id": "g045"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does aiter_raw call?",
+  "op": "callees",
+  "args": [
+   "aiter_raw"
+  ],
+  "gold_set": [
+   "ByteChunker",
+   "StreamClosed",
+   "StreamConsumed",
+   "aclose",
+   "decode",
+   "flush",
+   "request_context"
+  ],
+  "id": "g046"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does _build_redirect_request call?",
+  "op": "callees",
+  "args": [
+   "_build_redirect_request"
+  ],
+  "gold_set": [
+   "Cookies",
+   "Request",
+   "_redirect_headers",
+   "_redirect_method",
+   "_redirect_stream",
+   "_redirect_url"
+  ],
+  "id": "g047"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does _send_single_request call?",
+  "op": "callees",
+  "args": [
+   "_send_single_request"
+  ],
+  "gold_set": [
+   "BoundAsyncStream",
+   "BoundSyncStream",
+   "_transport_for_url",
+   "extract_cookies",
+   "info",
+   "request_context"
+  ],
+  "id": "g048"
+ },
+ {
+  "cat": "structural",
+  "sub": "callees",
+  "q": "Which project functions does iter_bytes call?",
+  "op": "callees",
+  "args": [
+   "iter_bytes"
+  ],
+  "gold_set": [
+   "ByteChunker",
+   "_get_content_decoder",
+   "decode",
+   "flush",
+   "iter_raw",
+   "request_context"
+  ],
+  "id": "g049"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from ContentDecoder?",
+  "op": "subclasses",
+  "args": [
+   "ContentDecoder"
+  ],
+  "gold_set": [
+   "BrotliDecoder",
+   "DeflateDecoder",
+   "GZipDecoder",
+   "IdentityDecoder",
+   "MultiDecoder",
+   "ZStandardDecoder"
+  ],
+  "gold_file": "_decoders.py",
+  "id": "g050"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from SyncByteStream?",
+  "op": "subclasses",
+  "args": [
+   "SyncByteStream"
+  ],
+  "gold_set": [
+   "BoundSyncStream",
+   "ByteStream",
+   "IteratorByteStream",
+   "MultipartStream",
+   "UnattachedStream"
+  ],
+  "gold_file": "_types.py",
+  "id": "g051"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from AsyncByteStream?",
+  "op": "subclasses",
+  "args": [
+   "AsyncByteStream"
+  ],
+  "gold_set": [
+   "AsyncIteratorByteStream",
+   "BoundAsyncStream",
+   "ByteStream",
+   "MultipartStream",
+   "UnattachedStream"
+  ],
+  "gold_file": "_types.py",
+  "id": "g052"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from TransportError?",
+  "op": "subclasses",
+  "args": [
+   "TransportError"
+  ],
+  "gold_set": [
+   "NetworkError",
+   "ProtocolError",
+   "ProxyError",
+   "TimeoutException",
+   "UnsupportedProtocol"
+  ],
+  "gold_file": "_exceptions.py",
+  "id": "g053"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from Auth?",
+  "op": "subclasses",
+  "args": [
+   "Auth"
+  ],
+  "gold_set": [
+   "BasicAuth",
+   "DigestAuth",
+   "FunctionAuth",
+   "NetRCAuth"
+  ],
+  "gold_file": "_auth.py",
+  "id": "g054"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from TimeoutException?",
+  "op": "subclasses",
+  "args": [
+   "TimeoutException"
+  ],
+  "gold_set": [
+   "ConnectTimeout",
+   "PoolTimeout",
+   "ReadTimeout",
+   "WriteTimeout"
+  ],
+  "gold_file": "_exceptions.py",
+  "id": "g055"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from NetworkError?",
+  "op": "subclasses",
+  "args": [
+   "NetworkError"
+  ],
+  "gold_set": [
+   "CloseError",
+   "ConnectError",
+   "ReadError",
+   "WriteError"
+  ],
+  "gold_file": "_exceptions.py",
+  "id": "g056"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from StreamError?",
+  "op": "subclasses",
+  "args": [
+   "StreamError"
+  ],
+  "gold_set": [
+   "RequestNotRead",
+   "ResponseNotRead",
+   "StreamClosed",
+   "StreamConsumed"
+  ],
+  "gold_file": "_exceptions.py",
+  "id": "g057"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from RequestError?",
+  "op": "subclasses",
+  "args": [
+   "RequestError"
+  ],
+  "gold_set": [
+   "DecodingError",
+   "TooManyRedirects",
+   "TransportError"
+  ],
+  "gold_file": "_exceptions.py",
+  "id": "g058"
+ },
+ {
+  "cat": "structural",
+  "sub": "subclasses",
+  "q": "Which classes inherit from BaseClient?",
+  "op": "subclasses",
+  "args": [
+   "BaseClient"
+  ],
+  "gold_set": [
+   "AsyncClient",
+   "Client"
+  ],
+  "gold_file": "_client.py",
+  "id": "g059"
+ },
+ {
+  "cat": "structural",
+  "sub": "most_imported",
+  "q": "Which internal module is imported by the most others?",
+  "op": "most_imported",
+  "args": [],
+  "gold_set": [
+   "_types"
+  ],
+  "id": "g060"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Alternative to `httpx.request()` that streams the response body instead of loading it into memory at once.",
+  "gold_file": "_api.py",
+  "gold_sym": "stream",
+  "id": "g061"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Use a 'netrc' file to lookup basic auth credentials based on the url host.",
+  "gold_file": "_auth.py",
+  "gold_sym": "NetRCAuth",
+  "id": "g062"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Execute the authentication flow synchronously.",
+  "gold_file": "_auth.py",
+  "gold_sym": "sync_auth_flow",
+  "id": "g063"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "An HTTP client, with connection pooling, HTTP/2, redirects, cookie persistence, etc.",
+  "gold_file": "_client.py",
+  "gold_sym": "Client",
+  "id": "g064"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Merge a cookies argument together with any cookies on the client, to create the cookies used for the outgoing request.",
+  "gold_file": "_client.py",
+  "gold_sym": "_merge_cookies",
+  "id": "g065"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Return the headers that should be used for the redirect request.",
+  "gold_file": "_client.py",
+  "gold_sym": "_redirect_headers",
+  "id": "g066"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Return 'True' if the given URLs share the same origin.",
+  "gold_file": "_client.py",
+  "gold_sym": "_same_origin",
+  "id": "g067"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Authentication class used when none is passed at the request-level.",
+  "gold_file": "_client.py",
+  "gold_sym": "auth",
+  "id": "g068"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Cookie values to include when sending requests.",
+  "gold_file": "_client.py",
+  "gold_sym": "cookies",
+  "id": "g069"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "HTTP headers to include when sending requests.",
+  "gold_file": "_client.py",
+  "gold_sym": "headers",
+  "id": "g070"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "If a request or response is serialized using pickle, then it is no longer attached to a stream for I/O purposes.",
+  "gold_file": "_content.py",
+  "gold_sym": "UnattachedStream",
+  "id": "g071"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Handles returning byte content in fixed-size chunks.",
+  "gold_file": "_decoders.py",
+  "gold_sym": "ByteChunker",
+  "id": "g072"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Handles incrementally reading lines from text.",
+  "gold_file": "_decoders.py",
+  "gold_sym": "LineDecoder",
+  "id": "g073"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Handle 'zstd' RFC 8878 decoding.",
+  "gold_file": "_decoders.py",
+  "gold_sym": "ZStandardDecoder",
+  "id": "g074"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Timed out while connecting to the host.",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "ConnectTimeout",
+  "id": "g075"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "The response had an error HTTP status of 4xx or 5xx.",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "HTTPStatusError",
+  "id": "g076"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Timed out waiting to acquire a connection from the pool.",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "PoolTimeout",
+  "id": "g077"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Timed out while receiving data from the host.",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "ReadTimeout",
+  "id": "g078"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Attempted to access streaming response content, without having called `read()`.",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "ResponseNotRead",
+  "id": "g079"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "The base class for timeout errors.",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "TimeoutException",
+  "id": "g080"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Failed to send data through the network.",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "WriteError",
+  "id": "g081"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "HTTP Cookies, as a mutable mapping.",
+  "gold_file": "_models.py",
+  "gold_sym": "Cookies",
+  "id": "g082"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Return `True` if `encoding` is a known codec.",
+  "gold_file": "_models.py",
+  "gold_sym": "_is_known_encoding",
+  "id": "g083"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Close the response and release the connection.",
+  "gold_file": "_models.py",
+  "gold_sym": "aclose",
+  "id": "g084"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Read and return the response content.",
+  "gold_file": "_models.py",
+  "gold_sym": "aread",
+  "id": "g085"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Delete a cookie by name.",
+  "gold_file": "_models.py",
+  "gold_sym": "delete",
+  "id": "g086"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Get a cookie by name.",
+  "gold_file": "_models.py",
+  "gold_sym": "get",
+  "id": "g087"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "A property which is `True` for 4xx and 5xx status codes, `False` otherwise.",
+  "gold_file": "_models.py",
+  "gold_sym": "is_error",
+  "id": "g088"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "A property which is `True` for 2xx status codes, `False` otherwise.",
+  "gold_file": "_models.py",
+  "gold_sym": "is_success",
+  "id": "g089"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "A str-iterator over the decoded response content that handles both gzip, deflate, etc but also detects the content's string encoding.",
+  "gold_file": "_models.py",
+  "gold_sym": "iter_text",
+  "id": "g090"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Returns a list of the raw header items, as byte pairs.",
+  "gold_file": "_models.py",
+  "gold_sym": "raw",
+  "id": "g091"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Sets an appropriate 'Cookie:' HTTP header on the `Request`.",
+  "gold_file": "_models.py",
+  "gold_sym": "set_cookie_header",
+  "id": "g092"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Request content as streaming multipart encoded form data.",
+  "gold_file": "_multipart.py",
+  "gold_sym": "MultipartStream",
+  "id": "g093"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "HTTP status codes and reason phrases Status codes from the following RFCs are all observed: * RFC 7231: Hypertext Transfer Protocol (HTTP/1.1), obsoletes 2616 * RFC 6585: Additional HTTP Status Codes ",
+  "gold_file": "_status_codes.py",
+  "gold_sym": "codes",
+  "id": "g094"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Returns `True` for 3xx status codes, `False` otherwise.",
+  "gold_file": "_status_codes.py",
+  "gold_sym": "is_redirect",
+  "id": "g095"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Drop \".\" and \"..\" segments from a URL path.",
+  "gold_file": "_urlparse.py",
+  "gold_sym": "normalize_path",
+  "id": "g096"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "URL query parameters, as a multi-dict.",
+  "gold_file": "_urls.py",
+  "gold_sym": "QueryParams",
+  "id": "g097"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "The URL fragments, as used in HTML anchors.",
+  "gold_file": "_urls.py",
+  "gold_sym": "fragment",
+  "id": "g098"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Return `True` for absolute URLs such as 'http://example.com/path', and `False` for relative URLs such as '/path'.",
+  "gold_file": "_urls.py",
+  "gold_sym": "is_absolute_url",
+  "id": "g099"
+ },
+ {
+  "cat": "semantic",
+  "sub": "semantic",
+  "q": "Return all the keys in the query params.",
+  "gold_file": "_urls.py",
+  "gold_sym": "keys",
+  "id": "g100"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is AsyncByteStream defined?",
+  "gold_file": "_types.py",
+  "gold_sym": "AsyncByteStream",
+  "id": "g101"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is Client defined?",
+  "gold_file": "_client.py",
+  "gold_sym": "Client",
+  "id": "g102"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is DigestAuth defined?",
+  "gold_file": "_auth.py",
+  "gold_sym": "DigestAuth",
+  "id": "g103"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is LineDecoder defined?",
+  "gold_file": "_decoders.py",
+  "gold_sym": "LineDecoder",
+  "id": "g104"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is ProxyError defined?",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "ProxyError",
+  "id": "g105"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is StreamConsumed defined?",
+  "gold_file": "_exceptions.py",
+  "gold_sym": "StreamConsumed",
+  "id": "g106"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is UnattachedStream defined?",
+  "gold_file": "_content.py",
+  "gold_sym": "UnattachedStream",
+  "id": "g107"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is __aexit__ defined?",
+  "gold_file": "_client.py",
+  "gold_sym": "__aexit__",
+  "id": "g108"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is __init__ defined?",
+  "gold_file": "_auth.py",
+  "gold_sym": "__init__",
+  "id": "g109"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is _build_redirect_request defined?",
+  "gold_file": "_client.py",
+  "gold_sym": "_build_redirect_request",
+  "id": "g110"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is _is_https_redirect defined?",
+  "gold_file": "_client.py",
+  "gold_sym": "_is_https_redirect",
+  "id": "g111"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is _parse_content_type_charset defined?",
+  "gold_file": "_models.py",
+  "gold_sym": "_parse_content_type_charset",
+  "id": "g112"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is _send_handling_redirects defined?",
+  "gold_file": "_client.py",
+  "gold_sym": "_send_handling_redirects",
+  "id": "g113"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is aread defined?",
+  "gold_file": "_models.py",
+  "gold_sym": "aread",
+  "id": "g114"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is codes defined?",
+  "gold_file": "_status_codes.py",
+  "gold_sym": "codes",
+  "id": "g115"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is delete defined?",
+  "gold_file": "_api.py",
+  "gold_sym": "delete",
+  "id": "g116"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is encode_text defined?",
+  "gold_file": "_content.py",
+  "gold_sym": "encode_text",
+  "id": "g117"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is get_content_length defined?",
+  "gold_file": "_multipart.py",
+  "gold_sym": "get_content_length",
+  "id": "g118"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is headers defined?",
+  "gold_file": "_client.py",
+  "gold_sym": "headers",
+  "id": "g119"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is is_redirect defined?",
+  "gold_file": "_models.py",
+  "gold_sym": "is_redirect",
+  "id": "g120"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is json defined?",
+  "gold_file": "_models.py",
+  "gold_sym": "json",
+  "id": "g121"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is options defined?",
+  "gold_file": "_api.py",
+  "gold_sym": "options",
+  "id": "g122"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is print_request_headers defined?",
+  "gold_file": "_main.py",
+  "gold_sym": "print_request_headers",
+  "id": "g123"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is raw_path defined?",
+  "gold_file": "_urls.py",
+  "gold_sym": "raw_path",
+  "id": "g124"
+ },
+ {
+  "cat": "lookup",
+  "sub": "lookup",
+  "q": "Where is scheme defined?",
+  "gold_file": "_urls.py",
+  "gold_sym": "scheme",
+  "id": "g125"
+ }
+]

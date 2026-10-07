@@ -1,0 +1,240 @@
+[
+ {
+  "id": "q01",
+  "q": "Which function directly calls bulk_discount?",
+  "op": "callers",
+  "args": [
+   "bulk_discount"
+  ],
+  "gf": [
+   "explain",
+   "bulk_discount()"
+  ],
+  "raw": [
+   "pricing",
+   "discounts"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "item_price"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q02",
+  "q": "Which internal modules does pricing import from?",
+  "op": "imports",
+  "args": [
+   "pricing"
+  ],
+  "gf": [
+   "explain",
+   "pricing{ext}"
+  ],
+  "raw": [
+   "pricing"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "discounts",
+   "utils"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q03",
+  "q": "Which module defines format_money?",
+  "op": "defines",
+  "args": [
+   "format_money"
+  ],
+  "gf": [
+   "explain",
+   "format_money()"
+  ],
+  "raw": [
+   "utils"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "utils"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q04",
+  "q": "Which project functions does cart_total call?",
+  "op": "callees",
+  "args": [
+   "cart_total"
+  ],
+  "gf": [
+   "explain",
+   "cart_total()"
+  ],
+  "raw": [
+   "pricing"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "item_price",
+   "loyalty_discount",
+   "format_money"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q05",
+  "q": "What directly calls format_money?",
+  "op": "callers",
+  "args": [
+   "format_money"
+  ],
+  "gf": [
+   "explain",
+   "format_money()"
+  ],
+  "raw": [
+   "pricing",
+   "checkout",
+   "utils"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "cart_total",
+   "checkout"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q06",
+  "q": "What does checkout import?",
+  "op": "imports",
+  "args": [
+   "checkout"
+  ],
+  "gf": [
+   "explain",
+   "checkout{ext}"
+  ],
+  "raw": [
+   "checkout"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "pricing",
+   "utils"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q07",
+  "q": "Which module defines loyalty_discount?",
+  "op": "defines",
+  "args": [
+   "loyalty_discount"
+  ],
+  "gf": [
+   "explain",
+   "loyalty_discount"
+  ],
+  "raw": [
+   "cart"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "discounts"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q08",
+  "q": "Which symbols does Cart.add call or construct?",
+  "op": "callees",
+  "args": [
+   "add"
+  ],
+  "gf": [
+   "explain",
+   ".add()"
+  ],
+  "raw": [
+   "cart"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "find_product",
+   "CartItem"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q09",
+  "q": "Which modules does app transitively depend on?",
+  "op": "tdeps",
+  "args": [
+   "app"
+  ],
+  "gf": [
+   "query",
+   "transitive import dependencies of app{ext}"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "catalog",
+   "cart",
+   "checkout",
+   "models",
+   "pricing",
+   "discounts",
+   "utils"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q10",
+  "q": "What module is on the import path from app to utils?",
+  "op": "path",
+  "args": [
+   "app",
+   "utils"
+  ],
+  "gf": [
+   "path",
+   "app{ext}",
+   "utils{ext}"
+  ],
+  "raw": [
+   "app",
+   "checkout",
+   "cart",
+   "pricing"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "checkout"
+  ],
+  "distract": []
+ },
+ {
+  "id": "q11",
+  "q": "Which module is imported by the most other modules?",
+  "op": "most_imported",
+  "args": [],
+  "gf": [
+   "query",
+   "which module is imported by the most other modules"
+  ],
+  "raw": [
+   "ALL"
+  ],
+  "gtype": "presence",
+  "gold": [
+   "utils"
+  ],
+  "distract": []
+ }
+]

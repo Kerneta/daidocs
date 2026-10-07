@@ -1,0 +1,240 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "shop",
+      "label": "shop.rs",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "shop.rs",
+      "source_file": "shop.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "shop_bulk_discount",
+      "label": "bulk_discount()",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "bulk_discount()",
+      "source_file": "shop.rs",
+      "source_location": "L9"
+    },
+    {
+      "id": "shop_item_price",
+      "label": "item_price()",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "item_price()",
+      "source_file": "shop.rs",
+      "source_location": "L21"
+    },
+    {
+      "id": "shop_loyalty_discount",
+      "label": "loyalty_discount()",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "loyalty_discount()",
+      "source_file": "shop.rs",
+      "source_location": "L17"
+    },
+    {
+      "id": "shop_pct",
+      "label": "pct()",
+      "_origin": "ast",
+      "community": 0,
+      "file_type": "code",
+      "norm_label": "pct()",
+      "source_file": "shop.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "shop_cart_total",
+      "label": "cart_total()",
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "cart_total()",
+      "source_file": "shop.rs",
+      "source_location": "L25"
+    },
+    {
+      "id": "shop_format_money",
+      "label": "format_money()",
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "format_money()",
+      "source_file": "shop.rs",
+      "source_location": "L5"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "_origin": "ast",
+      "community": 1,
+      "file_type": "code",
+      "norm_label": "string",
+      "source_file": "",
+      "source_location": ""
+    }
+  ],
+  "links": [
+    {
+      "source": "shop_bulk_discount",
+      "target": "shop_pct",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shop.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_cart_total",
+      "target": "shop_item_price",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shop.rs",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_cart_total",
+      "target": "shop_loyalty_discount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shop.rs",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_cart_total",
+      "target": "shop_format_money",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shop.rs",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_item_price",
+      "target": "shop_bulk_discount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shop.rs",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_loyalty_discount",
+      "target": "shop_pct",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shop.rs",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "shop_format_money",
+      "target": "string",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "source_file": "shop.rs",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "shop",
+      "target": "shop_pct",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shop.rs",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "shop",
+      "target": "shop_loyalty_discount",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shop.rs",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "shop",
+      "target": "shop_item_price",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shop.rs",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "shop",
+      "target": "shop_cart_total",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shop.rs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "shop",
+      "target": "shop_format_money",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shop.rs",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "shop",
+      "target": "shop_bulk_discount",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shop.rs",
+      "source_location": "L9",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

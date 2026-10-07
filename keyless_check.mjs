@@ -19,7 +19,7 @@ const check = (name, ok, detail) => {
 // 1. Everything parses.
 console.log('\nsyntax:');
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => {
-  if (e.name === 'node_modules' || e.name === '.git' || e.name.startsWith('.')) return [];
+  if (e.name === 'node_modules' || e.name === '.git' || e.name === 'code-benchmarks' || e.name.startsWith('.')) return [];
   const p = path.join(d, e.name);
   return e.isDirectory() ? walk(p) : (/\.(js|mjs)$/.test(e.name) ? [p] : []);
 });
