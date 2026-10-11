@@ -33,3 +33,27 @@ jobs:
       - run: npm run check
       - run: npm run verify
       - run: node tools/check_numbers.mjs
+
+  # The pip-installed `kerneta` CLI (Kerneta-Cai): builds the sdist and wheel, installs the
+  # wheel into a fresh venv and drives doctor/build/update/watch from outside the checkout.
+  # Kept out of npm run check so the Node suite needs no Python. 3.10 is the minimum supported.
+  python:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.12"]
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONNOUSERSITE: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m venv "$RUNNER_TEMP/kerneta-test"
+      - run: '"$RUNNER_TEMP/kerneta-test/bin/python" -m pip install --disable-pip-version-check build'
+      - working-directory: ${{ runner.temp }}
+        run: '"$RUNNER_TEMP/kerneta-test/bin/python" -m unittest discover -s "$GITHUB_WORKSPACE/Kerneta-Cai/tests" -v'

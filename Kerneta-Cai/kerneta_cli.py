@@ -87,6 +87,9 @@ def main():
         return 2
     eng = _engine_dir()
     path = os.path.join(eng, script)
+    # run_path does not put the script's directory on sys.path; the engine's flat sibling
+    # imports (cai_update -> cai_ts_extract) need it.
+    sys.path.insert(0, eng)
     sys.argv = [path] + injected + rest
     runpy.run_path(path, run_name="__main__")
     return 0

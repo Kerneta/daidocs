@@ -37,10 +37,9 @@ kerneta = "kerneta_cli:main"
 
 [tool.setuptools]
 py-modules = ["kerneta_cli"]
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["kerneta_engine*"]
+# Explicit, not packages.find: discovery looks for a real kerneta_engine/ directory, finds
+# none (the source lives in engine/), and ships a wheel without the engine.
+packages = ["kerneta_engine"]
 
 [tool.setuptools.package-dir]
 kerneta_engine = "engine"
